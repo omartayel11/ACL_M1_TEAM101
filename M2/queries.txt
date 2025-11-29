@@ -1,0 +1,65 @@
+// 1. Retrieve the count of travellers who have visited a country where they don't need a visa. Include domestic travel (travellers visiting their own country) in the results.
+// Answer: 1999
+MATCH (t:Traveller)-[:FROM_COUNTRY]->(fromCountry:Country)
+MATCH (t)-[:STAYED_AT]->(h:Hotel)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(toCountry:Country)
+WHERE NOT (fromCountry)-[:NEEDS_VISA]->(toCountry)
+RETURN COUNT(DISTINCT t) AS traveller_count
+
+
+// 2. Retrieve the top 3 hotels with the highest average ratings for Business travellers. The average rating should be calculated as the average of score_overall from all reviews written by Business travellers for each hotel.
+MATCH (t:Traveller {type: 'Business'})-[:WROTE]->(r:Review)-[:REVIEWED]->(h:Hotel)
+WITH h, AVG(r.score_overall) AS avg_rating
+ORDER BY avg_rating DESC
+LIMIT 3
+RETURN h.name AS hotel_name, avg_rating
+
+
+// 3. Return the number of couple travellers who stayed at each hotel. Include all hotels in the results, even those with 0 couple travellers (show count as 0). Sort by Hotel name.
+MATCH (h:Hotel)
+OPTIONAL MATCH (t:Traveller {type: 'Couple'})-[:STAYED_AT]->(h)
+WITH h, COUNT(DISTINCT t) AS couple_count
+ORDER BY h.name
+RETURN h.name AS hotel_name, couple_count
+
+
+// 4. Return the top 3 hotels with an average review cleanliness below 8.8. Sort by the average review cleanliness in ascending order.
+MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
+WITH h, AVG(r.score_cleanliness) AS avg_cleanliness
+WHERE avg_cleanliness < 8.8
+ORDER BY avg_cleanliness ASC
+LIMIT 3
+RETURN h.name AS hotel_name, avg_cleanliness
+
+
+// 5. Return all hotels with the highest scores for locations for women, using the average score_location from reviews (include all ties).
+MATCH (t:Traveller {gender: 'Female'})-[:WROTE]->(r:Review)-[:REVIEWED]->(h:Hotel)
+WITH h, AVG(r.score_location) AS avg_location_score
+WITH MAX(avg_location_score) AS max_score
+MATCH (t2:Traveller {gender: 'Female'})-[:WROTE]->(r2:Review)-[:REVIEWED]->(h2:Hotel)
+WITH h2, AVG(r2.score_location) AS avg_location_score, max_score
+WHERE avg_location_score = max_score
+RETURN h2.name AS hotel_name, avg_location_score
+
+
+// EXCEEDS EXPECTATIONS RULE
+// A hotel is said to "exceed expectations" when the sum of its base quality scores is greater than or equal to the average of the review scores from a specific demographic group of travellers.
+// For each demographic group (age group), focus on Solo Female travellers, while noting that for women travelling alone, the main concern would be the cleanliness and comfort of the hotel and the facilities they provide.
+// Calculate: Minimum, Maximum, and Average Improvement Percentage for hotels that exceed expectations per age group.
+// First row answer: age_group='18-24', min_improve=1.7, max_improve=4.8, avg_improve=3.51
+
+MATCH (t:Traveller {gender: 'Female', type: 'Solo'})-[:WROTE]->(r:Review)-[:REVIEWED]->(h:Hotel)
+WITH t.age AS age_group, h, 
+     h.cleanliness_base + h.comfort_base + h.facilities_base AS base_sum,
+     AVG(r.score_cleanliness + r.score_comfort + r.score_facilities) AS avg_review_sum
+WITH age_group, h, base_sum, avg_review_sum,
+     ((base_sum - avg_review_sum) / avg_review_sum) * 100 AS improvement_percentage
+WHERE base_sum >= avg_review_sum
+WITH age_group, 
+     MIN(improvement_percentage) AS min_improve,
+     MAX(improvement_percentage) AS max_improve,
+     AVG(improvement_percentage) AS avg_improve
+ORDER BY age_group
+RETURN age_group, 
+       ROUND(min_improve * 100) / 100 AS min_improve, 
+       ROUND(max_improve * 100) / 100 AS max_improve, 
+       ROUND(avg_improve * 100) / 100 AS avg_improve

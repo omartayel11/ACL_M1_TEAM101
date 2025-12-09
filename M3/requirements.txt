@@ -1,0 +1,23 @@
+langgraph
+langchain
+langchain-community
+langchain-openai
+
+neo4j
+
+sentence-transformers
+numpy
+pandas
+scikit-learn
+faiss-cpu
+
+streamlit
+
+python-dotenv
+requests
+
+# Groq for LLM inference
+groq
+
+# Additional utilities
+pyyaml

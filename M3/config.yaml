@@ -1,0 +1,87 @@
+# Workflow Configuration
+workflows:
+  default: "hybrid"
+  available:
+    - baseline_only
+    - embedding_only
+    - hybrid
+    - llm_pipeline
+
+# LLM Configuration
+llm:
+  provider: "groq"
+  # Default model (used if not specified)
+  default_model: "openai/gpt-oss-120b"
+  
+  # Available models for testing/comparison
+  available_models:
+    - name: "openai/gpt-oss-120b"
+      display_name: "GPT-OSS 120B"
+      description: "OpenAI open-source model"
+    - name: "meta-llama/llama-4-maverick-17b-128e-instruct"
+      display_name: "Llama 4 Maverick 17B"
+      description: "Meta Llama 4 instruction model"
+    - name: "qwen/qwen3-32b"
+      display_name: "Qwen 3 32B"
+      description: "Alibaba Qwen 3 model"
+  
+  temperature: 0.7
+  max_tokens: 500
+  api_key_env: "GROQ_API_KEY"
+
+# Retrieval Settings
+retrieval:
+  baseline:
+    enabled: true
+    max_results: 10
+  
+  embedding:
+    enabled: true
+    max_results: 10
+    similarity_threshold: 0.3
+  
+  merge:
+    max_context_tokens: 2500
+    deduplication: true
+
+# Embedding Configuration
+embedding:
+  # Default model (used if not specified)
+  default_model: "all-MiniLM-L6-v2"
+  
+  # Available models for testing/comparison
+  available_models:
+    - name: "all-MiniLM-L6-v2"
+      display_name: "MiniLM L6 v2"
+      description: "Fast, 384 dimensions"
+      dimensions: 384
+    - name: "all-mpnet-base-v2"
+      display_name: "MPNet Base v2"
+      description: "Better quality, 768 dimensions"
+      dimensions: 768
+  
+  cache_embeddings: true
+  batch_size: 32
+
+# Neo4j Configuration (optional - overrides config.txt)
+neo4j:
+  uri: null  # Use config.txt if null
+  username: null
+  password: null
+  # Vector indexes
+  hotel_index: "hotel_embeddings"
+  review_index: "review_embeddings"
+
+# UI Settings
+ui:
+  show_debug: true
+  max_display_results: 5
+  enable_graph_viz: false
+  show_timings: true
+  show_cypher: true
+  
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_queries: true
+  log_results: false

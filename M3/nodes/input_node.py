@@ -66,7 +66,7 @@ def _extract_last_entities(chat_history: list) -> dict:
 if __name__ == "__main__":
     # Test input node
     test_state: GraphState = {
-        "user_query": "  Find hotels in Paris  "
+        "user_query": "  i want the hotels than have cleanliness score greater than 8   "
     }
     
     result = input_node(test_state)

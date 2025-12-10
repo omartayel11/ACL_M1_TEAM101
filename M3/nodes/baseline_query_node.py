@@ -31,16 +31,23 @@ def baseline_query_node(state: GraphState) -> GraphState:
     results = []
     if cypher:
         try:
-            print(f"\n🔍 [BASELINE RETRIEVAL]")
-            print(f"Generated Cypher: {cypher}")
+            print(f"\n🔍 [BASELINE RETRIEVAL]", flush=True)
+            print(f"Generated Cypher: {cypher}", flush=True)
             if params:
-                print(f"Parameters: {params}")
+                print(f"Parameters: {params}", flush=True)
             results = executor.execute(cypher, params)
-            print(f"✓ Retrieved {len(results)} results from graph database")
+            
+            # Print all results from query execution
             if results:
-                print(f"Sample: {results[0] if len(results) > 0 else 'N/A'}")
+                print(f"✓ Retrieved {len(results)} results from graph database", flush=True)
+                print(f"\n📊 [BASELINE QUERY RESULTS] ({len(results)} total):", flush=True)
+                for i, result in enumerate(results, 1):
+                    print(f"  [{i}] {result}", flush=True)
+            else:
+                print(f"✓ Retrieved 0 results from graph database", flush=True)
+                print("  (No results found)", flush=True)
         except Exception as e:
-            print(f"❌ Baseline query execution failed: {e}")
+            print(f"❌ Baseline query execution failed: {e}", flush=True)
             results = []
     
     # Return only changed fields

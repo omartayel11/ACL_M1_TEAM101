@@ -16,6 +16,22 @@ class EntityExtractor:
     # Valid values for entity validation
     TRAVELLER_TYPES = ["Business", "Couple", "Family", "Solo", "Group"]
     
+    # Valid cities from hotels.csv
+    VALID_CITIES = [
+        "New York", "London", "Paris", "Tokyo", "Dubai", "Singapore", "Sydney",
+        "Rio de Janeiro", "Berlin", "Toronto", "Shanghai", "Mexico City", "Mumbai",
+        "Rome", "Cape Town", "Seoul", "Moscow", "Cairo", "Barcelona", "Bangkok",
+        "Istanbul", "Amsterdam", "Buenos Aires", "Lagos", "Wellington"
+    ]
+    
+    # Valid countries from hotels.csv
+    VALID_COUNTRIES = [
+        "United States", "United Kingdom", "France", "Japan", "United Arab Emirates",
+        "Singapore", "Australia", "Brazil", "Germany", "Canada", "China", "Mexico",
+        "India", "Italy", "South Africa", "South Korea", "Russia", "Egypt", "Spain",
+        "Thailand", "Turkey", "Netherlands", "Argentina", "Nigeria", "New Zealand"
+    ]
+    
     def __init__(self, debug: bool = False):
         """Initialize entity extractor
         
@@ -177,16 +193,98 @@ Extract the entities now."""
                 except (ValueError, TypeError):
                     validated[key] = 10  # Default
             
-            # String fields - capitalize city/country names for Neo4j matching
-            elif key in ["city", "country", "from_country", "to_country"]:
-                # Capitalize each word for proper names (e.g., "dubai" → "Dubai")
-                validated[key] = str(value).strip().title()
+            # Validate and normalize city names
+            elif key == "city":
+                normalized_city = self._normalize_city(str(value).strip())
+                if normalized_city:
+                    validated[key] = normalized_city
+            
+            # Validate and normalize country names
+            elif key in ["country", "from_country", "to_country"]:
+                normalized_country = self._normalize_country(str(value).strip())
+                if normalized_country:
+                    validated[key] = normalized_country
             
             # Other string fields - just clean whitespace
             else:
                 validated[key] = str(value).strip()
         
         return validated
+    
+    def _normalize_city(self, city_input: str) -> Optional[str]:
+        """
+        Normalize city name to match valid cities from database.
+        Uses fuzzy matching to handle typos and variations.
+        
+        Args:
+            city_input: User's city input (may have typos)
+            
+        Returns:
+            Normalized city name or None if no match
+        """
+        if not city_input:
+            return None
+        
+        city_lower = city_input.lower().strip()
+        
+        # Exact match (case-insensitive)
+        for valid_city in self.VALID_CITIES:
+            if city_lower == valid_city.lower():
+                return valid_city
+        
+        # Fuzzy match: check if input is contained in valid city or vice versa
+        for valid_city in self.VALID_CITIES:
+            valid_lower = valid_city.lower()
+            # Handle common patterns: "new york" matches "New York", "rio" matches "Rio de Janeiro"
+            if city_lower in valid_lower or valid_lower in city_lower:
+                return valid_city
+        
+        # No match found - return title case version as fallback
+        return city_input.title()
+    
+    def _normalize_country(self, country_input: str) -> Optional[str]:
+        """
+        Normalize country name to match valid countries from database.
+        Uses fuzzy matching to handle typos and variations.
+        
+        Args:
+            country_input: User's country input (may have typos)
+            
+        Returns:
+            Normalized country name or None if no match
+        """
+        if not country_input:
+            return None
+        
+        country_lower = country_input.lower().strip()
+        
+        # Exact match (case-insensitive)
+        for valid_country in self.VALID_COUNTRIES:
+            if country_lower == valid_country.lower():
+                return valid_country
+        
+        # Fuzzy match: check if input is contained in valid country or vice versa
+        for valid_country in self.VALID_COUNTRIES:
+            valid_lower = valid_country.lower()
+            if country_lower in valid_lower or valid_lower in country_lower:
+                return valid_country
+        
+        # Common aliases
+        aliases = {
+            "usa": "United States",
+            "america": "United States",
+            "us": "United States",
+            "uk": "United Kingdom",
+            "uae": "United Arab Emirates",
+            "korea": "South Korea",
+            "south korea": "South Korea"
+        }
+        
+        if country_lower in aliases:
+            return aliases[country_lower]
+        
+        # No match found - return title case version as fallback
+        return country_input.title()
 
 
 if __name__ == "__main__":

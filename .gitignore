@@ -1,0 +1,9 @@
+# Environment variables
+M3/.env
+
+# FAISS index files
+*.faiss
+
+# Neo4j configuration
+M3/config.txt
+M2/config.txt

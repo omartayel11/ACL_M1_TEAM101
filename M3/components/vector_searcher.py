@@ -14,7 +14,7 @@ from components.query_executor import QueryExecutor
 class VectorSearcher:
     """
     Perform vector similarity search using FAISS.
-    Loads FAISS indexes for hotels and reviews, searches for similar vectors,
+    Loads FAISS index for hotels, searches for similar vectors,
     and enriches results with full node data from Neo4j.
     """
     
@@ -33,16 +33,14 @@ class VectorSearcher:
         
         self.index_dir = index_dir
         self.hotel_index = None
-        self.review_index = None
         self.hotel_mapping = None
-        self.review_mapping = None
         self.query_executor = QueryExecutor()
         
-        # Try to load indexes on initialization
+        # Try to load hotel index on initialization
         self._load_indexes()
     
     def _load_indexes(self):
-        """Load FAISS indexes and ID mappings from disk"""
+        """Load FAISS index and ID mapping from disk"""
         try:
             # Load hotel index
             hotel_index_path = self.index_dir / "hotel_embeddings.faiss"
@@ -55,37 +53,21 @@ class VectorSearcher:
                 print(f"✓ Loaded hotel index: {self.hotel_index.ntotal} vectors")
             else:
                 print(f"Warning: Hotel FAISS index not found at {hotel_index_path}")
-            
-            # Load review index
-            review_index_path = self.index_dir / "review_embeddings.faiss"
-            review_mapping_path = self.index_dir / "review_id_mapping.json"
-            
-            if review_index_path.exists() and review_mapping_path.exists():
-                self.review_index = faiss.read_index(str(review_index_path))
-                with open(review_mapping_path, 'r') as f:
-                    self.review_mapping = json.load(f)
-                print(f"✓ Loaded review index: {self.review_index.ntotal} vectors")
-            else:
-                print(f"Warning: Review FAISS index not found at {review_index_path}")
                 
         except Exception as e:
-            print(f"Error loading FAISS indexes: {e}")
-            print("Run create_embeddings.py to generate indexes")
+            print(f"Error loading FAISS index: {e}")
+            print("Run create_embeddings.py to generate index")
     
     def load_index(self, index_path: str):
         """
-        Load a specific FAISS index from disk
+        Load hotel FAISS index from disk
         
         Args:
-            index_path: Path to FAISS index file
+            index_path: Path to hotel FAISS index file
         """
         try:
-            if "hotel" in index_path.lower():
-                self.hotel_index = faiss.read_index(index_path)
-                print(f"✓ Loaded hotel index from {index_path}")
-            elif "review" in index_path.lower():
-                self.review_index = faiss.read_index(index_path)
-                print(f"✓ Loaded review index from {index_path}")
+            self.hotel_index = faiss.read_index(index_path)
+            print(f"✓ Loaded hotel index from {index_path}")
         except Exception as e:
             print(f"Error loading index from {index_path}: {e}")
             raise
@@ -94,29 +76,27 @@ class VectorSearcher:
         self,
         embedding: List[float],
         limit: int = 10,
-        threshold: float = 0.7,
-        search_type: str = "both"
+        threshold: float = 0.7
     ) -> List[Dict[str, Any]]:
         """
-        Search for similar vectors in FAISS index
+        Search for similar hotels in FAISS index
         
         Args:
             embedding: Query embedding vector
             limit: Maximum number of results
             threshold: Minimum similarity score (0-1)
-            search_type: "hotels", "reviews", or "both"
             
         Returns:
-            List of similar nodes with similarity scores and full details from Neo4j
+            List of similar hotels with similarity scores and full details from Neo4j
         """
         results = []
         
         # Convert embedding to numpy array
         query_vector = np.array([embedding], dtype=np.float32)
         
-        # Search hotels
-        if search_type in ["hotels", "both"] and self.hotel_index is not None:
-            hotel_results = self._search_index(
+        # Search hotels only
+        if self.hotel_index is not None:
+            results = self._search_index(
                 self.hotel_index,
                 self.hotel_mapping,
                 query_vector,
@@ -124,25 +104,8 @@ class VectorSearcher:
                 threshold,
                 "hotel"
             )
-            results.extend(hotel_results)
         
-        # Search reviews
-        if search_type in ["reviews", "both"] and self.review_index is not None:
-            review_results = self._search_index(
-                self.review_index,
-                self.review_mapping,
-                query_vector,
-                limit,
-                threshold,
-                "review"
-            )
-            results.extend(review_results)
-        
-        # Sort by similarity score
-        results.sort(key=lambda x: x.get('similarity_score', 0), reverse=True)
-        
-        # Limit total results
-        return results[:limit]
+        return results
     
     def _search_index(
         self,
@@ -154,18 +117,18 @@ class VectorSearcher:
         node_type: str
     ) -> List[Dict[str, Any]]:
         """
-        Search a specific FAISS index
+        Search the hotel FAISS index
         
         Args:
             index: FAISS index
-            mapping: Mapping from FAISS index to node IDs
+            mapping: Mapping from FAISS index to hotel IDs
             query_vector: Query embedding
             limit: Max results
             threshold: Similarity threshold
-            node_type: "hotel" or "review"
+            node_type: "hotel"
             
         Returns:
-            List of search results with Neo4j node details
+            List of search results with Neo4j hotel details
         """
         try:
             # FAISS returns L2 distances, convert to cosine similarity
@@ -233,18 +196,6 @@ class VectorSearcher:
                        country.name AS country
                 """
                 params = {"hotel_id": node_id}
-            else:  # review
-                cypher = """
-                MATCH (r:Review {review_id: $review_id})
-                OPTIONAL MATCH (r)-[:REVIEWED]->(h:Hotel)
-                RETURN r.review_id AS review_id,
-                       r.text AS review_text,
-                       r.score_overall AS score,
-                       r.date AS date,
-                       h.hotel_id AS hotel_id,
-                       h.name AS hotel_name
-                """
-                params = {"review_id": node_id}
             
             results = self.query_executor.execute(cypher, params)
             return results[0] if results else None
@@ -254,12 +205,10 @@ class VectorSearcher:
             return None
     
     def get_index_stats(self) -> Dict[str, Any]:
-        """Get statistics about loaded indexes"""
+        """Get statistics about loaded hotel index"""
         return {
             'hotel_index_loaded': self.hotel_index is not None,
-            'review_index_loaded': self.review_index is not None,
-            'hotel_vectors': self.hotel_index.ntotal if self.hotel_index else 0,
-            'review_vectors': self.review_index.ntotal if self.review_index else 0
+            'hotel_vectors': self.hotel_index.ntotal if self.hotel_index else 0
         }
 
 
@@ -272,7 +221,7 @@ if __name__ == "__main__":
     searcher = VectorSearcher()
     print(f"Index stats: {searcher.get_index_stats()}\n")
     
-    if searcher.hotel_index is not None or searcher.review_index is not None:
+    if searcher.hotel_index is not None:
         # Generate test embedding
         generator = EmbeddingGenerator()
         test_query = "luxury hotels with great location"
@@ -285,19 +234,14 @@ if __name__ == "__main__":
         results = searcher.search(
             embedding=embedding,
             limit=5,
-            threshold=0.5,
-            search_type="both"
+            threshold=0.5
         )
         
         print(f"Found {len(results)} results:\n")
         for i, result in enumerate(results, 1):
-            print(f"{i}. Type: {result.get('node_type')}")
+            print(f"{i}. Hotel: {result.get('hotel_name')} ({result.get('city')})")
             print(f"   Similarity: {result.get('similarity_score', 0):.4f}")
-            if result.get('node_type') == 'hotel':
-                print(f"   Hotel: {result.get('hotel_name')} ({result.get('city')})")
-                print(f"   Score: {result.get('avg_score')}")
-            else:
-                print(f"   Review: {result.get('review_text', '')[:100]}...")
+            print(f"   Score: {result.get('avg_score')}")
             print()
     else:
-        print("No FAISS indexes loaded. Run create_embeddings.py first.")
+        print("No hotel index loaded. Run create_embeddings.py first.")

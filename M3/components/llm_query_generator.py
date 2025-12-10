@@ -68,15 +68,19 @@ Common Query Patterns:
 
 Natural Language Query: "{query}"
 
-Requirements:
+CRITICAL Requirements:
 - Generate ONLY the Cypher query, no explanations
-- DO NOT use parameters ($param) - embed values directly in the query using single quotes for strings
+- DO NOT use parameters ($param) - embed values directly using single quotes for strings
+- NO trailing commas in RETURN clause (very important!)
 - Include RETURN clause with relevant fields
 - Add LIMIT clause if asking for "top" or "best" (use specific number from query or default LIMIT 10)
 - Use OPTIONAL MATCH for relationships that might not exist
-- Order results by relevance (ratings, scores, etc.)
+- Order results by relevance (ratings, scores, etc.) using ORDER BY clause
 
-Example: For "Find hotels in Paris", use: MATCH (h:Hotel)-[:LOCATED_IN]->(c:City {{name: 'Paris'}})
+Example Format:
+MATCH (h:Hotel)-[:LOCATED_IN]->(c:City {{name: 'Paris'}})
+RETURN h.name AS hotel_name, c.name AS city
+LIMIT 10
 
 Cypher Query:"""
 
@@ -113,6 +117,20 @@ Cypher Query:"""
         
         # Remove any leading/trailing quotes
         response = response.strip('"').strip("'")
+        
+        # Fix common LLM syntax errors
+        # Remove trailing comma before newline or end of RETURN clause
+        lines = response.split('\n')
+        cleaned_lines = []
+        for i, line in enumerate(lines):
+            # Check if this line has a trailing comma and next line is not part of RETURN list
+            if line.strip().endswith(','):
+                # If it's the last line or next line doesn't start with whitespace (new clause)
+                if i == len(lines) - 1 or not lines[i + 1].strip() or lines[i + 1].strip().startswith(('LIMIT', 'ORDER', 'WHERE', 'WITH', 'MATCH', 'RETURN')):
+                    line = line.rstrip(',')
+            cleaned_lines.append(line)
+        
+        response = '\n'.join(cleaned_lines)
         
         return response
 

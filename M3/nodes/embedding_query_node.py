@@ -35,20 +35,15 @@ def embedding_query_node(state: GraphState) -> GraphState:
             limit = config.get('retrieval.embedding.max_results', 10)
             threshold = config.get('retrieval.embedding.similarity_threshold', 0.7)
             
-            # Determine search type based on query
-            # Default to hotels for most queries; could add intent-based logic here
-            search_type = "hotels"
-            
             print(f"\n🧠 [EMBEDDING RETRIEVAL]")
             print(f"Query: {query}")
             print(f"Embedding dimensions: {len(embedding)}")
-            print(f"Search type: {search_type} | Top-K: {limit} | Threshold: {threshold}")
+            print(f"Searching hotels | Top-K: {limit} | Threshold: {threshold}")
             
             results = searcher.search(
                 embedding=embedding,
                 limit=limit,
-                threshold=threshold,
-                search_type=search_type
+                threshold=threshold
             )
             
             print(f"✓ Retrieved {len(results)} results from vector index")

@@ -30,9 +30,16 @@ def llm_query_node(state: GraphState) -> GraphState:
     try:
         cypher = generator.generate(query)
         
+        print(f"\n🤖 [LLM QUERY GENERATION]")
+        print(f"User Query: {query}")
+        print(f"Generated Cypher:\n{cypher}\n")
+        
         # Execute generated query
         if cypher:
             results = executor.execute(cypher, {})
+            print(f"✓ Retrieved {len(results)} results from Neo4j")
+            if results:
+                print(f"Sample result: {results[0]}")
     except Exception as e:
         print(f"LLM query generation/execution failed: {e}")
         cypher = ""

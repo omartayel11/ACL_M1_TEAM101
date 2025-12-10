@@ -454,6 +454,11 @@ class QuerySelector:
                 return QueryLibrary.get_hotels_by_comfort_score(entities["min_comfort"])
             elif "min_value" in entities:
                 return QueryLibrary.get_hotels_by_value_for_money(entities["min_value"])
+            elif "min_staff" in entities:
+                return QueryLibrary.get_hotels_with_best_staff_scores(entities.get("limit", 10))
+            # Fallback: if no specific score provided, default to cleanliness with 8.0 threshold
+            else:
+                return QueryLibrary.get_hotels_by_cleanliness_score(8.0)
         
         elif intent == "ReviewLookup":
             if "hotel_name" in entities:

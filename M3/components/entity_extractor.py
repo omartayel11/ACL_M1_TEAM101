@@ -72,7 +72,10 @@ Instructions:
 - Extract ONLY entities explicitly mentioned
 - Use null for missing values
 - For traveller types: use singular form (Family not families, Couple not couples)
+- If query mentions "me and my wife/husband/partner", set traveller_type to "Couple"
 - For scores: extract numeric values mentioned (e.g., "above 8.5" → 8.5)
+- If user says "high" without a specific number, use 8.0 as the threshold
+- If user says "good" or "best" without a number, use 7.5 as the threshold
 - Score types: cleanliness, comfort, value, staff, location, facilities
 
 Extract the entities now."""
@@ -174,7 +177,12 @@ Extract the entities now."""
                 except (ValueError, TypeError):
                     validated[key] = 10  # Default
             
-            # String fields - just clean whitespace
+            # String fields - capitalize city/country names for Neo4j matching
+            elif key in ["city", "country", "from_country", "to_country"]:
+                # Capitalize each word for proper names (e.g., "dubai" → "Dubai")
+                validated[key] = str(value).strip().title()
+            
+            # Other string fields - just clean whitespace
             else:
                 validated[key] = str(value).strip()
         

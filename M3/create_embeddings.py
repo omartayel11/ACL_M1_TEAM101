@@ -14,13 +14,17 @@ from utils.embedding_client import EmbeddingClient
 
 def fetch_hotels_from_neo4j(neo4j_client: Neo4jClient) -> List[Dict]:
     """
-    Fetch all hotels with their properties from Neo4j
+    Fetch all hotels with their properties and visa requirements from Neo4j
     
     Returns:
-        List of hotel dicts with all properties
+        List of hotel dicts with all properties including visa info
     """
     cypher = """
     MATCH (h:Hotel)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(co:Country)
+    OPTIONAL MATCH (co)-[needs:NEEDS_VISA]->(:Country)
+    WITH h, c, co, 
+         count(needs) > 0 AS requires_visa_to_some,
+         collect(DISTINCT needs.visa_type) AS visa_types
     RETURN h.hotel_id AS hotel_id,
            h.name AS name,
            c.name AS city,
@@ -32,7 +36,9 @@ def fetch_hotels_from_neo4j(neo4j_client: Neo4jClient) -> List[Dict]:
            h.facilities_base AS facilities_base,
            h.location_base AS location_base,
            h.staff_base AS staff_base,
-           h.value_for_money_base AS value_for_money_base
+           h.value_for_money_base AS value_for_money_base,
+           requires_visa_to_some AS has_visa_requirements,
+           visa_types
     ORDER BY h.hotel_id
     """
     
@@ -41,24 +47,7 @@ def fetch_hotels_from_neo4j(neo4j_client: Neo4jClient) -> List[Dict]:
     return results
 
 
-def fetch_reviews_from_neo4j(neo4j_client: Neo4jClient) -> List[Dict]:
-    """
-    Fetch all reviews with their text from Neo4j
-    
-    Returns:
-        List of review dicts with id and text
-    """
-    cypher = """
-    MATCH (r:Review)
-    WHERE r.text IS NOT NULL AND r.text <> ''
-    RETURN r.review_id AS review_id,
-           r.text AS text
-    ORDER BY r.review_id
-    """
-    
-    results = neo4j_client.run_query(cypher, {})
-    print(f"✓ Fetched {len(results)} reviews from Neo4j")
-    return results
+
 
 
 def build_hotel_feature_string(hotel: Dict) -> str:
@@ -69,7 +58,7 @@ def build_hotel_feature_string(hotel: Dict) -> str:
         hotel: Hotel dict with all properties
         
     Returns:
-        Feature string combining all hotel attributes
+        Feature string combining all hotel attributes including visa info
     """
     # Handle None values
     name = hotel.get('name', 'Unknown')
@@ -83,10 +72,19 @@ def build_hotel_feature_string(hotel: Dict) -> str:
     location = hotel.get('location_base', 0.0)
     staff = hotel.get('staff_base', 0.0)
     value = hotel.get('value_for_money_base', 0.0)
+    has_visa_reqs = hotel.get('has_visa_requirements', False)
+    visa_types = hotel.get('visa_types', [])
     
-    # Build feature string
+    # Build feature string with visa information
+    if has_visa_reqs and visa_types:
+        # Filter out None values
+        valid_types = [vt for vt in visa_types if vt]
+        visa_text = f"{country} requires visa for travel" if valid_types else f"{country} destination"
+    else:
+        visa_text = f"{country} destination"
+    
     feature_string = (
-        f"{name} in {city}, {country}. "
+        f"{name} in {city}, {country}. {visa_text}. "
         f"Star rating: {star_rating:.1f}. "
         f"Average score: {avg_score:.2f}. "
         f"Cleanliness: {cleanliness:.1f}, "
@@ -174,78 +172,7 @@ def create_hotel_embeddings(
     return faiss_path, mapping_path
 
 
-def create_review_embeddings(
-    neo4j_client: Neo4jClient,
-    embedding_client: EmbeddingClient,
-    output_dir: str = "."
-) -> Tuple[str, str]:
-    """
-    Create FAISS index and mapping for reviews
-    
-    Args:
-        neo4j_client: Neo4j connection
-        embedding_client: Embedding model
-        output_dir: Directory to save files
-        
-    Returns:
-        Tuple of (faiss_path, mapping_path)
-    """
-    print("\n=== Creating Review Embeddings ===")
-    
-    # Fetch reviews
-    reviews = fetch_reviews_from_neo4j(neo4j_client)
-    
-    if not reviews:
-        print("✗ No reviews found in Neo4j")
-        return None, None
-    
-    # Generate embeddings
-    print("Generating embeddings...")
-    review_ids = []
-    embeddings = []
-    
-    for i, review in enumerate(reviews):
-        review_id = review['review_id']
-        text = review['text']
-        
-        # Generate embedding from review text
-        embedding = embedding_client.encode(text)
-        
-        review_ids.append(review_id)
-        embeddings.append(embedding)
-        
-        if (i + 1) % 100 == 0:
-            print(f"  Processed {i + 1}/{len(reviews)} reviews...")
-    
-    print(f"✓ Generated embeddings for {len(embeddings)} reviews")
-    
-    # Convert to numpy array
-    embeddings_array = np.array(embeddings, dtype='float32')
-    dimension = embeddings_array.shape[1]
-    
-    print(f"  Embedding dimension: {dimension}")
-    
-    # Create FAISS index
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings_array)
-    
-    print(f"✓ Created FAISS index with {index.ntotal} vectors")
-    
-    # Save FAISS index
-    faiss_path = os.path.join(output_dir, "review_embeddings.faiss")
-    faiss.write_index(index, faiss_path)
-    print(f"✓ Saved FAISS index to {faiss_path}")
-    
-    # Create mapping: faiss_index -> review_id
-    mapping = {i: review_id for i, review_id in enumerate(review_ids)}
-    mapping_path = os.path.join(output_dir, "review_id_mapping.json")
-    
-    with open(mapping_path, 'w') as f:
-        json.dump(mapping, f, indent=2)
-    
-    print(f"✓ Saved mapping to {mapping_path}")
-    
-    return faiss_path, mapping_path
+
 
 
 def main():
@@ -262,14 +189,8 @@ def main():
     embedding_client = EmbeddingClient()
     
     try:
-        # Create hotel embeddings
+        # Create hotel embeddings (with visa information)
         hotel_faiss, hotel_mapping = create_hotel_embeddings(
-            neo4j_client,
-            embedding_client
-        )
-        
-        # Create review embeddings
-        review_faiss, review_mapping = create_review_embeddings(
             neo4j_client,
             embedding_client
         )
@@ -282,9 +203,6 @@ def main():
         if hotel_faiss:
             print(f"  • {hotel_faiss}")
             print(f"  • {hotel_mapping}")
-        if review_faiss:
-            print(f"  • {review_faiss}")
-            print(f"  • {review_mapping}")
         
         print("\nYou can now run embedding_workflow and hybrid_workflow!")
         print("=" * 60)

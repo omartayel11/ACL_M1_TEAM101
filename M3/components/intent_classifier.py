@@ -110,24 +110,42 @@ class IntentClassifier:
                 for cap in capabilities:
                     capabilities_desc += f"  - {cap}\n"
             
-            prompt = f"""You are an intent classifier for a hotel travel assistant chatbot. Classify the following query into ONE of these intent categories.
+            prompt = f"""You are an intent classifier. Classify this query into ONE category.
 
-Available Intent Categories and Their Query Capabilities:
-{capabilities_desc}
+Categories:
+1. HotelSearch - Finding hotels in a city/country
+   Examples: "hotels in Cairo", "find hotels in Paris", "show me hotels in Egypt"
 
-Intent Definitions:
-1. HotelSearch - Finding specific hotels by location (city/country), rating threshold, or star rating
-2. HotelRecommendation - Asking for best/top/recommended hotels based on traveller type or quality metrics
-3. ReviewLookup - Requesting reviews, feedback, or ratings for specific hotels
-4. LocationQuery - Asking specifically about location quality or hotels with best location scores
-5. VisaQuestion - Asking about visa requirements or travel document needs between countries
-6. AmenityFilter - Filtering hotels by specific quality scores (cleanliness, comfort, value, staff)
-7. GeneralQuestionAnswering - General questions, hotel details inquiries, or queries that don't fit other categories
-8. CasualConversation - Greetings (hi, hello), asking about the bot's purpose/capabilities, small talk, thank you, goodbye
+2. HotelRecommendation - Asking for best/top hotels by traveler type
+   Examples: "best hotels for couples", "top hotels for families", "recommended hotels for business travelers"
 
-User Query: "{query}"
+3. ReviewLookup - Requesting reviews/feedback for hotels
+   Examples: "reviews for Hilton", "what do guests say about this hotel", "show me feedback"
 
-Respond with ONLY the intent name exactly as written above (e.g., "HotelSearch" or "CasualConversation"). No explanation needed."""
+4. LocationQuery - Asking about location scores/quality
+   Examples: "hotels with best location score", "which hotels have good location", "find hotels with best location"
+
+5. VisaQuestion - Visa requirements between countries
+   Examples: "do I need visa from USA to France", "visa requirements from Egypt to UK"
+
+6. AmenityFilter - Filtering by quality scores (cleanliness, comfort, value, staff)
+   Examples: "hotels with high cleanliness", "best comfort score", "good value for money"
+
+7. CasualConversation - Greetings, bot capabilities, small talk
+   Examples: "hi", "what can you do", "thank you", "goodbye"
+
+8. GeneralQuestionAnswering - Everything else
+
+MATCHING RULES:
+- City/country + hotels = HotelSearch
+- "best"/"top" + traveler type (couples/families/business) = HotelRecommendation
+- "location score"/"best location" = LocationQuery
+- "reviews"/"feedback"/"ratings" = ReviewLookup
+- Cleanliness/comfort/value/staff scores = AmenityFilter
+
+Query: "{query}"
+
+Answer with ONLY the category name (e.g., "LocationQuery")."""
 
             response = self.llm_client.generate(prompt, temperature=0.0, max_tokens=50)
             

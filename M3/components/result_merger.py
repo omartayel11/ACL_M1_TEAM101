@@ -67,16 +67,21 @@ class ResultMerger:
         seen = {}
         
         # Process baseline results first (prioritize)
-        for result in baseline_results:
+        for i, result in enumerate(baseline_results):
             key = result.get('hotel_id') or result.get('review_id')
-            if key:
-                result['source'] = 'baseline'
-                result['relevance_score'] = result.get('relevance_score', 1.0)
-                seen[key] = result
+            # For non-hotel/review results (visa, etc.), use index as key
+            if not key:
+                key = f"other_{i}"
+            result['source'] = 'baseline'
+            result['relevance_score'] = result.get('relevance_score', 1.0)
+            seen[key] = result
         
         # Process embedding results
-        for result in embedding_results:
+        for i, result in enumerate(embedding_results):
             key = result.get('hotel_id') or result.get('review_id')
+            # For non-hotel/review results, use index as key
+            if not key:
+                key = f"other_emb_{i}"
             if key:
                 if key in seen:
                     # Duplicate found - combine scores
@@ -123,12 +128,22 @@ class ResultMerger:
         context_parts = []
         current_chars = 0
         
-        # Separate hotels and reviews
+        # Separate hotels, reviews, and other results (visa, general data)
         hotels = [r for r in results if 'hotel_name' in r or 'hotel_id' in r]
         reviews = [r for r in results if 'review_text' in r or 'review_id' in r]
+        other_results = [r for r in results if r not in hotels and r not in reviews]
+        
+        # Format other results first (visa questions, general queries)
+        if other_results:
+            for i, result in enumerate(other_results, 1):
+                other_text = self._format_other_result(result, i)
+                if current_chars + len(other_text) > self.max_chars:
+                    break
+                context_parts.append(other_text)
+                current_chars += len(other_text)
         
         # Format hotels
-        if hotels:
+        if hotels and current_chars < self.max_chars:
             context_parts.append("=== HOTELS ===\n")
             for i, hotel in enumerate(hotels, 1):
                 hotel_text = self._format_hotel(hotel, i)
@@ -197,6 +212,33 @@ class ResultMerger:
             text += f"   Score: {score}\n"
         text += f"   Relevance: {relevance:.2f}\n"
         text += f"   Text: {review_text[:200]}{'...' if len(review_text) > 200 else ''}\n\n"
+        
+        return text
+    
+    def _format_other_result(self, result: Dict[str, Any], index: int) -> str:
+        """Format non-hotel, non-review results (visa, general queries, etc.)"""
+        text = ""
+        
+        # Check for visa-specific fields
+        if 'from_country' in result and 'to_country' in result:
+            from_country = result.get('from_country', 'Unknown')
+            to_country = result.get('to_country', 'Unknown')
+            visa_required = result.get('visa_required', False)
+            visa_type = result.get('visa_type', 'Not specified')
+            
+            text = f"=== VISA INFORMATION ===\n\n"
+            text += f"Travel Route: {from_country} → {to_country}\n"
+            text += f"Visa Required: {'Yes' if visa_required else 'No'}\n"
+            if visa_required and visa_type and visa_type != 'Not specified':
+                text += f"Visa Type: {visa_type}\n"
+            text += "\n"
+        else:
+            # Generic formatting for other types of results
+            text = f"=== QUERY RESULT {index} ===\n\n"
+            for key, value in result.items():
+                if key not in ['source', 'relevance_score']:
+                    text += f"{key.replace('_', ' ').title()}: {value}\n"
+            text += "\n"
         
         return text
 

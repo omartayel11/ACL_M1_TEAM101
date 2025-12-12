@@ -60,18 +60,18 @@ def build_hotel_feature_string(hotel: Dict) -> str:
     Returns:
         Feature string combining all hotel attributes including visa info
     """
-    # Handle None values
-    name = hotel.get('name', 'Unknown')
-    city = hotel.get('city', 'Unknown')
-    country = hotel.get('country', 'Unknown')
-    star_rating = hotel.get('star_rating', 0.0)
-    avg_score = hotel.get('average_reviews_score', 0.0)
-    cleanliness = hotel.get('cleanliness_base', 0.0)
-    comfort = hotel.get('comfort_base', 0.0)
-    facilities = hotel.get('facilities_base', 0.0)
-    location = hotel.get('location_base', 0.0)
-    staff = hotel.get('staff_base', 0.0)
-    value = hotel.get('value_for_money_base', 0.0)
+    # Handle None values with defaults
+    name = hotel.get('name') or 'Unknown Hotel'
+    city = hotel.get('city') or 'Unknown City'
+    country = hotel.get('country') or 'Unknown Country'
+    star_rating = hotel.get('star_rating') or 0.0
+    avg_score = hotel.get('average_reviews_score') or 0.0
+    cleanliness = hotel.get('cleanliness_base') or 0.0
+    comfort = hotel.get('comfort_base') or 0.0
+    facilities = hotel.get('facilities_base') or 0.0
+    location = hotel.get('location_base') or 0.0
+    staff = hotel.get('staff_base') or 0.0
+    value = hotel.get('value_for_money_base') or 0.0
     has_visa_reqs = hotel.get('has_visa_requirements', False)
     visa_types = hotel.get('visa_types', [])
     

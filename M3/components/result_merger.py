@@ -183,19 +183,51 @@ class ResultMerger:
             text += f"   Average Score: {avg_score:.2f}\n" if isinstance(avg_score, (int, float)) else f"   Average Score: {avg_score}\n"
         text += f"   Relevance: {relevance:.2f}\n"
         
-        # Add quality scores if available
+        # Add quality scores if available (prioritize dynamic scores from reviews)
         scores = []
-        if 'cleanliness_base' in hotel:
+        
+        # Dynamic scores from Review aggregations (preferred)
+        if 'avg_cleanliness' in hotel:
+            scores.append(f"Cleanliness: {hotel['avg_cleanliness']:.2f}")
+        elif 'cleanliness_base' in hotel:
             scores.append(f"Cleanliness: {hotel['cleanliness_base']}")
-        if 'comfort_base' in hotel:
+        
+        if 'avg_comfort' in hotel:
+            scores.append(f"Comfort: {hotel['avg_comfort']:.2f}")
+        elif 'comfort_base' in hotel:
             scores.append(f"Comfort: {hotel['comfort_base']}")
-        if 'location_base' in hotel:
-            scores.append(f"Location: {hotel['location_base']}")
-        if 'staff_base' in hotel:
+        
+        if 'avg_value' in hotel:
+            scores.append(f"Value: {hotel['avg_value']:.2f}")
+        elif 'value_for_money_base' in hotel:
+            scores.append(f"Value: {hotel['value_for_money_base']}")
+        
+        if 'avg_staff_score' in hotel:
+            scores.append(f"Staff: {hotel['avg_staff_score']:.2f}")
+        elif 'staff_base' in hotel:
             scores.append(f"Staff: {hotel['staff_base']}")
+        
+        if 'avg_location_score' in hotel:
+            scores.append(f"Location: {hotel['avg_location_score']:.2f}")
+        elif 'location_base' in hotel:
+            scores.append(f"Location: {hotel['location_base']}")
+        
+        if 'avg_facilities' in hotel:
+            scores.append(f"Facilities: {hotel['avg_facilities']:.2f}")
+        elif 'facilities_base' in hotel:
+            scores.append(f"Facilities: {hotel['facilities_base']}")
+        
+        if 'avg_rating' in hotel:
+            scores.append(f"Overall Rating: {hotel['avg_rating']:.2f}")
         
         if scores:
             text += f"   Scores: {', '.join(scores)}\n"
+        
+        if 'review_count' in hotel:
+            text += f"   Reviews: {hotel['review_count']}"
+            if 'traveller_type' in hotel:
+                text += f" (by {hotel['traveller_type']} travellers)"
+            text += "\n"
         
         text += "\n"
         return text
@@ -219,18 +251,30 @@ class ResultMerger:
         """Format non-hotel, non-review results (visa, general queries, etc.)"""
         text = ""
         
-        # Check for visa-specific fields
-        if 'from_country' in result and 'to_country' in result:
+        # Check for traveller count without visa (Query11) - check this FIRST as it has all 3 fields
+        if 'from_country' in result and 'to_country' in result and 'traveller_count' in result:
+            from_country = result.get('from_country', 'Unknown')
+            to_country = result.get('to_country', 'Unknown')
+            count = result.get('traveller_count', 0)
+            
+            text = f"{index}. TRAVELLER STATISTICS\n"
+            text += f"   From: {from_country}\n"
+            text += f"   Destination: {to_country}\n"
+            text += f"   Travellers (no visa required): {count}\n"
+            text += "\n"
+        # Check for visa-specific fields (Query10)
+        elif 'from_country' in result and 'to_country' in result:
             from_country = result.get('from_country', 'Unknown')
             to_country = result.get('to_country', 'Unknown')
             visa_required = result.get('visa_required', False)
             visa_type = result.get('visa_type', 'Not specified')
             
-            text = f"=== VISA INFORMATION ===\n\n"
-            text += f"Travel Route: {from_country} → {to_country}\n"
-            text += f"Visa Required: {'Yes' if visa_required else 'No'}\n"
+            text = f"{index}. VISA INFORMATION\n"
+            text += f"   From: {from_country}\n"
+            text += f"   To: {to_country}\n"
+            text += f"   Visa Required: {'Yes' if visa_required else 'No'}\n"
             if visa_required and visa_type and visa_type != 'Not specified':
-                text += f"Visa Type: {visa_type}\n"
+                text += f"   Visa Type: {visa_type}\n"
             text += "\n"
         else:
             # Generic formatting for other types of results

@@ -66,17 +66,18 @@ class QueryLibrary:
         Parameters: min_rating (float)
         """
         return """
-        MATCH (h:Hotel)
-        WHERE h.average_reviews_score >= $min_rating
+        MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
         OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+        WITH h, c, country, AVG(r.score_overall) AS avg_score
+        WHERE avg_score >= $min_rating
+        ORDER BY avg_score DESC
+        LIMIT 10
         RETURN h.hotel_id AS hotel_id,
                h.name AS hotel_name,
                h.star_rating AS star_rating,
-               h.average_reviews_score AS avg_score,
+               avg_score,
                c.name AS city,
                country.name AS country
-        ORDER BY h.average_reviews_score DESC
-        LIMIT 10
         """, {"min_rating": min_rating}
     
     
@@ -439,8 +440,7 @@ class QuerySelector:
                 return QueryLibrary.get_hotels_by_country(entities["country"])
             elif "min_rating" in entities:
                 return QueryLibrary.get_hotels_by_rating_threshold(entities["min_rating"])
-            elif "star_rating" in entities:
-                return QueryLibrary.get_hotels_by_star_rating(entities["star_rating"])
+            # star_rating queries not implemented - fall through to return None
         
         elif intent == "HotelRecommendation":
             if "traveller_type" in entities:
@@ -484,6 +484,27 @@ class QuerySelector:
                     entities["from_country"],
                     entities["to_country"]
                 )
+        
+        elif intent == "AmenityFilter":
+            # Handle quality score filters (cleanliness, comfort, value, staff)
+            if "min_cleanliness" in entities:
+                return QueryLibrary.get_hotels_by_cleanliness_score(entities["min_cleanliness"])
+            elif "min_comfort" in entities:
+                return QueryLibrary.get_hotels_by_comfort_score(
+                    entities["min_comfort"],
+                    entities.get("limit", 10)
+                )
+            elif "min_value" in entities:
+                return QueryLibrary.get_hotels_by_value_for_money(
+                    entities["min_value"],
+                    entities.get("limit", 10)
+                )
+            elif "min_staff" in entities:
+                return QueryLibrary.get_hotels_with_best_staff_scores(entities.get("limit", 10))
+            # Fallback: if just asking about cleanliness/comfort/staff without threshold
+            # Use default threshold of 8.0 for cleanliness
+            else:
+                return QueryLibrary.get_hotels_by_cleanliness_score(8.0)
         
         elif intent == "GeneralQuestionAnswering":
             if "hotel_name" in entities:

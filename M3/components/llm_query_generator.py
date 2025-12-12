@@ -19,7 +19,8 @@ class LLMQueryGenerator:
 
 Nodes:
 - Hotel: hotel_id, name, star_rating, cleanliness_base, comfort_base, facilities_base,
-         location_base, staff_base, value_for_money_base, average_reviews_score
+         location_base, staff_base, value_for_money_base, lat, lon
+         NOTE: Hotels DO NOT have average_reviews_score property!
 - Review: review_id, text, date, score_overall, score_cleanliness, score_comfort,
           score_facilities, score_location, score_staff, score_value_for_money
 - Traveller: user_id, gender, age, type (Business|Couple|Family|Solo|Group), join_date
@@ -35,11 +36,28 @@ Relationships:
 - (Traveller)-[:STAYED_AT]->(Hotel)
 - (Country)-[:NEEDS_VISA]->(Country)
 
+IMPORTANT: To get hotel ratings, you MUST calculate from reviews:
+- Average rating: MATCH (r:Review)-[:REVIEWED]->(h:Hotel) WITH h, AVG(r.score_overall) AS avg_rating
+- Filter by rating: WHERE avg_rating >= 8.0
+
 Common Query Patterns:
-1. Find hotels by location: MATCH (h:Hotel)-[:LOCATED_IN]->(c:City {name: $city_name})
-2. Get reviews: MATCH (r:Review)-[:REVIEWED]->(h:Hotel {name: $hotel_name})
-3. Filter by traveller type: MATCH (t:Traveller {type: $traveller_type})-[:STAYED_AT]->(h:Hotel)
-4. Check visa: MATCH (from:Country {name: $from})-[v:NEEDS_VISA]->(to:Country {name: $to})
+1. Find hotels by location: 
+   MATCH (h:Hotel)-[:LOCATED_IN]->(c:City {name: 'Paris'})
+   
+2. Find hotels by rating (calculate from reviews):
+   MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
+   WITH h, AVG(r.score_overall) AS avg_rating
+   WHERE avg_rating >= 8.0
+   RETURN h.name, avg_rating ORDER BY avg_rating DESC
+   
+3. Get reviews: 
+   MATCH (r:Review)-[:REVIEWED]->(h:Hotel {name: 'Hotel Name'})
+   
+4. Filter by traveller type: 
+   MATCH (t:Traveller {type: 'Family'})-[:WROTE]->(r:Review)-[:REVIEWED]->(h:Hotel)
+   
+5. Check visa: 
+   MATCH (from:Country {name: 'USA'})-[v:NEEDS_VISA]->(to:Country {name: 'France'})
 """
     
     def __init__(self):

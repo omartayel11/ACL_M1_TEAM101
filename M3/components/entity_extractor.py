@@ -87,12 +87,28 @@ Intent: {intent}
 Instructions:
 - Extract ONLY entities explicitly mentioned
 - Use null for missing values
-- For traveller types: use singular form (Family not families, Couple not couples)
+- For traveller types: use singular form (Family not families, Couple not couples, Solo not "solo travelers")
 - If query mentions "me and my wife/husband/partner", set traveller_type to "Couple"
+- If query mentions "families" or "family-friendly", set traveller_type to "Family"
+- If query mentions "solo traveler" or "solo travelers", set traveller_type to "Solo"
+- If query mentions "business traveler", set traveller_type to "Business"
 - For scores: extract numeric values mentioned (e.g., "above 8.5" → 8.5)
 - If user says "high" without a specific number, use 8.0 as the threshold
 - If user says "good" or "best" without a number, use 7.5 as the threshold
 - Score types: cleanliness, comfort, value, staff, location, facilities
+
+IMPORTANT for AmenityFilter intent:
+- If query mentions "clean" or "cleanliness", set min_cleanliness to 7.5 (or higher if specified)
+- If query mentions "comfort" or "comfortable", set min_comfort to 7.5 (or higher if specified)  
+- If query mentions "value", "value for money", or "affordable", set min_value to 7.5 (or higher if specified)
+- If query mentions "staff", "service", or "excellent staff", set min_staff to 7.5 (or higher if specified)
+- If user says "excellent" before a quality word (e.g., "excellent staff"), use 8.5 as the threshold
+- If user says "best", use 8.0 as the threshold
+
+IMPORTANT for rating thresholds:
+- Extract decimal values precisely (e.g., "8.5" should be 8.5, not 8 or rounded)
+- "above 8.5" means min_rating = 8.5
+- "above 8" means min_rating = 8.0
 
 Extract the entities now."""
 
@@ -175,6 +191,19 @@ Extract the entities now."""
                     value = "Family"
                 elif value == "Couples":
                     value = "Couple"
+                elif value == "Solos":
+                    value = "Solo"
+                # Handle "solo travelers" -> "Solo"
+                if "solo" in value.lower():
+                    value = "Solo"
+                elif "couple" in value.lower():
+                    value = "Couple"
+                elif "famil" in value.lower():
+                    value = "Family"
+                elif "business" in value.lower():
+                    value = "Business"
+                elif "group" in value.lower():
+                    value = "Group"
                 if value in self.TRAVELLER_TYPES:
                     validated[key] = value
             

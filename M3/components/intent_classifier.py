@@ -113,8 +113,8 @@ class IntentClassifier:
             prompt = f"""You are an intent classifier. Classify this query into ONE category.
 
 Categories:
-1. HotelSearch - Finding hotels in a city/country
-   Examples: "hotels in Cairo", "find hotels in Paris", "show me hotels in Egypt"
+1. HotelSearch - Finding hotels in a city/country OR filtering by rating/stars
+   Examples: "hotels in Cairo", "find hotels in Paris", "show me hotels in Egypt", "hotels with rating above 8", "highly rated hotels", "5-star hotels"
 
 2. HotelRecommendation - Asking for best/top hotels by traveler type
    Examples: "best hotels for couples", "top hotels for families", "recommended hotels for business travelers"
@@ -138,6 +138,7 @@ Categories:
 
 MATCHING RULES:
 - City/country + hotels = HotelSearch
+- Rating/stars + hotels = HotelSearch (e.g., "rating above 8", "highly rated", "5-star")
 - "best"/"top" + traveler type (couples/families/business) = HotelRecommendation
 - "location score"/"best location" = LocationQuery
 - "reviews"/"feedback"/"ratings" = ReviewLookup

@@ -1,4 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
 # Environment variables
+.env
 M3/.env
 
 # FAISS index files
@@ -7,3 +21,27 @@ M3/.env
 # Neo4j configuration
 M3/config.txt
 M2/config.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# macOS
+.DS_Store
+
+# Test outputs
+test_output*.txt
+test_output*.log
+test_results*.txt
+*_test.py.bak
+
+# Large data files (keep originals out of git if too large)
+# Uncomment if these become too large:
+# my_cleaned_dataset.csv
+# *.h5
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

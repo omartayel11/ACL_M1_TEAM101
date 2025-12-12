@@ -172,7 +172,125 @@ def create_hotel_embeddings(
     return faiss_path, mapping_path
 
 
+def fetch_visa_relationships_from_neo4j(neo4j_client: Neo4jClient) -> List[Dict]:
+    """
+    Fetch all visa relationships from Neo4j
+    
+    Returns:
+        List of visa relationship dicts
+    """
+    cypher = """
+    MATCH (from:Country)-[v:NEEDS_VISA]->(to:Country)
+    RETURN from.name AS from_country,
+           to.name AS to_country,
+           v.visa_type AS visa_type,
+           id(v) AS relationship_id
+    ORDER BY from.name, to.name
+    """
+    
+    results = neo4j_client.run_query(cypher, {})
+    print(f"✓ Fetched {len(results)} visa relationships from Neo4j")
+    return results
 
+
+def build_visa_feature_string(visa_rel: Dict) -> str:
+    """
+    Build feature string for visa relationship embedding
+    
+    Args:
+        visa_rel: Visa relationship dict
+        
+    Returns:
+        Feature string describing visa requirement
+    """
+    from_country = visa_rel.get('from_country', 'Unknown')
+    to_country = visa_rel.get('to_country', 'Unknown')
+    visa_type = visa_rel.get('visa_type', 'Required')
+    
+    # Build natural language description
+    feature_string = (
+        f"Visa required from {from_country} to {to_country}. "
+        f"Visa type: {visa_type}. "
+        f"Travelers from {from_country} need a visa to visit {to_country}. "
+        f"{from_country} citizens require {visa_type} visa for {to_country} travel."
+    )
+    
+    return feature_string
+
+
+def create_visa_embeddings(
+    neo4j_client: Neo4jClient,
+    embedding_client: EmbeddingClient,
+    output_dir: str = "."
+) -> Tuple[str, str]:
+    """
+    Create FAISS index and mapping for visa relationships
+    
+    Args:
+        neo4j_client: Neo4j connection
+        embedding_client: Embedding model
+        output_dir: Directory to save files
+        
+    Returns:
+        Tuple of (faiss_path, mapping_path)
+    """
+    print("\n=== Creating Visa Embeddings ===")
+    
+    # Fetch visa relationships
+    visa_rels = fetch_visa_relationships_from_neo4j(neo4j_client)
+    
+    if not visa_rels:
+        print("✗ No visa relationships found in Neo4j")
+        return None, None
+    
+    # Build feature strings and generate embeddings
+    print("Generating embeddings...")
+    visa_ids = []
+    embeddings = []
+    
+    for i, visa_rel in enumerate(visa_rels):
+        # Create unique ID from country pair
+        visa_id = f"{visa_rel['from_country']}_to_{visa_rel['to_country']}"
+        feature_string = build_visa_feature_string(visa_rel)
+        
+        # Generate embedding
+        embedding = embedding_client.encode(feature_string)
+        
+        visa_ids.append(visa_id)
+        embeddings.append(embedding)
+        
+        if (i + 1) % 10 == 0:
+            print(f"  Processed {i + 1}/{len(visa_rels)} visa relationships...")
+    
+    print(f"✓ Generated embeddings for {len(embeddings)} visa relationships")
+    
+    # Convert to numpy array
+    embeddings_array = np.array(embeddings, dtype='float32')
+    dimension = embeddings_array.shape[1]
+    
+    print(f"  Embedding dimension: {dimension}")
+    
+    # Create FAISS index
+    index = faiss.IndexFlatL2(dimension)
+    index.add(embeddings_array)
+    
+    print(f"✓ Created FAISS index with {index.ntotal} vectors")
+    
+    # Save FAISS index
+    faiss_path = os.path.join(output_dir, "visa_embeddings.faiss")
+    faiss.write_index(index, faiss_path)
+    print(f"✓ Saved FAISS index to {faiss_path}")
+    
+    # Create mapping: faiss_index -> visa_id
+    mapping = {i: visa_id for i, visa_id in enumerate(visa_ids)}
+    mapping_path = os.path.join(output_dir, "visa_id_mapping.json")
+    
+    with open(mapping_path, 'w') as f:
+        json.dump(mapping, f, indent=2)
+    
+    print(f"✓ Saved mapping to {mapping_path}")
+    
+    return faiss_path, mapping_path
 
 
 def main():
@@ -189,8 +307,14 @@ def main():
     embedding_client = EmbeddingClient()
     
     try:
-        # Create hotel embeddings (with visa information)
+        # Create hotel embeddings
         hotel_faiss, hotel_mapping = create_hotel_embeddings(
+            neo4j_client,
+            embedding_client
+        )
+        
+        # Create visa embeddings
+        visa_faiss, visa_mapping = create_visa_embeddings(
             neo4j_client,
             embedding_client
         )
@@ -203,6 +327,9 @@ def main():
         if hotel_faiss:
             print(f"  • {hotel_faiss}")
             print(f"  • {hotel_mapping}")
+        if visa_faiss:
+            print(f"  • {visa_faiss}")
+            print(f"  • {visa_mapping}")
         
         print("\nYou can now run embedding_workflow and hybrid_workflow!")
         print("=" * 60)

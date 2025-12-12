@@ -132,16 +132,145 @@ st.markdown("""
         border: 1px solid rgba(212, 175, 55, 0.3);
     }
     
-    /* Developer console */
-    .dev-console {
-        background: rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        border-radius: 10px;
+    /* Developer console - clean and professional */
+    .dev-console-container {
+        position: sticky;
+        top: 100px;
+        height: calc(100vh - 200px);
+        background: rgba(15, 20, 30, 0.95);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .dev-console-header {
         padding: 1rem;
-        font-family: 'Courier New', monospace;
-        color: #00FF00;
-        max-height: 600px;
+        background: rgba(212, 175, 55, 0.1);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        font-weight: bold;
+        color: #D4AF37;
+    }
+    
+    .dev-console-logs {
+        flex: 1;
         overflow-y: auto;
+        padding: 1rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+    
+    .dev-log-entry {
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        border-radius: 4px;
+        border-left: 3px solid;
+    }
+    
+    .log-user { 
+        border-left-color: #D4AF37; 
+        background: rgba(212, 175, 55, 0.05);
+        color: #D4AF37;
+    }
+    
+    .log-system { 
+        border-left-color: #3498DB; 
+        background: rgba(52, 152, 219, 0.05);
+        color: #3498DB;
+    }
+    
+    .log-success { 
+        border-left-color: #2ECC71; 
+        background: rgba(46, 204, 113, 0.05);
+        color: #2ECC71;
+    }
+    
+    .log-error { 
+        border-left-color: #E74C3C; 
+        background: rgba(231, 76, 60, 0.05);
+        color: #E74C3C;
+    }
+    
+    .log-output { 
+        border-left-color: #95A5A6; 
+        background: rgba(149, 165, 166, 0.05);
+        color: #BDC3C7;
+    }
+    
+    .log-terminal {
+        border-left: none;
+        background: transparent;
+        color: #ECF0F1;
+        padding: 0.75rem;
+        margin: 0;
+        white-space: pre-wrap;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+    
+    .dev-console-logs::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .dev-console-logs::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .dev-console-logs::-webkit-scrollbar-thumb {
+        background: rgba(212, 175, 55, 0.3);
+        border-radius: 3px;
+    }
+    
+    /* Chat area - use native Streamlit container with fixed height */
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"]:has(.chat-area-marker) {
+        position: sticky;
+        top: 80px;
+        height: calc(100vh - 160px);
+        max-height: 80vh;
+        background: rgba(27, 40, 56, 0.95);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"]:has(.chat-area-marker)::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"]:has(.chat-area-marker)::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"]:has(.chat-area-marker)::-webkit-scrollbar-thumb {
+        background: rgba(212, 175, 55, 0.3);
+        border-radius: 3px;
+    }
+    
+    /* Chat input at bottom */
+    .stChatFloatingInputContainer {
+        position: sticky !important;
+        bottom: 1rem !important;
+        background: rgba(27, 40, 56, 0.98) !important;
+        padding: 1rem !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
+    }
+    
+    /* Prevent page scrolling */
+    section.main > div {
+        overflow: hidden !important;
+        max-height: 100vh;
+    }
+    
+    /* Marker styling */
+    .chat-area-marker {
+        display: none;
     }
     
     /* Status badges */
@@ -206,9 +335,7 @@ def _initialize_workflow():
 
 def add_dev_log(log_type: str, message: str):
     """Add a log entry to developer console"""
-    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
     st.session_state.dev_logs.append({
-        'timestamp': timestamp,
         'type': log_type,
         'message': message
     })
@@ -218,7 +345,7 @@ def add_dev_log(log_type: str, message: str):
 
 
 def capture_output_as_log(func, *args, **kwargs):
-    """Capture print output and add to dev logs"""
+    """Capture print output and add to dev logs - preserve terminal formatting"""
     output_buffer = io.StringIO()
     
     with contextlib.redirect_stdout(output_buffer):
@@ -226,9 +353,8 @@ def capture_output_as_log(func, *args, **kwargs):
     
     output = output_buffer.getvalue()
     if output.strip():
-        for line in output.strip().split('\n'):
-            if line.strip():
-                add_dev_log('OUTPUT', line)
+        # Add the entire output as one log entry to preserve formatting
+        add_dev_log('TERMINAL', output.strip())
     
     return result
 
@@ -243,8 +369,8 @@ def process_query(user_query: str) -> Dict[str, Any]:
     Returns:
         Response dictionary with answer and metadata
     """
-    add_dev_log('USER', f"Query: {user_query}")
-    add_dev_log('SYSTEM', f"Workflow: {st.session_state.workflow_mode}")
+    add_dev_log('USER', f"User: {user_query}")
+    add_dev_log('SYSTEM', f"{'='*60}\nWorkflow: {st.session_state.workflow_mode} | Thread: {st.session_state.thread_id[:8]}...\n{'='*60}")
     
     try:
         initial_state = {
@@ -266,8 +392,6 @@ def process_query(user_query: str) -> Dict[str, Any]:
                 "thread_id": st.session_state.thread_id
             }
         }
-        
-        add_dev_log('SYSTEM', f"Thread ID: {st.session_state.thread_id}")
         
         # Invoke workflow and capture output
         result = capture_output_as_log(
@@ -301,8 +425,7 @@ def process_query(user_query: str) -> Dict[str, Any]:
         else:
             response["result_count"] = 0
         
-        add_dev_log('SUCCESS', f"Intent: {response['intent']} | Entities: {response['entities']}")
-        add_dev_log('SUCCESS', f"Results: {response['result_count']} | Answer length: {len(response['answer'])} chars")
+        add_dev_log('SUCCESS', f"✓ Query Complete | Intent: {response['intent']} | Results: {response['result_count']} | Answer: {len(response['answer'])} chars\n")
         
         return response
         
@@ -483,78 +606,76 @@ def render_sidebar():
 
 
 def render_developer_console():
-    """Render developer console with logs"""
-    st.markdown("### 👨‍💻 Developer Console")
-    st.markdown("Real-time system logs and debug information")
-    
-    # Log display
-    log_container = st.container()
-    
-    with log_container:
-        if not st.session_state.dev_logs:
-            st.info("No logs yet. Start chatting to see system activity!")
-        else:
-            # Create scrollable log area
-            log_html = '<div class="dev-console">'
+    """Render developer console with logs - terminal style"""
+    if not st.session_state.dev_logs:
+        st.info("👨‍💻 Developer Console\n\nNo logs yet. Start chatting to see system activity!")
+    else:
+        # Build terminal-style log HTML
+        log_html = '<div class="dev-console-container">'
+        log_html += '<div class="dev-console-header">👨‍💻 Developer Console</div>'
+        log_html += '<div class="dev-console-logs">'
+        
+        # Show last 50 logs in reverse order (newest first)
+        for log in reversed(st.session_state.dev_logs[-50:]):
+            log_type = log['type'].lower()
+            message = log['message']
             
-            for log in reversed(st.session_state.dev_logs[-50:]):  # Show last 50 logs
-                timestamp = log['timestamp']
-                log_type = log['type']
-                message = log['message']
+            if log_type == 'terminal':
+                # Terminal output - preserve exact formatting
+                log_html += f'<div class="log-terminal">{message}</div>'
+            else:
+                # System messages - compact format
+                css_class = f"log-{log_type}"
                 
-                # Color coding
-                if log_type == 'ERROR':
-                    color = '#FF4444'
+                # Format message with icon
+                if log_type == 'error':
                     icon = '❌'
-                elif log_type == 'SUCCESS':
-                    color = '#00FF00'
+                elif log_type == 'success':
                     icon = '✅'
-                elif log_type == 'USER':
-                    color = '#D4AF37'
+                elif log_type == 'user':
                     icon = '👤'
-                elif log_type == 'SYSTEM':
-                    color = '#3498DB'
+                elif log_type == 'system':
                     icon = '⚙️'
                 else:
-                    color = '#FFFFFF'
-                    icon = '📝'
+                    icon = '📋'
                 
-                log_html += f'<div style="margin: 0.25rem 0; color: {color};">'
-                log_html += f'<span style="color: #888;">[{timestamp}]</span> '
-                log_html += f'{icon} <strong>{log_type}:</strong> {message}'
+                log_html += f'<div class="dev-log-entry {css_class}">'
+                log_html += f'{icon} {message}'
                 log_html += '</div>'
-            
-            log_html += '</div>'
-            st.markdown(log_html, unsafe_allow_html=True)
+        
+        log_html += '</div></div>'
+        st.markdown(log_html, unsafe_allow_html=True)
 
 
 def render_chat_interface():
-    """Render main chat interface"""
-    st.markdown("## 💬 Chat with Hotel Assistant")
+    """Render main chat interface - messages and input only"""
+    # Add invisible marker for CSS targeting
+    st.markdown('<div class="chat-area-marker"></div>', unsafe_allow_html=True)
     
-    # Display chat messages
-    chat_container = st.container()
+    # Header
+    st.markdown("### 💬 Chat with Hotel Assistant")
+    st.markdown("---")
     
-    with chat_container:
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-                
-                # Show metadata for assistant messages
-                if message["role"] == "assistant" and "metadata" in message:
-                    with st.expander("📊 Response Details"):
-                        meta = message["metadata"]
-                        
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("Intent", meta.get("intent", "N/A"))
-                        with col2:
-                            st.metric("Results", meta.get("result_count", 0))
-                        with col3:
-                            st.metric("Workflow", meta.get("workflow", "N/A"))
-                        
-                        if meta.get("entities"):
-                            st.json(meta["entities"])
+    # Display all chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            
+            # Show metadata for assistant messages in a clean expander
+            if message["role"] == "assistant" and "metadata" in message:
+                with st.expander("📊 Details"):
+                    meta = message["metadata"]
+                    
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Intent", meta.get("intent", "N/A"))
+                    with col2:
+                        st.metric("Results", meta.get("result_count", 0))
+                    with col3:
+                        st.metric("Workflow", meta.get("workflow", "N/A"))
+                    
+                    if meta.get("entities"):
+                        st.json(meta["entities"])
     
     # Chat input
     if prompt := st.chat_input("Ask me about hotels, travel, or visa requirements..."):
@@ -564,43 +685,21 @@ def render_chat_interface():
             "content": prompt
         })
         
-        # Display user message immediately
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        
         # Process query
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = process_query(prompt)
-                st.session_state.last_response = response
-                
-                # Display response
-                st.markdown(response["answer"])
-                
-                # Add assistant message to chat
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": response["answer"],
-                    "metadata": {
-                        "intent": response.get("intent"),
-                        "result_count": response.get("result_count", 0),
-                        "workflow": response.get("workflow"),
-                        "entities": response.get("entities", {})
-                    }
-                })
-                
-                # Show metadata
-                with st.expander("📊 Response Details"):
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Intent", response.get("intent", "N/A"))
-                    with col2:
-                        st.metric("Results", response.get("result_count", 0))
-                    with col3:
-                        st.metric("Workflow", response.get("workflow", "N/A"))
-                    
-                    if response.get("entities"):
-                        st.json(response["entities"])
+        response = process_query(prompt)
+        st.session_state.last_response = response
+        
+        # Add assistant message to chat
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": response["answer"],
+            "metadata": {
+                "intent": response.get("intent"),
+                "result_count": response.get("result_count", 0),
+                "workflow": response.get("workflow"),
+                "entities": response.get("entities", {})
+            }
+        })
         
         st.rerun()
 
@@ -623,19 +722,23 @@ def main():
     # Render sidebar
     render_sidebar()
     
-    # Main layout
+    # Main layout - fixed modals for both chat and console
     if st.session_state.show_dev_console:
-        # Split layout: chat on left, console on right
+        # Split layout: chat on left, console on right (both in fixed containers)
         col1, col2 = st.columns([2, 1])
         
         with col1:
-            render_chat_interface()
+            chat_container = st.container()
+            with chat_container:
+                render_chat_interface()
         
         with col2:
             render_developer_console()
     else:
         # Full width chat
-        render_chat_interface()
+        chat_container = st.container()
+        with chat_container:
+            render_chat_interface()
 
 
 if __name__ == "__main__":

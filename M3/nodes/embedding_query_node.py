@@ -24,6 +24,7 @@ def embedding_query_node(state: GraphState) -> GraphState:
         Updated state with embedding results
     """
     query = state.get("user_query", "")
+    intent = state.get("intent", None)
     
     # Generate embedding
     embedding = generator.embed(query)
@@ -35,20 +36,28 @@ def embedding_query_node(state: GraphState) -> GraphState:
             limit = config.get('retrieval.embedding.max_results', 10)
             threshold = config.get('retrieval.embedding.similarity_threshold', 0.7)
             
+            # Determine search target based on intent
+            search_target = "visa" if intent == "VisaQuestion" else "hotels"
+            
             print(f"\n🧠 [EMBEDDING RETRIEVAL]")
             print(f"Query: {query}")
+            print(f"Intent: {intent}")
             print(f"Embedding dimensions: {len(embedding)}")
-            print(f"Searching hotels | Top-K: {limit} | Threshold: {threshold}")
+            print(f"Searching {search_target} | Top-K: {limit} | Threshold: {threshold}")
             
             results = searcher.search(
                 embedding=embedding,
                 limit=limit,
-                threshold=threshold
+                threshold=threshold,
+                intent=intent
             )
             
             print(f"✓ Retrieved {len(results)} results from vector index")
             if results:
-                print(f"Top result: {results[0].get('hotel_name', 'N/A')} (score: {results[0].get('similarity_score', 'N/A'):.3f})")
+                if intent == "VisaQuestion":
+                    print(f"Top result: {results[0].get('from_country', 'N/A')} to {results[0].get('to_country', 'N/A')} (score: {results[0].get('similarity_score', 'N/A'):.3f})")
+                else:
+                    print(f"Top result: {results[0].get('hotel_name', 'N/A')} (score: {results[0].get('similarity_score', 'N/A'):.3f})")
         except Exception as e:
             print(f"❌ Embedding search failed: {e}")
             results = []

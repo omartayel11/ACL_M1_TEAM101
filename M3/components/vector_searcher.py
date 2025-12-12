@@ -34,13 +34,15 @@ class VectorSearcher:
         self.index_dir = index_dir
         self.hotel_index = None
         self.hotel_mapping = None
+        self.visa_index = None
+        self.visa_mapping = None
         self.query_executor = QueryExecutor()
         
-        # Try to load hotel index on initialization
+        # Try to load indexes on initialization
         self._load_indexes()
     
     def _load_indexes(self):
-        """Load FAISS index and ID mapping from disk"""
+        """Load FAISS indexes and ID mappings from disk"""
         try:
             # Load hotel index
             hotel_index_path = self.index_dir / "hotel_embeddings.faiss"
@@ -53,10 +55,22 @@ class VectorSearcher:
                 print(f"✓ Loaded hotel index: {self.hotel_index.ntotal} vectors")
             else:
                 print(f"Warning: Hotel FAISS index not found at {hotel_index_path}")
+            
+            # Load visa index
+            visa_index_path = self.index_dir / "visa_embeddings.faiss"
+            visa_mapping_path = self.index_dir / "visa_id_mapping.json"
+            
+            if visa_index_path.exists() and visa_mapping_path.exists():
+                self.visa_index = faiss.read_index(str(visa_index_path))
+                with open(visa_mapping_path, 'r') as f:
+                    self.visa_mapping = json.load(f)
+                print(f"✓ Loaded visa index: {self.visa_index.ntotal} vectors")
+            else:
+                print(f"Warning: Visa FAISS index not found at {visa_index_path}")
                 
         except Exception as e:
-            print(f"Error loading FAISS index: {e}")
-            print("Run create_embeddings.py to generate index")
+            print(f"Error loading FAISS indexes: {e}")
+            print("Run create_embeddings.py to generate indexes")
     
     def load_index(self, index_path: str):
         """
@@ -76,26 +90,39 @@ class VectorSearcher:
         self,
         embedding: List[float],
         limit: int = 10,
-        threshold: float = 0.7
+        threshold: float = 0.7,
+        intent: str = None
     ) -> List[Dict[str, Any]]:
         """
-        Search for similar hotels in FAISS index
+        Search for similar items in FAISS index based on intent
         
         Args:
             embedding: Query embedding vector
             limit: Maximum number of results
             threshold: Minimum similarity score (0-1)
+            intent: Query intent to determine which index to search
             
         Returns:
-            List of similar hotels with similarity scores and full details from Neo4j
+            List of similar items with similarity scores and full details from Neo4j
         """
         results = []
         
         # Convert embedding to numpy array
         query_vector = np.array([embedding], dtype=np.float32)
         
-        # Search hotels only
-        if self.hotel_index is not None:
+        # Route to appropriate index based on intent
+        if intent == "VisaQuestion" and self.visa_index is not None:
+            # Search visa index for visa questions
+            results = self._search_index(
+                self.visa_index,
+                self.visa_mapping,
+                query_vector,
+                limit,
+                threshold,
+                "visa"
+            )
+        elif self.hotel_index is not None:
+            # Search hotel index for all other queries
             results = self._search_index(
                 self.hotel_index,
                 self.hotel_mapping,
@@ -117,18 +144,18 @@ class VectorSearcher:
         node_type: str
     ) -> List[Dict[str, Any]]:
         """
-        Search the hotel FAISS index
+        Search a FAISS index
         
         Args:
             index: FAISS index
-            mapping: Mapping from FAISS index to hotel IDs
+            mapping: Mapping from FAISS index to node IDs
             query_vector: Query embedding
             limit: Max results
             threshold: Similarity threshold
-            node_type: "hotel"
+            node_type: "hotel" or "visa"
             
         Returns:
-            List of search results with Neo4j hotel details
+            List of search results with Neo4j details
         """
         try:
             # FAISS returns L2 distances, convert to cosine similarity
@@ -171,8 +198,8 @@ class VectorSearcher:
         Fetch full node details from Neo4j
         
         Args:
-            node_id: Node ID (hotel_id or review_id)
-            node_type: "hotel" or "review"
+            node_id: Node ID (hotel_id or visa_id like "Egypt_to_France")
+            node_type: "hotel" or "visa"
             
         Returns:
             Node details dictionary or None
@@ -196,6 +223,23 @@ class VectorSearcher:
                        country.name AS country
                 """
                 params = {"hotel_id": node_id}
+            elif node_type == "visa":
+                # Parse visa_id like "Egypt_to_France"
+                parts = node_id.split("_to_")
+                if len(parts) == 2:
+                    from_country, to_country = parts[0], parts[1]
+                    cypher = """
+                    MATCH (from:Country {name: $from_country})-[v:NEEDS_VISA]->(to:Country {name: $to_country})
+                    RETURN from.name AS from_country,
+                           to.name AS to_country,
+                           v.visa_type AS visa_type,
+                           true AS visa_required
+                    """
+                    params = {"from_country": from_country, "to_country": to_country}
+                else:
+                    return None
+            else:
+                return None
             
             results = self.query_executor.execute(cypher, params)
             return results[0] if results else None
@@ -205,10 +249,12 @@ class VectorSearcher:
             return None
     
     def get_index_stats(self) -> Dict[str, Any]:
-        """Get statistics about loaded hotel index"""
+        """Get statistics about loaded indexes"""
         return {
             'hotel_index_loaded': self.hotel_index is not None,
-            'hotel_vectors': self.hotel_index.ntotal if self.hotel_index else 0
+            'hotel_vectors': self.hotel_index.ntotal if self.hotel_index else 0,
+            'visa_index_loaded': self.visa_index is not None,
+            'visa_vectors': self.visa_index.ntotal if self.visa_index else 0
         }
 
 

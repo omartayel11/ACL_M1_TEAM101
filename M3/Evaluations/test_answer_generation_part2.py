@@ -39,7 +39,8 @@ class LLMJudge:
             judge_model: Model to use as judge
         """
         self.judge_model = judge_model
-        self.llm_client = LLMClient(model_name=judge_model)
+        self.llm_client = LLMClient()
+        self.llm_client.set_model(judge_model)
         print(f"✓ Initialized LLM Judge: {judge_model}")
     
     def evaluate_answer(self, query, context, expected_elements, generated_answer):

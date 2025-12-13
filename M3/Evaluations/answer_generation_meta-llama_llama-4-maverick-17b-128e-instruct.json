@@ -1,0 +1,366 @@
+{
+  "model_name": "meta-llama/llama-4-maverick-17b-128e-instruct",
+  "test_date": "2025-12-13T20:08:45.327237",
+  "statistics": {
+    "model_name": "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "total_queries": 15,
+    "successful": 15,
+    "failed": 0,
+    "success_rate": 100.0,
+    "average_response_time": 0.9851917902628581,
+    "total_tokens": 4286,
+    "average_tokens_per_query": 285.73333333333335,
+    "total_estimated_cost": 0.0,
+    "average_cost_per_query": 0.0
+  },
+  "results": [
+    {
+      "query_id": 1,
+      "query": "What are the best 5-star hotels in Dubai?",
+      "intent": "HotelSearch",
+      "context": "Hotel: The Golden Oasis\nLocation: Dubai, United Arab Emirates\nStar Rating: 5\nOverall Score: 8.5/10\nCleanliness: 9.3, Comfort: 9.5, Facilities: 9.6, Location: 8.9, Staff: 9.4, Value: 8.5\nDescription: Luxury 5-star hotel in Dubai with excellent facilities and comfort ratings.",
+      "expected_elements": [
+        "The Golden Oasis",
+        "Dubai",
+        "5-star",
+        "luxury",
+        "high ratings"
+      ],
+      "generated_answer": "The Golden Oasis is a great option for a 5-star hotel in Dubai, with an overall score of 8.5/10 and excellent facilities and comfort ratings. In fact, it's a luxury 5-star hotel with a star rating of 5. However, the context doesn't provide a list of other 5-star hotels in Dubai to compare or rank them. If you're looking for more options, I can suggest that you check reviews or hotel comparison websites for more information on other top-rated 5-star hotels in Dubai.",
+      "response_time": 1.3503689765930176,
+      "token_usage": {
+        "prompt_tokens": 176,
+        "completion_tokens": 107,
+        "total_tokens": 283,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:03:51.808584"
+    },
+    {
+      "query_id": 2,
+      "query": "Find me hotels in Paris with good cleanliness",
+      "intent": "HotelSearch",
+      "context": "Hotel: L'Étoile Palace\nLocation: Paris, France\nStar Rating: 5\nOverall Score: 8.1/10\nCleanliness: 8.8, Comfort: 9.4, Facilities: 8.7, Location: 9.6, Staff: 9.3, Value: 8.1\nDescription: Located in central Paris with excellent location score and high comfort ratings.\n\nHotel: Canal House Grand\nLocation: Amsterdam, Netherlands\nStar Rating: 5\nOverall Score: 8.9/10\nCleanliness: 9.4, Comfort: 9.1, Facilities: 9.0, Location: 9.6, Staff: 9.2, Value: 8.9\nDescription: While not in Paris, this hotel has the highest cleanliness rating in our system.",
+      "expected_elements": [
+        "L'Étoile Palace",
+        "Paris",
+        "cleanliness: 8.8",
+        "5-star"
+      ],
+      "generated_answer": "You're looking for hotels in Paris with good cleanliness. Based on the context, I can suggest L'Étoile Palace, which is a 5-star hotel in central Paris with a cleanliness rating of 8.8. While it's not the highest cleanliness rating I've seen (Canal House Grand in Amsterdam has a 9.4), it's still a great option if you're looking for a clean hotel in Paris.",
+      "response_time": 1.0630998611450195,
+      "token_usage": {
+        "prompt_tokens": 261,
+        "completion_tokens": 82,
+        "total_tokens": 343,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:04:12.880104"
+    },
+    {
+      "query_id": 3,
+      "query": "Which hotel has the best location in Singapore?",
+      "intent": "HotelSearch",
+      "context": "Hotel: Marina Bay Zenith\nLocation: Singapore, Singapore\nStar Rating: 5\nOverall Score: 8.3/10\nCleanliness: 9.2, Comfort: 9.1, Facilities: 9.4, Location: 9.7, Staff: 9.1, Value: 8.3\nDescription: Located at Marina Bay with exceptional location score of 9.7, highest in Singapore.",
+      "expected_elements": [
+        "Marina Bay Zenith",
+        "Singapore",
+        "location: 9.7",
+        "Marina Bay"
+      ],
+      "generated_answer": "The Marina Bay Zenith has the best location in Singapore, with an exceptional location score of 9.7, the highest in the city.",
+      "response_time": 1.2270417213439941,
+      "token_usage": {
+        "prompt_tokens": 177,
+        "completion_tokens": 30,
+        "total_tokens": 207,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:04:34.111859"
+    },
+    {
+      "query_id": 4,
+      "query": "Do I need a visa from China to United States?",
+      "intent": "VisaQuestion",
+      "context": "Visa Requirement:\nFrom: China\nTo: United States\nVisa Required: Yes\nVisa Type: Tourist Visa\nDescription: Chinese citizens traveling to the United States must obtain a Tourist Visa before travel.",
+      "expected_elements": [
+        "Yes",
+        "visa required",
+        "China",
+        "United States",
+        "Tourist Visa"
+      ],
+      "generated_answer": "Yes, as a Chinese citizen traveling to the United States, you need a Tourist Visa. According to the visa requirements, Chinese citizens must obtain a Tourist Visa before traveling to the United States.",
+      "response_time": 0.8698825836181641,
+      "token_usage": {
+        "prompt_tokens": 127,
+        "completion_tokens": 39,
+        "total_tokens": 166,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:04:54.985564"
+    },
+    {
+      "query_id": 5,
+      "query": "What do guests say about the staff at hotels in Tokyo?",
+      "intent": "ReviewQuery",
+      "context": "Hotel: Kyo-to Grand\nLocation: Tokyo, Japan\nStar Rating: 5\nStaff Rating: 9.5/10\nReviews mentioning staff:\n- \"The staff were incredibly helpful and friendly, made our stay perfect\"\n- \"Outstanding service from all staff members, very professional\"\n- \"Staff went above and beyond to help with our requests\"\n- \"Helpful and courteous staff throughout our visit\"",
+      "expected_elements": [
+        "Kyo-to Grand",
+        "Tokyo",
+        "staff rating: 9.5",
+        "helpful",
+        "friendly",
+        "professional"
+      ],
+      "generated_answer": "Guests at the Kyo-to Grand hotel in Tokyo have great things to say about the staff. They've mentioned that the staff are \"incredibly helpful and friendly\", \"outstanding\", \"very professional\", and \"courteous\" throughout their visit. Many have also noted that the staff went \"above and beyond\" to help with their requests, making their stay perfect. Overall, the staff have received a high rating of 9.5/10.",
+      "response_time": 0.912217378616333,
+      "token_usage": {
+        "prompt_tokens": 173,
+        "completion_tokens": 94,
+        "total_tokens": 267,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:05:15.902606"
+    },
+    {
+      "query_id": 6,
+      "query": "Compare hotels in New York and London",
+      "intent": "HotelComparison",
+      "context": "Hotel: The Azure Tower\nLocation: New York, United States\nStar Rating: 5\nOverall Score: 8.0/10\nCleanliness: 9.1, Comfort: 8.8, Facilities: 8.9, Location: 9.5, Staff: 8.6, Value: 8.0\nDescription: Luxury hotel in New York with excellent location score.\n\nHotel: The Royal Compass\nLocation: London, United Kingdom\nStar Rating: 5\nOverall Score: 7.9/10\nCleanliness: 9.0, Comfort: 9.2, Facilities: 8.8, Location: 9.4, Staff: 9.0, Value: 7.9\nDescription: Premium hotel in London with high comfort and staff ratings.",
+      "expected_elements": [
+        "The Azure Tower",
+        "New York",
+        "The Royal Compass",
+        "London",
+        "comparison",
+        "both 5-star"
+      ],
+      "generated_answer": "Let's compare the hotels in New York and London based on the information provided.\n\nWe have The Azure Tower in New York, a 5-star hotel with an overall score of 8.0/10, and The Royal Compass in London, also a 5-star hotel, with an overall score of 7.9/10. Both hotels have excellent location scores, with The Azure Tower scoring 9.5 and The Royal Compass scoring 9.4.\n\nHere's a quick comparison of the two hotels:\n\n* The Azure Tower has a slightly higher overall score (8.0 vs 7.9) and a better location score.\n* The Royal Compass excels in comfort (9.2 vs 8.8) and has a higher staff rating (9.0 vs 8.6).\n\nIn terms of cleanliness, facilities, and value, both hotels have similar scores, with The Azure Tower scoring 9.1 for cleanliness and The Royal Compass scoring 9.0. The Royal Compass has a slightly lower value score (7.9 vs 8.0).\n\nUltimately, the choice between the two hotels depends on your priorities. If you prefer a hotel with an unbeatable location, The Azure Tower might be the better choice. If you value comfort and exceptional staff, The Royal Compass is worth considering.",
+      "response_time": 1.2970519065856934,
+      "token_usage": {
+        "prompt_tokens": 254,
+        "completion_tokens": 267,
+        "total_tokens": 521,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:05:37.203984"
+    },
+    {
+      "query_id": 7,
+      "query": "What are the cheapest hotels with good value for money?",
+      "intent": "HotelSearch",
+      "context": "Hotel: The Bund Palace\nLocation: Shanghai, China\nStar Rating: 5\nOverall Score: 8.9/10\nValue for Money: 8.9/10\nDescription: Excellent value for money with high overall ratings.\n\nHotel: Canal House Grand\nLocation: Amsterdam, Netherlands\nStar Rating: 5\nOverall Score: 8.9/10\nValue for Money: 8.9/10\nDescription: Best value for money combined with high quality.\n\nHotel: The Maple Grove\nLocation: Toronto, Canada\nStar Rating: 5\nOverall Score: 8.8/10\nValue for Money: 8.8/10\nDescription: Great value option with consistently high ratings.",
+      "expected_elements": [
+        "value for money",
+        "The Bund Palace",
+        "Canal House Grand",
+        "The Maple Grove",
+        "8.9",
+        "8.8"
+      ],
+      "generated_answer": "All three hotels you've mentioned are 5-star and have excellent value for money, with scores of 8.8 or 8.9 out of 10. The Bund Palace in Shanghai and Canal House Grand in Amsterdam are tied for the best value, both scoring 8.9. The Maple Grove in Toronto is a close third with a score of 8.8.\n\nSince they all have similar value for money scores, the cheapest option would depend on the actual prices, which aren't provided. If you're looking for the cheapest, I would recommend checking the current prices for The Bund Palace, Canal House Grand, and The Maple Grove to see which one offers the best deal.",
+      "response_time": 1.1922330856323242,
+      "token_usage": {
+        "prompt_tokens": 236,
+        "completion_tokens": 137,
+        "total_tokens": 373,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:05:58.400633"
+    },
+    {
+      "query_id": 8,
+      "query": "Are there hotels near the beach in Sydney?",
+      "intent": "LocationQuery",
+      "context": "Hotel: Sydney Harbour Grand\nLocation: Sydney, Australia\nStar Rating: 5\nOverall Score: 8.4/10\nLocation: 9.8/10\nDescription: Located near Sydney Harbour with exceptional location score. Close to waterfront areas and beaches. Guests praise the proximity to Bondi Beach and Manly Beach.",
+      "expected_elements": [
+        "Sydney Harbour Grand",
+        "Sydney",
+        "near beach",
+        "Bondi",
+        "location: 9.8"
+      ],
+      "generated_answer": "You're looking for hotels near the beach in Sydney? You're in luck! The Sydney Harbour Grand hotel is located close to some amazing waterfront areas and beaches, including Bondi Beach and Manly Beach. So, yes, there are hotels near the beach in Sydney, and this 5-star hotel is one of them.",
+      "response_time": 0.5516467094421387,
+      "token_usage": {
+        "prompt_tokens": 153,
+        "completion_tokens": 64,
+        "total_tokens": 217,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:06:18.958580"
+    },
+    {
+      "query_id": 9,
+      "query": "What visa do Indian citizens need for Japan?",
+      "intent": "VisaQuestion",
+      "context": "Visa Requirement:\nFrom: India\nTo: Japan\nVisa Required: Yes\nVisa Type: Tourist Visa / eVisa\nDescription: Indian citizens traveling to Japan need to obtain either a Tourist Visa or eVisa. The eVisa option is available for eligible travelers and can be applied for online.",
+      "expected_elements": [
+        "Yes",
+        "visa required",
+        "India",
+        "Japan",
+        "Tourist Visa",
+        "eVisa"
+      ],
+      "generated_answer": "Indian citizens traveling to Japan need to obtain either a Tourist Visa or an eVisa. The eVisa is available for eligible travelers and can be applied for online.",
+      "response_time": 0.686267614364624,
+      "token_usage": {
+        "prompt_tokens": 144,
+        "completion_tokens": 33,
+        "total_tokens": 177,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:06:39.649504"
+    },
+    {
+      "query_id": 10,
+      "query": "Which hotel in Cairo has the best reviews?",
+      "intent": "ReviewQuery",
+      "context": "Hotel: Nile Grandeur\nLocation: Cairo, Egypt\nStar Rating: 5\nOverall Score: 8.4/10\nCleanliness: 8.8, Comfort: 8.7, Facilities: 8.6, Location: 9.1, Staff: 8.7, Value: 8.4\nRecent Reviews:\n- \"Amazing views of the Nile, staff were wonderful\" (Rating: 9/10)\n- \"Beautiful hotel with great location near the pyramids\" (Rating: 8.5/10)\n- \"Comfortable rooms and excellent service\" (Rating: 8/10)\n- \"Would definitely stay here again, great experience\" (Rating: 9/10)",
+      "expected_elements": [
+        "Nile Grandeur",
+        "Cairo",
+        "overall score: 8.4",
+        "positive reviews",
+        "Nile views"
+      ],
+      "generated_answer": "Based on the context, I'd say the Nile Grandeur hotel in Cairo has excellent reviews, with an overall score of 8.4/10 and a 5-star rating. Recent reviews praise its amazing views of the Nile, wonderful staff, beautiful hotel, great location, comfortable rooms, and excellent service. While I don't have information on other hotels in Cairo, the Nile Grandeur seems to be a top contender. If you're looking for a comparison, I'd need more information on other hotels.",
+      "response_time": 0.780418872833252,
+      "token_usage": {
+        "prompt_tokens": 237,
+        "completion_tokens": 100,
+        "total_tokens": 337,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:07:00.435275"
+    },
+    {
+      "query_id": 11,
+      "query": "What are the amenities at luxury hotels in Barcelona?",
+      "intent": "AmenityQuery",
+      "context": "Hotel: Gaudi's Retreat\nLocation: Barcelona, Spain\nStar Rating: 5\nOverall Score: 8.8/10\nFacilities: 8.9/10\nAmenities: Rooftop pool, Spa and wellness center, Fitness center, Fine dining restaurant, Bar and lounge, Concierge service, 24-hour room service, Business center, Free WiFi\nDescription: Luxury hotel inspired by Gaudi architecture with comprehensive amenities and high facility ratings.",
+      "expected_elements": [
+        "Gaudi's Retreat",
+        "Barcelona",
+        "amenities",
+        "pool",
+        "spa",
+        "restaurant"
+      ],
+      "generated_answer": "Luxury hotels in Barcelona, like Gaudi's Retreat, typically offer top-notch amenities. Some of the amenities you can expect include a rooftop pool, a spa and wellness center, a fitness center, a fine dining restaurant, a bar and lounge, and a concierge service to help with any arrangements. You'll also have access to 24-hour room service, a business center, and free WiFi throughout the hotel.",
+      "response_time": 0.7032554149627686,
+      "token_usage": {
+        "prompt_tokens": 183,
+        "completion_tokens": 85,
+        "total_tokens": 268,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:07:21.148337"
+    },
+    {
+      "query_id": 12,
+      "query": "I'm looking for a family-friendly hotel in Toronto",
+      "intent": "HotelSearch",
+      "context": "Hotel: The Maple Grove\nLocation: Toronto, Canada\nStar Rating: 5\nOverall Score: 8.8/10\nCleanliness: 9.4, Comfort: 9.3, Facilities: 9.2, Location: 8.8, Staff: 9.2, Value: 8.8\nFamily Features: Family rooms available, Kids club, Children's menu, Babysitting services, Playground, Family-friendly activities\nGuest Reviews: \"Perfect for families with children\", \"Kids loved the play area\", \"Very accommodating for our family needs\"",
+      "expected_elements": [
+        "The Maple Grove",
+        "Toronto",
+        "family-friendly",
+        "children",
+        "high ratings"
+      ],
+      "generated_answer": "The Maple Grove in Toronto is a great option for a family-friendly hotel. It's a 5-star hotel with excellent reviews, particularly for families. They have family rooms available, a kids club, children's menu, babysitting services, and even a playground. Guests have praised the hotel for being very accommodating to family needs and the kids loved the play area. With an overall score of 8.8/10, it's definitely worth considering for your family trip to Toronto.",
+      "response_time": 0.8372602462768555,
+      "token_usage": {
+        "prompt_tokens": 206,
+        "completion_tokens": 95,
+        "total_tokens": 301,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:07:41.991078"
+    },
+    {
+      "query_id": 13,
+      "query": "What are guests saying about cleanliness at hotels?",
+      "intent": "ReviewQuery",
+      "context": "Analysis of cleanliness reviews across multiple hotels:\n\nKyo-to Grand (Tokyo): Cleanliness 9.6/10\n- \"Spotlessly clean, attention to detail was impressive\"\n- \"The cleanest hotel I've ever stayed in\"\n\nThe Maple Grove (Toronto): Cleanliness 9.4/10\n- \"Immaculate rooms, housekeeping was excellent\"\n- \"Very clean throughout the entire property\"\n\nCanal House Grand (Amsterdam): Cleanliness 9.4/10\n- \"Pristine condition, exceeded expectations for cleanliness\"\n- \"Rooms were sparkling clean every day\"",
+      "expected_elements": [
+        "cleanliness",
+        "Kyo-to Grand",
+        "9.6",
+        "clean",
+        "positive reviews"
+      ],
+      "generated_answer": "Guests are raving about the cleanliness at these hotels! At Kyo-to Grand in Tokyo, they're saying it's \"spotlessly clean\" and \"the cleanest hotel I've ever stayed in,\" with an impressive attention to detail, earning it a 9.6/10 cleanliness rating. Similarly, The Maple Grove in Toronto and Canal House Grand in Amsterdam are getting high praise for their immaculate rooms and sparkling cleanliness, with both hotels scoring 9.4/10. Guests have used words like \"immaculate,\" \"pristine,\" and \"excellent\" to describe the housekeeping and overall cleanliness at these properties.",
+      "response_time": 1.6383764743804932,
+      "token_usage": {
+        "prompt_tokens": 207,
+        "completion_tokens": 128,
+        "total_tokens": 335,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:08:03.636252"
+    },
+    {
+      "query_id": 14,
+      "query": "Do I need a visa from United States to France?",
+      "intent": "VisaQuestion",
+      "context": "Visa Requirement:\nFrom: United States\nTo: France\nVisa Required: No\nVisa Type: Visa-Free / eVisa\nDescription: US citizens can travel to France visa-free for stays up to 90 days within a 180-day period under the Schengen agreement.",
+      "expected_elements": [
+        "No",
+        "visa-free",
+        "United States",
+        "France",
+        "90 days"
+      ],
+      "generated_answer": "You don't need a visa to travel to France from the United States. As a US citizen, you're eligible for visa-free travel to France for stays up to 90 days within a 180-day period.",
+      "response_time": 0.713709831237793,
+      "token_usage": {
+        "prompt_tokens": 141,
+        "completion_tokens": 42,
+        "total_tokens": 183,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:08:24.357651"
+    },
+    {
+      "query_id": 15,
+      "query": "Tell me about hotels in Rome near historical sites",
+      "intent": "LocationQuery",
+      "context": "Hotel: Colosseum Gardens\nLocation: Rome, Italy\nStar Rating: 5\nOverall Score: 8.7/10\nLocation: 9.8/10\nDescription: Located steps away from the Colosseum with exceptional location score. Easy walking distance to Roman Forum, Palatine Hill, and other historical attractions.\nGuest Reviews: \"Perfect location for exploring ancient Rome\", \"Can see the Colosseum from our room\", \"Within walking distance of all major historical sites\"",
+      "expected_elements": [
+        "Colosseum Gardens",
+        "Rome",
+        "Colosseum",
+        "historical sites",
+        "location: 9.8"
+      ],
+      "generated_answer": "If you're looking for a hotel in Rome that's close to historical sites, I'd recommend considering the Colosseum Gardens. It's a 5-star hotel with an exceptional location score of 9.8/10. Guests rave about its proximity to ancient Rome's major attractions, saying it's within walking distance to the Colosseum, Roman Forum, and Palatine Hill. In fact, some rooms even have a view of the Colosseum! With an overall score of 8.7/10, it's a great option for history buffs who want to be in the heart of the action.",
+      "response_time": 0.9550461769104004,
+      "token_usage": {
+        "prompt_tokens": 187,
+        "completion_tokens": 121,
+        "total_tokens": 308,
+        "model": "meta-llama/llama-4-maverick-17b-128e-instruct"
+      },
+      "estimated_cost": 0.0,
+      "timestamp": "2025-12-13T20:08:45.317773"
+    }
+  ]
+}

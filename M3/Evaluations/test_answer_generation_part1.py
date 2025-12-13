@@ -50,7 +50,14 @@ class AnswerGenerationTester:
         
         # Load test cases
         with open(test_cases_file, 'r', encoding='utf-8') as f:
-            self.test_cases = json.load(f)
+            data = json.load(f)
+            # Handle both formats: direct list or {"test_cases": [...]}
+            if isinstance(data, dict) and 'test_cases' in data:
+                self.test_cases = data['test_cases']
+            elif isinstance(data, list):
+                self.test_cases = data
+            else:
+                raise ValueError("Invalid test cases file format")
         
         print(f"✓ Loaded {len(self.test_cases)} test cases")
         print(f"✓ Testing {len(self.models)} models")
@@ -126,8 +133,9 @@ Answer:"""
         print(f"Testing Model: {model_name}")
         print(f"{'='*80}")
         
-        # Initialize LLM client
-        llm_client = LLMClient(model_name=model_name)
+        # Initialize LLM client and set model
+        llm_client = LLMClient()
+        llm_client.set_model(model_name)
         
         # Initialize or continue results
         if existing_results:

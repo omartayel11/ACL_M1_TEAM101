@@ -1,0 +1,202 @@
+{
+  "test_cases": [
+    {
+      "id": 1,
+      "query": "What are the best 5-star hotels in Dubai?",
+      "intent": "HotelSearch",
+      "context": "Hotel: The Golden Oasis\nLocation: Dubai, United Arab Emirates\nStar Rating: 5\nOverall Score: 8.5/10\nCleanliness: 9.3, Comfort: 9.5, Facilities: 9.6, Location: 8.9, Staff: 9.4, Value: 8.5\nDescription: Luxury 5-star hotel in Dubai with excellent facilities and comfort ratings.",
+      "expected_elements": [
+        "The Golden Oasis",
+        "Dubai",
+        "5-star",
+        "luxury",
+        "high ratings"
+      ]
+    },
+    {
+      "id": 2,
+      "query": "Find me hotels in Paris with good cleanliness",
+      "intent": "HotelSearch",
+      "context": "Hotel: L'Étoile Palace\nLocation: Paris, France\nStar Rating: 5\nOverall Score: 8.1/10\nCleanliness: 8.8, Comfort: 9.4, Facilities: 8.7, Location: 9.6, Staff: 9.3, Value: 8.1\nDescription: Located in central Paris with excellent location score and high comfort ratings.\n\nHotel: Canal House Grand\nLocation: Amsterdam, Netherlands\nStar Rating: 5\nOverall Score: 8.9/10\nCleanliness: 9.4, Comfort: 9.1, Facilities: 9.0, Location: 9.6, Staff: 9.2, Value: 8.9\nDescription: While not in Paris, this hotel has the highest cleanliness rating in our system.",
+      "expected_elements": [
+        "L'Étoile Palace",
+        "Paris",
+        "cleanliness: 8.8",
+        "5-star"
+      ]
+    },
+    {
+      "id": 3,
+      "query": "Which hotel has the best location in Singapore?",
+      "intent": "HotelSearch",
+      "context": "Hotel: Marina Bay Zenith\nLocation: Singapore, Singapore\nStar Rating: 5\nOverall Score: 8.3/10\nCleanliness: 9.2, Comfort: 9.1, Facilities: 9.4, Location: 9.7, Staff: 9.1, Value: 8.3\nDescription: Located at Marina Bay with exceptional location score of 9.7, highest in Singapore.",
+      "expected_elements": [
+        "Marina Bay Zenith",
+        "Singapore",
+        "location: 9.7",
+        "Marina Bay"
+      ]
+    },
+    {
+      "id": 4,
+      "query": "Do I need a visa from China to United States?",
+      "intent": "VisaQuestion",
+      "context": "Visa Requirement:\nFrom: China\nTo: United States\nVisa Required: Yes\nVisa Type: Tourist Visa\nDescription: Chinese citizens traveling to the United States must obtain a Tourist Visa before travel.",
+      "expected_elements": [
+        "Yes",
+        "visa required",
+        "China",
+        "United States",
+        "Tourist Visa"
+      ]
+    },
+    {
+      "id": 5,
+      "query": "What do guests say about the staff at hotels in Tokyo?",
+      "intent": "ReviewQuery",
+      "context": "Hotel: Kyo-to Grand\nLocation: Tokyo, Japan\nStar Rating: 5\nStaff Rating: 9.5/10\nReviews mentioning staff:\n- \"The staff were incredibly helpful and friendly, made our stay perfect\"\n- \"Outstanding service from all staff members, very professional\"\n- \"Staff went above and beyond to help with our requests\"\n- \"Helpful and courteous staff throughout our visit\"",
+      "expected_elements": [
+        "Kyo-to Grand",
+        "Tokyo",
+        "staff rating: 9.5",
+        "helpful",
+        "friendly",
+        "professional"
+      ]
+    },
+    {
+      "id": 6,
+      "query": "Compare hotels in New York and London",
+      "intent": "HotelComparison",
+      "context": "Hotel: The Azure Tower\nLocation: New York, United States\nStar Rating: 5\nOverall Score: 8.0/10\nCleanliness: 9.1, Comfort: 8.8, Facilities: 8.9, Location: 9.5, Staff: 8.6, Value: 8.0\nDescription: Luxury hotel in New York with excellent location score.\n\nHotel: The Royal Compass\nLocation: London, United Kingdom\nStar Rating: 5\nOverall Score: 7.9/10\nCleanliness: 9.0, Comfort: 9.2, Facilities: 8.8, Location: 9.4, Staff: 9.0, Value: 7.9\nDescription: Premium hotel in London with high comfort and staff ratings.",
+      "expected_elements": [
+        "The Azure Tower",
+        "New York",
+        "The Royal Compass",
+        "London",
+        "comparison",
+        "both 5-star"
+      ]
+    },
+    {
+      "id": 7,
+      "query": "What are the cheapest hotels with good value for money?",
+      "intent": "HotelSearch",
+      "context": "Hotel: The Bund Palace\nLocation: Shanghai, China\nStar Rating: 5\nOverall Score: 8.9/10\nValue for Money: 8.9/10\nDescription: Excellent value for money with high overall ratings.\n\nHotel: Canal House Grand\nLocation: Amsterdam, Netherlands\nStar Rating: 5\nOverall Score: 8.9/10\nValue for Money: 8.9/10\nDescription: Best value for money combined with high quality.\n\nHotel: The Maple Grove\nLocation: Toronto, Canada\nStar Rating: 5\nOverall Score: 8.8/10\nValue for Money: 8.8/10\nDescription: Great value option with consistently high ratings.",
+      "expected_elements": [
+        "value for money",
+        "The Bund Palace",
+        "Canal House Grand",
+        "The Maple Grove",
+        "8.9",
+        "8.8"
+      ]
+    },
+    {
+      "id": 8,
+      "query": "Are there hotels near the beach in Sydney?",
+      "intent": "LocationQuery",
+      "context": "Hotel: Sydney Harbour Grand\nLocation: Sydney, Australia\nStar Rating: 5\nOverall Score: 8.4/10\nLocation: 9.8/10\nDescription: Located near Sydney Harbour with exceptional location score. Close to waterfront areas and beaches. Guests praise the proximity to Bondi Beach and Manly Beach.",
+      "expected_elements": [
+        "Sydney Harbour Grand",
+        "Sydney",
+        "near beach",
+        "Bondi",
+        "location: 9.8"
+      ]
+    },
+    {
+      "id": 9,
+      "query": "What visa do Indian citizens need for Japan?",
+      "intent": "VisaQuestion",
+      "context": "Visa Requirement:\nFrom: India\nTo: Japan\nVisa Required: Yes\nVisa Type: Tourist Visa / eVisa\nDescription: Indian citizens traveling to Japan need to obtain either a Tourist Visa or eVisa. The eVisa option is available for eligible travelers and can be applied for online.",
+      "expected_elements": [
+        "Yes",
+        "visa required",
+        "India",
+        "Japan",
+        "Tourist Visa",
+        "eVisa"
+      ]
+    },
+    {
+      "id": 10,
+      "query": "Which hotel in Cairo has the best reviews?",
+      "intent": "ReviewQuery",
+      "context": "Hotel: Nile Grandeur\nLocation: Cairo, Egypt\nStar Rating: 5\nOverall Score: 8.4/10\nCleanliness: 8.8, Comfort: 8.7, Facilities: 8.6, Location: 9.1, Staff: 8.7, Value: 8.4\nRecent Reviews:\n- \"Amazing views of the Nile, staff were wonderful\" (Rating: 9/10)\n- \"Beautiful hotel with great location near the pyramids\" (Rating: 8.5/10)\n- \"Comfortable rooms and excellent service\" (Rating: 8/10)\n- \"Would definitely stay here again, great experience\" (Rating: 9/10)",
+      "expected_elements": [
+        "Nile Grandeur",
+        "Cairo",
+        "overall score: 8.4",
+        "positive reviews",
+        "Nile views"
+      ]
+    },
+    {
+      "id": 11,
+      "query": "What are the amenities at luxury hotels in Barcelona?",
+      "intent": "AmenityQuery",
+      "context": "Hotel: Gaudi's Retreat\nLocation: Barcelona, Spain\nStar Rating: 5\nOverall Score: 8.8/10\nFacilities: 8.9/10\nAmenities: Rooftop pool, Spa and wellness center, Fitness center, Fine dining restaurant, Bar and lounge, Concierge service, 24-hour room service, Business center, Free WiFi\nDescription: Luxury hotel inspired by Gaudi architecture with comprehensive amenities and high facility ratings.",
+      "expected_elements": [
+        "Gaudi's Retreat",
+        "Barcelona",
+        "amenities",
+        "pool",
+        "spa",
+        "restaurant"
+      ]
+    },
+    {
+      "id": 12,
+      "query": "I'm looking for a family-friendly hotel in Toronto",
+      "intent": "HotelSearch",
+      "context": "Hotel: The Maple Grove\nLocation: Toronto, Canada\nStar Rating: 5\nOverall Score: 8.8/10\nCleanliness: 9.4, Comfort: 9.3, Facilities: 9.2, Location: 8.8, Staff: 9.2, Value: 8.8\nFamily Features: Family rooms available, Kids club, Children's menu, Babysitting services, Playground, Family-friendly activities\nGuest Reviews: \"Perfect for families with children\", \"Kids loved the play area\", \"Very accommodating for our family needs\"",
+      "expected_elements": [
+        "The Maple Grove",
+        "Toronto",
+        "family-friendly",
+        "children",
+        "high ratings"
+      ]
+    },
+    {
+      "id": 13,
+      "query": "What are guests saying about cleanliness at hotels?",
+      "intent": "ReviewQuery",
+      "context": "Analysis of cleanliness reviews across multiple hotels:\n\nKyo-to Grand (Tokyo): Cleanliness 9.6/10\n- \"Spotlessly clean, attention to detail was impressive\"\n- \"The cleanest hotel I've ever stayed in\"\n\nThe Maple Grove (Toronto): Cleanliness 9.4/10\n- \"Immaculate rooms, housekeeping was excellent\"\n- \"Very clean throughout the entire property\"\n\nCanal House Grand (Amsterdam): Cleanliness 9.4/10\n- \"Pristine condition, exceeded expectations for cleanliness\"\n- \"Rooms were sparkling clean every day\"",
+      "expected_elements": [
+        "cleanliness",
+        "Kyo-to Grand",
+        "9.6",
+        "clean",
+        "positive reviews"
+      ]
+    },
+    {
+      "id": 14,
+      "query": "Do I need a visa from United States to France?",
+      "intent": "VisaQuestion",
+      "context": "Visa Requirement:\nFrom: United States\nTo: France\nVisa Required: No\nVisa Type: Visa-Free / eVisa\nDescription: US citizens can travel to France visa-free for stays up to 90 days within a 180-day period under the Schengen agreement.",
+      "expected_elements": [
+        "No",
+        "visa-free",
+        "United States",
+        "France",
+        "90 days"
+      ]
+    },
+    {
+      "id": 15,
+      "query": "Tell me about hotels in Rome near historical sites",
+      "intent": "LocationQuery",
+      "context": "Hotel: Colosseum Gardens\nLocation: Rome, Italy\nStar Rating: 5\nOverall Score: 8.7/10\nLocation: 9.8/10\nDescription: Located steps away from the Colosseum with exceptional location score. Easy walking distance to Roman Forum, Palatine Hill, and other historical attractions.\nGuest Reviews: \"Perfect location for exploring ancient Rome\", \"Can see the Colosseum from our room\", \"Within walking distance of all major historical sites\"",
+      "expected_elements": [
+        "Colosseum Gardens",
+        "Rome",
+        "Colosseum",
+        "historical sites",
+        "location: 9.8"
+      ]
+    }
+  ]
+}

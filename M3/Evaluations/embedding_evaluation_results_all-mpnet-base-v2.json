@@ -1,0 +1,1525 @@
+{
+  "embedding_model": "all-MiniLM-L6-v2",
+  "embedding_dimension": 384,
+  "hotel_results": {
+    "total_queries": 30,
+    "top1_correct": 25,
+    "top3_correct": 27,
+    "top5_correct": 28,
+    "failed_queries": [
+      {
+        "query_id": 26,
+        "query": "5 star hotel with best cleanliness rating",
+        "expected": [
+          "4",
+          "10",
+          "22"
+        ],
+        "retrieved": [
+          "5",
+          "19",
+          "6",
+          "16",
+          "24"
+        ]
+      },
+      {
+        "query_id": 28,
+        "query": "hotel with amazing location score above 9.5",
+        "expected": [
+          "7",
+          "14",
+          "6"
+        ],
+        "retrieved": [
+          "5",
+          "1",
+          "19",
+          "6",
+          "24"
+        ]
+      },
+      {
+        "query_id": 29,
+        "query": "hotel with best value for money",
+        "expected": [
+          "11",
+          "22",
+          "10"
+        ],
+        "retrieved": [
+          "5",
+          "21",
+          "19",
+          "16",
+          "24"
+        ]
+      }
+    ],
+    "query_details": [
+      {
+        "query_id": 1,
+        "query": "luxury hotel in New York with excellent location",
+        "expected_top1": "1",
+        "expected_top3": [
+          "1",
+          "2",
+          "3"
+        ],
+        "retrieved_top5": [
+          "5",
+          "1",
+          "8",
+          "23",
+          "16"
+        ],
+        "top1_correct": false,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.4243278503417969,
+          0.375641405582428,
+          0.3742142915725708,
+          0.3566693067550659,
+          0.34009766578674316
+        ]
+      },
+      {
+        "query_id": 2,
+        "query": "find the Royal Compass hotel in London",
+        "expected_top1": "2",
+        "expected_top3": [
+          "2"
+        ],
+        "retrieved_top5": [
+          "2",
+          "24",
+          "19",
+          "5",
+          "6"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7417738437652588,
+          0.2724604606628418,
+          0.27113866806030273,
+          0.2504795789718628,
+          0.24485599994659424
+        ]
+      },
+      {
+        "query_id": 3,
+        "query": "hotels in Paris France with great comfort",
+        "expected_top1": "3",
+        "expected_top3": [
+          "3"
+        ],
+        "retrieved_top5": [
+          "3",
+          "5",
+          "19",
+          "8",
+          "23"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.5735688805580139,
+          0.37847912311553955,
+          0.369260311126709,
+          0.33124983310699463,
+          0.3208051919937134
+        ]
+      },
+      {
+        "query_id": 4,
+        "query": "best hotel in Tokyo Japan",
+        "expected_top1": "4",
+        "expected_top3": [
+          "4"
+        ],
+        "retrieved_top5": [
+          "4",
+          "17",
+          "6",
+          "16",
+          "23"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.5735479593276978,
+          0.3583645224571228,
+          0.3529072403907776,
+          0.34094810485839844,
+          0.3110164403915405
+        ]
+      },
+      {
+        "query_id": 5,
+        "query": "luxury accommodation in Dubai UAE",
+        "expected_top1": "5",
+        "expected_top3": [
+          "5"
+        ],
+        "retrieved_top5": [
+          "5",
+          "6",
+          "20",
+          "24",
+          "16"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6532505750656128,
+          0.36253809928894043,
+          0.33211570978164673,
+          0.3148059844970703,
+          0.31265801191329956
+        ]
+      },
+      {
+        "query_id": 6,
+        "query": "Marina Bay hotel in Singapore with excellent location",
+        "expected_top1": "6",
+        "expected_top3": [
+          "6"
+        ],
+        "retrieved_top5": [
+          "6",
+          "16",
+          "5",
+          "20",
+          "7"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7397322654724121,
+          0.40464526414871216,
+          0.35893285274505615,
+          0.34696757793426514,
+          0.34666621685028076
+        ]
+      },
+      {
+        "query_id": 7,
+        "query": "Sydney harbour hotel in Australia",
+        "expected_top1": "7",
+        "expected_top3": [
+          "7"
+        ],
+        "retrieved_top5": [
+          "7",
+          "6",
+          "5",
+          "25",
+          "1"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6184777617454529,
+          0.3510875105857849,
+          0.334266722202301,
+          0.30507993698120117,
+          0.22846198081970215
+        ]
+      },
+      {
+        "query_id": 8,
+        "query": "hotel in Rio de Janeiro Brazil",
+        "expected_top1": "8",
+        "expected_top3": [
+          "8"
+        ],
+        "retrieved_top5": [
+          "8",
+          "21",
+          "19",
+          "23",
+          "5"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.5523331165313721,
+          0.316792368888855,
+          0.30877918004989624,
+          0.3060115575790405,
+          0.2979508638381958
+        ]
+      },
+      {
+        "query_id": 9,
+        "query": "accommodation in Berlin Germany",
+        "expected_top1": "9",
+        "expected_top3": [
+          "9"
+        ],
+        "retrieved_top5": [
+          "9",
+          "17",
+          "19",
+          "24",
+          "21"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.4728456139564514,
+          0.34900200366973877,
+          0.3345678448677063,
+          0.281794011592865,
+          0.26387810707092285
+        ]
+      },
+      {
+        "query_id": 10,
+        "query": "Maple Grove hotel in Toronto Canada",
+        "expected_top1": "10",
+        "expected_top3": [
+          "10"
+        ],
+        "retrieved_top5": [
+          "10",
+          "17",
+          "21",
+          "5",
+          "23"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.71604984998703,
+          0.3035629987716675,
+          0.2716270685195923,
+          0.2463262677192688,
+          0.23936259746551514
+        ]
+      },
+      {
+        "query_id": 11,
+        "query": "hotel near the Bund in Shanghai China",
+        "expected_top1": "11",
+        "expected_top3": [
+          "11"
+        ],
+        "retrieved_top5": [
+          "11",
+          "16",
+          "5",
+          "21",
+          "4"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7292096018791199,
+          0.3798067569732666,
+          0.30402088165283203,
+          0.27972280979156494,
+          0.25634765625
+        ]
+      },
+      {
+        "query_id": 12,
+        "query": "Aztec themed hotel in Mexico City",
+        "expected_top1": "12",
+        "expected_top3": [
+          "12"
+        ],
+        "retrieved_top5": [
+          "12",
+          "19",
+          "23",
+          "8",
+          "5"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.5925602912902832,
+          0.36595797538757324,
+          0.24856865406036377,
+          0.2331324815750122,
+          0.23238086700439453
+        ]
+      },
+      {
+        "query_id": 13,
+        "query": "Gateway hotel in Mumbai India",
+        "expected_top1": "13",
+        "expected_top3": [
+          "13"
+        ],
+        "retrieved_top5": [
+          "13",
+          "21",
+          "20",
+          "15",
+          "19"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6444565057754517,
+          0.2716641426086426,
+          0.2504810094833374,
+          0.245100736618042,
+          0.2206287384033203
+        ]
+      },
+      {
+        "query_id": 14,
+        "query": "hotel near the Colosseum in Rome Italy",
+        "expected_top1": "14",
+        "expected_top3": [
+          "14"
+        ],
+        "retrieved_top5": [
+          "14",
+          "21",
+          "19",
+          "3",
+          "8"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6724454760551453,
+          0.3960089683532715,
+          0.34190940856933594,
+          0.3206232786178589,
+          0.2807386517524719
+        ]
+      },
+      {
+        "query_id": 15,
+        "query": "Table Mountain view hotel in Cape Town South Africa",
+        "expected_top1": "15",
+        "expected_top3": [
+          "15"
+        ],
+        "retrieved_top5": [
+          "15",
+          "24",
+          "2",
+          "6",
+          "5"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7328618168830872,
+          0.32556307315826416,
+          0.28767383098602295,
+          0.25913500785827637,
+          0.24377912282943726
+        ]
+      },
+      {
+        "query_id": 16,
+        "query": "Han River hotel in Seoul South Korea",
+        "expected_top1": "16",
+        "expected_top3": [
+          "16"
+        ],
+        "retrieved_top5": [
+          "16",
+          "11",
+          "4",
+          "17",
+          "6"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7313604354858398,
+          0.3310033082962036,
+          0.3184617757797241,
+          0.2902538776397705,
+          0.27794206142425537
+        ]
+      },
+      {
+        "query_id": 17,
+        "query": "hotel near Kremlin in Moscow Russia",
+        "expected_top1": "17",
+        "expected_top3": [
+          "17"
+        ],
+        "retrieved_top5": [
+          "17",
+          "21",
+          "24",
+          "19",
+          "16"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7561306357383728,
+          0.3397446870803833,
+          0.285999059677124,
+          0.27169620990753174,
+          0.26561105251312256
+        ]
+      },
+      {
+        "query_id": 18,
+        "query": "Nile view hotel in Cairo Egypt",
+        "expected_top1": "18",
+        "expected_top3": [
+          "18"
+        ],
+        "retrieved_top5": [
+          "18",
+          "15",
+          "24",
+          "5",
+          "19"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6249309182167053,
+          0.2903556227684021,
+          0.2761857509613037,
+          0.2609022855758667,
+          0.25730931758880615
+        ]
+      },
+      {
+        "query_id": 19,
+        "query": "Gaudi inspired hotel in Barcelona Spain",
+        "expected_top1": "19",
+        "expected_top3": [
+          "19"
+        ],
+        "retrieved_top5": [
+          "19",
+          "8",
+          "23",
+          "6",
+          "3"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.724190354347229,
+          0.3032482862472534,
+          0.2693517208099365,
+          0.23871469497680664,
+          0.2274247407913208
+        ]
+      },
+      {
+        "query_id": 20,
+        "query": "Orchid hotel in Bangkok Thailand",
+        "expected_top1": "20",
+        "expected_top3": [
+          "20"
+        ],
+        "retrieved_top5": [
+          "20",
+          "5",
+          "6",
+          "23",
+          "19"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7358131408691406,
+          0.3115127682685852,
+          0.30390435457229614,
+          0.27444911003112793,
+          0.25840699672698975
+        ]
+      },
+      {
+        "query_id": 21,
+        "query": "Bosphorus hotel in Istanbul Turkey",
+        "expected_top1": "21",
+        "expected_top3": [
+          "21"
+        ],
+        "retrieved_top5": [
+          "21",
+          "17",
+          "5",
+          "11",
+          "14"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8065307140350342,
+          0.29885542392730713,
+          0.25511860847473145,
+          0.22751832008361816,
+          0.2199317216873169
+        ]
+      },
+      {
+        "query_id": 22,
+        "query": "canal house hotel in Amsterdam Netherlands",
+        "expected_top1": "22",
+        "expected_top3": [
+          "22"
+        ],
+        "retrieved_top5": [
+          "22",
+          "20",
+          "3",
+          "21",
+          "16"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7240887880325317,
+          0.2541090250015259,
+          0.25164514780044556,
+          0.22629106044769287,
+          0.22159820795059204
+        ]
+      },
+      {
+        "query_id": 23,
+        "query": "tango hotel in Buenos Aires Argentina",
+        "expected_top1": "23",
+        "expected_top3": [
+          "23"
+        ],
+        "retrieved_top5": [
+          "23",
+          "8",
+          "19",
+          "5",
+          "21"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8007664680480957,
+          0.31560808420181274,
+          0.2880517244338989,
+          0.28291070461273193,
+          0.2578244209289551
+        ]
+      },
+      {
+        "query_id": 24,
+        "query": "hotel in Lagos Nigeria",
+        "expected_top1": "24",
+        "expected_top3": [
+          "24"
+        ],
+        "retrieved_top5": [
+          "24",
+          "21",
+          "17",
+          "5",
+          "15"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.5531497001647949,
+          0.30666738748550415,
+          0.29741060733795166,
+          0.27584290504455566,
+          0.27500104904174805
+        ]
+      },
+      {
+        "query_id": 25,
+        "query": "Kiwi hotel in Wellington New Zealand",
+        "expected_top1": "25",
+        "expected_top3": [
+          "25"
+        ],
+        "retrieved_top5": [
+          "25",
+          "1",
+          "17",
+          "7",
+          "19"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7220956087112427,
+          0.3505403995513916,
+          0.26651471853256226,
+          0.24815744161605835,
+          0.233758807182312
+        ]
+      },
+      {
+        "query_id": 26,
+        "query": "5 star hotel with best cleanliness rating",
+        "expected_top1": "4",
+        "expected_top3": [
+          "4",
+          "10",
+          "22"
+        ],
+        "retrieved_top5": [
+          "5",
+          "19",
+          "6",
+          "16",
+          "24"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": false,
+        "similarities": [
+          0.4218921661376953,
+          0.406768798828125,
+          0.3965412378311157,
+          0.3558506965637207,
+          0.348651647567749
+        ]
+      },
+      {
+        "query_id": 27,
+        "query": "hotel with excellent comfort and facilities in Dubai",
+        "expected_top1": "5",
+        "expected_top3": [
+          "5"
+        ],
+        "retrieved_top5": [
+          "5",
+          "6",
+          "24",
+          "23",
+          "13"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6324885487556458,
+          0.38333237171173096,
+          0.3694078326225281,
+          0.35743290185928345,
+          0.3566458821296692
+        ]
+      },
+      {
+        "query_id": 28,
+        "query": "hotel with amazing location score above 9.5",
+        "expected_top1": "7",
+        "expected_top3": [
+          "7",
+          "14",
+          "6"
+        ],
+        "retrieved_top5": [
+          "5",
+          "1",
+          "19",
+          "6",
+          "24"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": true,
+        "similarities": [
+          0.4751208424568176,
+          0.42893654108047485,
+          0.42529141902923584,
+          0.4202117323875427,
+          0.4131543040275574
+        ]
+      },
+      {
+        "query_id": 29,
+        "query": "hotel with best value for money",
+        "expected_top1": "11",
+        "expected_top3": [
+          "11",
+          "22",
+          "10"
+        ],
+        "retrieved_top5": [
+          "5",
+          "21",
+          "19",
+          "16",
+          "24"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": false,
+        "similarities": [
+          0.370550274848938,
+          0.346388578414917,
+          0.3168541193008423,
+          0.30004727840423584,
+          0.2939854860305786
+        ]
+      },
+      {
+        "query_id": 30,
+        "query": "hotel with excellent staff rating above 9",
+        "expected_top1": "4",
+        "expected_top3": [
+          "4",
+          "5",
+          "16"
+        ],
+        "retrieved_top5": [
+          "5",
+          "19",
+          "21",
+          "3",
+          "24"
+        ],
+        "top1_correct": false,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.43983179330825806,
+          0.4282774329185486,
+          0.3955671191215515,
+          0.38925111293792725,
+          0.3665231466293335
+        ]
+      }
+    ],
+    "top1_accuracy": 0.8333333333333334,
+    "top3_accuracy": 0.9,
+    "top5_accuracy": 0.9333333333333333
+  },
+  "visa_results": {
+    "total_queries": 25,
+    "top1_correct": 20,
+    "top3_correct": 21,
+    "top5_correct": 21,
+    "failed_queries": [
+      {
+        "query_id": 18,
+        "query": "do I need visa from Nigeria to United States",
+        "expected": [
+          "Nigeria_to_United States"
+        ],
+        "retrieved": [
+          "South Africa_to_United States",
+          "India_to_United States",
+          "Egypt_to_United States",
+          "Russia_to_United States",
+          "South Africa_to_United Kingdom"
+        ]
+      },
+      {
+        "query_id": 19,
+        "query": "Nigeria to UK visa requirements",
+        "expected": [
+          "Nigeria_to_United Kingdom"
+        ],
+        "retrieved": [
+          "South Africa_to_United Kingdom",
+          "India_to_United Kingdom",
+          "Russia_to_United Kingdom",
+          "Egypt_to_United Kingdom",
+          "South Africa_to_United Arab Emirates"
+        ]
+      },
+      {
+        "query_id": 20,
+        "query": "visa from Nigeria to France",
+        "expected": [
+          "Nigeria_to_France"
+        ],
+        "retrieved": [
+          "South Africa_to_France",
+          "India_to_France",
+          "Egypt_to_France",
+          "Thailand_to_France",
+          "Russia_to_France"
+        ]
+      },
+      {
+        "query_id": 25,
+        "query": "Brazil to China visa requirements",
+        "expected": [
+          "Brazil_to_China"
+        ],
+        "retrieved": [
+          "China_to_Brazil",
+          "Egypt_to_Brazil",
+          "Thailand_to_Brazil",
+          "India_to_Brazil",
+          "Russia_to_Brazil"
+        ]
+      }
+    ],
+    "query_details": [
+      {
+        "query_id": 1,
+        "query": "do I need a visa from China to United States",
+        "expected_top1": "China_to_United States",
+        "expected_top3": [
+          "China_to_United States"
+        ],
+        "retrieved_top5": [
+          "China_to_United States",
+          "India_to_China",
+          "China_to_United Kingdom",
+          "Russia_to_China",
+          "Egypt_to_China"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8014227747917175,
+          0.5939798355102539,
+          0.5872008800506592,
+          0.5613538026809692,
+          0.5607360601425171
+        ]
+      },
+      {
+        "query_id": 2,
+        "query": "visa requirements from China to United Kingdom",
+        "expected_top1": "China_to_United Kingdom",
+        "expected_top3": [
+          "China_to_United Kingdom"
+        ],
+        "retrieved_top5": [
+          "China_to_United Kingdom",
+          "Russia_to_United Kingdom",
+          "India_to_United Kingdom",
+          "China_to_United States",
+          "Thailand_to_United Kingdom"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8453821539878845,
+          0.6140995621681213,
+          0.6028592586517334,
+          0.5997485518455505,
+          0.5963672995567322
+        ]
+      },
+      {
+        "query_id": 3,
+        "query": "traveling from China to France need visa",
+        "expected_top1": "China_to_France",
+        "expected_top3": [
+          "China_to_France"
+        ],
+        "retrieved_top5": [
+          "China_to_France",
+          "Thailand_to_France",
+          "China_to_Italy",
+          "Thailand_to_China",
+          "Egypt_to_China"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8245647549629211,
+          0.6244215965270996,
+          0.6220388412475586,
+          0.6032304763793945,
+          0.6022180914878845
+        ]
+      },
+      {
+        "query_id": 4,
+        "query": "China to Japan visa requirements",
+        "expected_top1": "China_to_Japan",
+        "expected_top3": [
+          "China_to_Japan"
+        ],
+        "retrieved_top5": [
+          "China_to_Japan",
+          "India_to_Japan",
+          "Egypt_to_Japan",
+          "Thailand_to_Japan",
+          "Russia_to_Japan"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8269983530044556,
+          0.716397762298584,
+          0.687492847442627,
+          0.6797311305999756,
+          0.6691029071807861
+        ]
+      },
+      {
+        "query_id": 5,
+        "query": "do Chinese citizens need visa for Dubai UAE",
+        "expected_top1": "China_to_United Arab Emirates",
+        "expected_top3": [
+          "China_to_United Arab Emirates"
+        ],
+        "retrieved_top5": [
+          "China_to_United Arab Emirates",
+          "Egypt_to_United Arab Emirates",
+          "India_to_United Arab Emirates",
+          "Russia_to_United Arab Emirates",
+          "Egypt_to_China"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7352408766746521,
+          0.576451301574707,
+          0.5642963647842407,
+          0.5602894425392151,
+          0.5586457252502441
+        ]
+      },
+      {
+        "query_id": 6,
+        "query": "China to Singapore visa",
+        "expected_top1": "China_to_Singapore",
+        "expected_top3": [
+          "China_to_Singapore"
+        ],
+        "retrieved_top5": [
+          "China_to_Singapore",
+          "Egypt_to_Singapore",
+          "Thailand_to_Singapore",
+          "India_to_Singapore",
+          "Russia_to_Singapore"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8031652569770813,
+          0.6895204186439514,
+          0.6536623239517212,
+          0.6373088359832764,
+          0.6357807517051697
+        ]
+      },
+      {
+        "query_id": 7,
+        "query": "visa from China to Australia",
+        "expected_top1": "China_to_Australia",
+        "expected_top3": [
+          "China_to_Australia"
+        ],
+        "retrieved_top5": [
+          "China_to_Australia",
+          "Egypt_to_Australia",
+          "Thailand_to_Australia",
+          "India_to_Australia",
+          "India_to_China"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7702032327651978,
+          0.6107364892959595,
+          0.6005148887634277,
+          0.5853840112686157,
+          0.5729802250862122
+        ]
+      },
+      {
+        "query_id": 8,
+        "query": "China to Brazil visa requirements",
+        "expected_top1": "China_to_Brazil",
+        "expected_top3": [
+          "China_to_Brazil"
+        ],
+        "retrieved_top5": [
+          "China_to_Brazil",
+          "Egypt_to_Brazil",
+          "Thailand_to_Brazil",
+          "India_to_Brazil",
+          "Russia_to_Brazil"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7873112559318542,
+          0.6546195149421692,
+          0.6375669240951538,
+          0.6247988939285278,
+          0.6056638360023499
+        ]
+      },
+      {
+        "query_id": 9,
+        "query": "do I need visa from India to United States",
+        "expected_top1": "India_to_United States",
+        "expected_top3": [
+          "India_to_United States"
+        ],
+        "retrieved_top5": [
+          "India_to_United States",
+          "South Africa_to_United States",
+          "Thailand_to_United States",
+          "India_to_United Kingdom",
+          "Egypt_to_United States"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7639765739440918,
+          0.5419644117355347,
+          0.5405600666999817,
+          0.534083902835846,
+          0.5103963613510132
+        ]
+      },
+      {
+        "query_id": 10,
+        "query": "India to UK visa requirements",
+        "expected_top1": "India_to_United Kingdom",
+        "expected_top3": [
+          "India_to_United Kingdom"
+        ],
+        "retrieved_top5": [
+          "India_to_United Kingdom",
+          "South Africa_to_United Kingdom",
+          "Thailand_to_United Kingdom",
+          "Russia_to_United Kingdom",
+          "Thailand_to_India"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7380687594413757,
+          0.5700793266296387,
+          0.5255184173583984,
+          0.5231508016586304,
+          0.5120943784713745
+        ]
+      },
+      {
+        "query_id": 11,
+        "query": "Indian citizens traveling to France visa",
+        "expected_top1": "India_to_France",
+        "expected_top3": [
+          "India_to_France"
+        ],
+        "retrieved_top5": [
+          "India_to_France",
+          "Thailand_to_France",
+          "South Africa_to_France",
+          "Egypt_to_France",
+          "Russia_to_France"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6916709542274475,
+          0.6058309078216553,
+          0.533816397190094,
+          0.5178587436676025,
+          0.5064465999603271
+        ]
+      },
+      {
+        "query_id": 12,
+        "query": "visa from India to Japan",
+        "expected_top1": "India_to_Japan",
+        "expected_top3": [
+          "India_to_Japan"
+        ],
+        "retrieved_top5": [
+          "India_to_Japan",
+          "China_to_Japan",
+          "Thailand_to_Japan",
+          "Egypt_to_Japan",
+          "Russia_to_Japan"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8051223754882812,
+          0.7183292508125305,
+          0.7112882137298584,
+          0.6944237947463989,
+          0.6847494840621948
+        ]
+      },
+      {
+        "query_id": 13,
+        "query": "India to Dubai UAE visa",
+        "expected_top1": "India_to_United Arab Emirates",
+        "expected_top3": [
+          "India_to_United Arab Emirates"
+        ],
+        "retrieved_top5": [
+          "India_to_United Arab Emirates",
+          "China_to_United Arab Emirates",
+          "Egypt_to_United Arab Emirates",
+          "South Africa_to_United Arab Emirates",
+          "Russia_to_United Arab Emirates"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.6897047758102417,
+          0.5732898712158203,
+          0.5659002661705017,
+          0.5393267869949341,
+          0.5322108864784241
+        ]
+      },
+      {
+        "query_id": 14,
+        "query": "India to China visa requirements",
+        "expected_top1": "India_to_China",
+        "expected_top3": [
+          "India_to_China"
+        ],
+        "retrieved_top5": [
+          "India_to_China",
+          "China_to_India",
+          "South Africa_to_China",
+          "Thailand_to_China",
+          "Egypt_to_China"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8121501207351685,
+          0.8104648590087891,
+          0.6623743772506714,
+          0.661636471748352,
+          0.6449940204620361
+        ]
+      },
+      {
+        "query_id": 15,
+        "query": "visa from Egypt to United States",
+        "expected_top1": "Egypt_to_United States",
+        "expected_top3": [
+          "Egypt_to_United States"
+        ],
+        "retrieved_top5": [
+          "Egypt_to_United States",
+          "Egypt_to_United Kingdom",
+          "Egypt_to_United Arab Emirates",
+          "India_to_Egypt",
+          "Egypt_to_India"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7871604561805725,
+          0.586002767086029,
+          0.5794177055358887,
+          0.5701866745948792,
+          0.5388743877410889
+        ]
+      },
+      {
+        "query_id": 16,
+        "query": "Egypt to Australia visa",
+        "expected_top1": "Egypt_to_Australia",
+        "expected_top3": [
+          "Egypt_to_Australia"
+        ],
+        "retrieved_top5": [
+          "Egypt_to_Australia",
+          "India_to_Egypt",
+          "Egypt_to_India",
+          "India_to_Australia",
+          "South Africa_to_Egypt"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7961741089820862,
+          0.6400538086891174,
+          0.5915917158126831,
+          0.5873680114746094,
+          0.5830763578414917
+        ]
+      },
+      {
+        "query_id": 17,
+        "query": "Egyptian citizens need visa for France",
+        "expected_top1": "Egypt_to_France",
+        "expected_top3": [
+          "Egypt_to_France"
+        ],
+        "retrieved_top5": [
+          "Egypt_to_France",
+          "Thailand_to_Egypt",
+          "India_to_Egypt",
+          "China_to_Egypt",
+          "Egypt_to_Italy"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8033624887466431,
+          0.6072620153427124,
+          0.5925998091697693,
+          0.5677825212478638,
+          0.5611110925674438
+        ]
+      },
+      {
+        "query_id": 18,
+        "query": "do I need visa from Nigeria to United States",
+        "expected_top1": "Nigeria_to_United States",
+        "expected_top3": [
+          "Nigeria_to_United States"
+        ],
+        "retrieved_top5": [
+          "South Africa_to_United States",
+          "India_to_United States",
+          "Egypt_to_United States",
+          "Russia_to_United States",
+          "South Africa_to_United Kingdom"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": false,
+        "similarities": [
+          0.5623834133148193,
+          0.4824528694152832,
+          0.4660172462463379,
+          0.43317049741744995,
+          0.40579521656036377
+        ]
+      },
+      {
+        "query_id": 19,
+        "query": "Nigeria to UK visa requirements",
+        "expected_top1": "Nigeria_to_United Kingdom",
+        "expected_top3": [
+          "Nigeria_to_United Kingdom"
+        ],
+        "retrieved_top5": [
+          "South Africa_to_United Kingdom",
+          "India_to_United Kingdom",
+          "Russia_to_United Kingdom",
+          "Egypt_to_United Kingdom",
+          "South Africa_to_United Arab Emirates"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": false,
+        "similarities": [
+          0.551261305809021,
+          0.46639788150787354,
+          0.4598912000656128,
+          0.4262244701385498,
+          0.40591371059417725
+        ]
+      },
+      {
+        "query_id": 20,
+        "query": "visa from Nigeria to France",
+        "expected_top1": "Nigeria_to_France",
+        "expected_top3": [
+          "Nigeria_to_France"
+        ],
+        "retrieved_top5": [
+          "South Africa_to_France",
+          "India_to_France",
+          "Egypt_to_France",
+          "Thailand_to_France",
+          "Russia_to_France"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": false,
+        "similarities": [
+          0.5732754468917847,
+          0.5213096141815186,
+          0.5168395042419434,
+          0.5074430108070374,
+          0.4685788154602051
+        ]
+      },
+      {
+        "query_id": 21,
+        "query": "Russia to China visa",
+        "expected_top1": "Russia_to_China",
+        "expected_top3": [
+          "Russia_to_China"
+        ],
+        "retrieved_top5": [
+          "Russia_to_China",
+          "China_to_Russia",
+          "China_to_Canada",
+          "India_to_China",
+          "India_to_Russia"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7682980298995972,
+          0.7620046138763428,
+          0.5715876817703247,
+          0.5715143084526062,
+          0.5708869695663452
+        ]
+      },
+      {
+        "query_id": 22,
+        "query": "Russia to India visa requirements",
+        "expected_top1": "Russia_to_India",
+        "expected_top3": [
+          "Russia_to_India"
+        ],
+        "retrieved_top5": [
+          "Russia_to_India",
+          "India_to_Russia",
+          "South Africa_to_Russia",
+          "Thailand_to_Russia",
+          "Russia_to_United States"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8385329842567444,
+          0.8323623538017273,
+          0.6795273423194885,
+          0.6441110372543335,
+          0.6338926553726196
+        ]
+      },
+      {
+        "query_id": 23,
+        "query": "South Africa to China visa",
+        "expected_top1": "South Africa_to_China",
+        "expected_top3": [
+          "South Africa_to_China"
+        ],
+        "retrieved_top5": [
+          "China_to_South Africa",
+          "South Africa_to_China",
+          "Thailand_to_South Africa",
+          "Egypt_to_South Africa",
+          "India_to_South Africa"
+        ],
+        "top1_correct": false,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.8014407157897949,
+          0.8008894920349121,
+          0.6457125544548035,
+          0.6344571113586426,
+          0.5959833860397339
+        ]
+      },
+      {
+        "query_id": 24,
+        "query": "visa from Thailand to China",
+        "expected_top1": "Thailand_to_China",
+        "expected_top3": [
+          "Thailand_to_China"
+        ],
+        "retrieved_top5": [
+          "Thailand_to_China",
+          "China_to_Thailand",
+          "India_to_Thailand",
+          "Egypt_to_Thailand",
+          "India_to_China"
+        ],
+        "top1_correct": true,
+        "top3_correct": true,
+        "top5_correct": true,
+        "similarities": [
+          0.7690287828445435,
+          0.7657358646392822,
+          0.6021963357925415,
+          0.5902084112167358,
+          0.5783766508102417
+        ]
+      },
+      {
+        "query_id": 25,
+        "query": "Brazil to China visa requirements",
+        "expected_top1": "Brazil_to_China",
+        "expected_top3": [
+          "Brazil_to_China"
+        ],
+        "retrieved_top5": [
+          "China_to_Brazil",
+          "Egypt_to_Brazil",
+          "Thailand_to_Brazil",
+          "India_to_Brazil",
+          "Russia_to_Brazil"
+        ],
+        "top1_correct": false,
+        "top3_correct": false,
+        "top5_correct": false,
+        "similarities": [
+          0.7864047288894653,
+          0.6532163619995117,
+          0.6370131969451904,
+          0.6208275556564331,
+          0.6032916307449341
+        ]
+      }
+    ],
+    "top1_accuracy": 0.8,
+    "top3_accuracy": 0.84,
+    "top5_accuracy": 0.84
+  },
+  "summary": {
+    "hotel_top1_accuracy": 0.8333333333333334,
+    "hotel_top3_accuracy": 0.9,
+    "visa_top1_accuracy": 0.8,
+    "visa_top3_accuracy": 0.84
+  }
+}

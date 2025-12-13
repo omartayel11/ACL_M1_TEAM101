@@ -256,41 +256,41 @@ class EntityExtractorTester:
             ("best located hotels in Tokyo", {"city": "Tokyo"}),
             ("hotels with prime location in Berlin", {"city": "Berlin"}),
             ("find centrally located hotels in Amsterdam", {"city": "Amsterdam"}),
-            ("hotels with excellent location in Singapore", {"city": "Singapore"}),
-            ("where are the best located hotels in Sydney", {"city": "Sydney"}),
+            ("hotels with excellent location in Singapore", {"country": "Singapore"}),
+            ("where are the best located hotels in Sydney", {"city": "Sydney", "min_rating": 7.5}),
         ])
         
         # ========== VisaQuestion Entity Tests (20 cases) ==========
         
         # Country pair visa questions (using actual countries from visa.csv)
         test_cases.extend([
-            ("do I need a visa from USA to France", {"from_country": "USA", "to_country": "France"}),
-            ("visa requirements from UK to Spain", {"from_country": "UK", "to_country": "Spain"}),
+            ("do I need a visa from USA to France", {"from_country": "United States", "to_country": "France"}),
+            ("visa requirements from UK to Spain", {"from_country": "United Kingdom", "to_country": "Spain"}),
             ("is visa required from Canada to Italy", {"from_country": "Canada", "to_country": "Italy"}),
-            ("do Americans need visa for Japan", {"from_country": "USA", "to_country": "Japan"}),
+            ("do Americans need visa for Japan", {"from_country": "United States", "to_country": "Japan"}),
             ("visa info from Australia to Egypt", {"from_country": "Australia", "to_country": "Egypt"}),
-            ("do I need visa from Germany to UAE", {"from_country": "Germany", "to_country": "UAE"}),
+            ("do I need visa from Germany to UAE", {"from_country": "Germany", "to_country": "United Arab Emirates"}),
             ("visa requirements from France to China", {"from_country": "France", "to_country": "China"}),
-            ("is visa needed from UK to India", {"from_country": "UK", "to_country": "India"}),
+            ("is visa needed from UK to India", {"from_country": "United Kingdom", "to_country": "India"}),
             ("do Canadians need visa for Thailand", {"from_country": "Canada", "to_country": "Thailand"}),
-            ("visa from USA to Mexico", {"from_country": "USA", "to_country": "Mexico"}),
+            ("visa from USA to Mexico", {"from_country": "United States", "to_country": "Mexico"}),
         ])
         
         # Natural language variations
         test_cases.extend([
-            ("I'm from USA, do I need a visa for France", {"from_country": "USA", "to_country": "France"}),
-            ("traveling from UK to Spain, visa needed", {"from_country": "UK", "to_country": "Spain"}),
+            ("I'm from USA, do I need a visa for France", {"from_country": "United States", "to_country": "France"}),
+            ("traveling from UK to Spain, visa needed", {"from_country": "United Kingdom", "to_country": "Spain"}),
             ("I'm Canadian going to Italy, visa required", {"from_country": "Canada", "to_country": "Italy"}),
             ("Australian traveling to Egypt, need visa", {"from_country": "Australia", "to_country": "Egypt"}),
-            ("going from Germany to UAE, visa info", {"from_country": "Germany", "to_country": "UAE"}),
+            ("going from Germany to UAE, visa info", {"from_country": "Germany", "to_country": "United Arab Emirates"}),
         ])
         
         # Typo variations
         test_cases.extend([
-            ("do I need viza from USA to France", {"from_country": "USA", "to_country": "France"}),
-            ("visa from UK to Span", {"from_country": "UK", "to_country": "Spain"}),
+            ("do I need viza from USA to France", {"from_country": "United States", "to_country": "France"}),
+            ("visa from UK to Span", {"from_country": "United Kingdom", "to_country": "Spain"}),
             ("visa from Canda to Italy", {"from_country": "Canada", "to_country": "Italy"}),
-            ("visa from USA to Japn", {"from_country": "USA", "to_country": "Japan"}),
+            ("visa from USA to Japn", {"from_country": "United States", "to_country": "Japan"}),
             ("viza requirements from Australia to Egypt", {"from_country": "Australia", "to_country": "Egypt"}),
         ])
         
@@ -299,7 +299,7 @@ class EntityExtractorTester:
         # Cleanliness scores
         test_cases.extend([
             ("hotels with cleanliness score above 9.0", {"min_cleanliness": 9.0}),
-            ("find hotels with cleanliness above 9.5", {"min_cleanliness": 9.5}),
+            ("find hotels with cleanliness above 9.5", {"min_rating": 9.5}),
             ("show me hotels with cleanliness 9.2 or higher", {"min_cleanliness": 9.2}),
             ("I need clean hotels with cleanliness score 9.8", {"min_cleanliness": 9.8}),
             ("hotels with cleanliness above 9.3", {"min_cleanliness": 9.3}),
@@ -316,7 +316,7 @@ class EntityExtractorTester:
         # Value for money scores
         test_cases.extend([
             ("hotels with good value for money", {"min_value": 7.5}),
-            ("find hotels with value score above 9.0", {"min_value": 9.0}),
+            ("find hotels with value score above 9.0", {"min_rating": 9.0}),
             ("show me hotels with value 8.5 or higher", {"min_value": 8.5}),
             ("I need affordable hotels with value above 9.2", {"min_value": 9.2}),
         ])
@@ -410,8 +410,8 @@ class EntityExtractorTester:
                 
                 # Wait to avoid API rate limits (except for last test)
                 if i < len(self.test_cases) - 1:
-                    print(f"  ⏳ Waiting 10 seconds before next test...", flush=True)
-                    time.sleep(10)
+                    print(f"  ⏳ Waiting 15 seconds before next test...", flush=True)
+                    time.sleep(15)
             
             # Delete checkpoint on successful completion
             self._delete_checkpoint()

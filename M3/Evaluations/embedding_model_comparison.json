@@ -1,0 +1,24 @@
+{
+  "models_tested": [
+    "all-MiniLM-L6-v2",
+    "all-mpnet-base-v2"
+  ],
+  "results_by_model": {
+    "all-MiniLM-L6-v2": {
+      "hotel_top1": 0.8333333333333334,
+      "hotel_top3": 0.9,
+      "visa_top1": 0.8,
+      "visa_top3": 0.84
+    },
+    "all-mpnet-base-v2": {
+      "hotel_top1": 0.8333333333333334,
+      "hotel_top3": 0.9,
+      "visa_top1": 0.8,
+      "visa_top3": 0.84
+    }
+  },
+  "best_models": {
+    "hotel": "all-MiniLM-L6-v2",
+    "visa": "all-MiniLM-L6-v2"
+  }
+}

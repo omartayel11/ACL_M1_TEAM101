@@ -1,0 +1,118 @@
+
+================================================================================
+RESUMED TEST SESSION
+================================================================================
+
+
+================================================================================
+ENTITY EXTRACTOR TEST RESULTS
+================================================================================
+
+Total Test Cases: 123
+Correct: 106
+Incorrect: 24
+Accuracy: 86.18%
+
+[███████████████████████████████████████████░░░░░░░] 86.2%
+
+================================================================================
+FAILED TEST CASES (24)
+================================================================================
+
+1. Query: "show me hotels with rating 4.8"
+   Expected: {'min_rating': 4.8}
+   Extracted: {}
+
+2. Query: "I want hotels with rating 4.7 or higher"
+   Expected: {'min_rating': 4.7}
+   Extracted: {}
+
+3. Query: "hotels with rating at least 4.3"
+   Expected: {'min_rating': 4.3}
+   Extracted: {}
+
+4. Query: "show hotels with rating 4.6 or above"
+   Expected: {'min_rating': 4.6}
+   Extracted: {}
+
+5. Query: "find hotels in Paaris"
+   Expected: {'city': 'Paris'}
+   Extracted: {'city': 'Paaris'}
+
+6. Query: "hotels with ratng above 4.5"
+   Expected: {'min_rating': 4.5}
+   Extracted: {}
+
+7. Query: "hotels in Londan"
+   Expected: {'city': 'London'}
+   Extracted: {'city': 'Londan'}
+
+8. Query: "hotels for couples"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+9. Query: "I'm traveling with my family, any recommendations"
+   Expected: {'traveller_type': 'Family'}
+   Extracted: {}
+
+10. Query: "best hotels for my honeymoon"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+11. Query: "I'm traveling alone, suggest some hotels"
+   Expected: {'traveller_type': 'Solo'}
+   Extracted: {}
+
+12. Query: "me and my wife need a hotel"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+13. Query: "traveling with my husband"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+14. Query: "hotels in Paris with good location"
+   Expected: {'city': 'Paris'}
+   Extracted: {}
+
+15. Query: "find hotels in London with great location"
+   Expected: {'city': 'London'}
+   Extracted: {}
+
+16. Query: "hotels in central Dubai"
+   Expected: {'city': 'Dubai'}
+   Extracted: {}
+
+17. Query: "hotels in Paris with good location"
+   Expected: {'city': 'Paris'}
+   Extracted: {}
+
+18. Query: "hotels near city center in Rome"
+   Expected: {'city': 'Rome'}
+   Extracted: {}
+
+19. Query: "best located hotels in Tokyo"
+   Expected: {'city': 'Tokyo'}
+   Extracted: {}
+
+20. Query: "best located hotels in Tokyo"
+   Expected: {'city': 'Tokyo'}
+   Extracted: {'city': 'Tokyo', 'min_rating': 7.5}
+
+21. Query: "visa from UK to Span"
+   Expected: {'from_country': 'United Kingdom', 'to_country': 'Spain'}
+   Extracted: {'from_country': 'United Kingdom', 'to_country': 'Span'}
+
+22. Query: "visa from Canda to Italy"
+   Expected: {'from_country': 'Canada', 'to_country': 'Italy'}
+   Extracted: {'from_country': 'Canda', 'to_country': 'Italy'}
+
+23. Query: "visa from USA to Japn"
+   Expected: {'from_country': 'United States', 'to_country': 'Japan'}
+   Extracted: {'from_country': 'United States', 'to_country': 'Japn'}
+
+24. Query: "find hotels with friendly staff score 9.5"
+   Expected: {'min_staff': 9.5}
+   Extracted: {}
+
+================================================================================

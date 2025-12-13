@@ -1,0 +1,391 @@
+{
+  "hotel_queries": [
+    {
+      "id": 1,
+      "query": "luxury hotel in New York with excellent location",
+      "expected_top1": "1",
+      "expected_top3": ["1", "2", "3"],
+      "description": "The Azure Tower in New York (ID 1) - 5 star, location 9.5"
+    },
+    {
+      "id": 2,
+      "query": "find the Royal Compass hotel in London",
+      "expected_top1": "2",
+      "expected_top3": ["2"],
+      "description": "The Royal Compass in London (ID 2) - direct name match"
+    },
+    {
+      "id": 3,
+      "query": "hotels in Paris France with great comfort",
+      "expected_top1": "3",
+      "expected_top3": ["3"],
+      "description": "L'Étoile Palace in Paris (ID 3) - comfort 9.4"
+    },
+    {
+      "id": 4,
+      "query": "best hotel in Tokyo Japan",
+      "expected_top1": "4",
+      "expected_top3": ["4"],
+      "description": "Kyo-to Grand in Tokyo (ID 4)"
+    },
+    {
+      "id": 5,
+      "query": "luxury accommodation in Dubai UAE",
+      "expected_top1": "5",
+      "expected_top3": ["5"],
+      "description": "The Golden Oasis in Dubai (ID 5) - facilities 9.6"
+    },
+    {
+      "id": 6,
+      "query": "Marina Bay hotel in Singapore with excellent location",
+      "expected_top1": "6",
+      "expected_top3": ["6"],
+      "description": "Marina Bay Zenith in Singapore (ID 6) - location 9.7"
+    },
+    {
+      "id": 7,
+      "query": "Sydney harbour hotel in Australia",
+      "expected_top1": "7",
+      "expected_top3": ["7"],
+      "description": "Sydney Harbour Grand in Sydney (ID 7) - location 9.8"
+    },
+    {
+      "id": 8,
+      "query": "hotel in Rio de Janeiro Brazil",
+      "expected_top1": "8",
+      "expected_top3": ["8"],
+      "description": "Copacabana Lux in Rio (ID 8)"
+    },
+    {
+      "id": 9,
+      "query": "accommodation in Berlin Germany",
+      "expected_top1": "9",
+      "expected_top3": ["9"],
+      "description": "Berlin Mitte Elite in Berlin (ID 9)"
+    },
+    {
+      "id": 10,
+      "query": "Maple Grove hotel in Toronto Canada",
+      "expected_top1": "10",
+      "expected_top3": ["10"],
+      "description": "The Maple Grove in Toronto (ID 10) - name match"
+    },
+    {
+      "id": 11,
+      "query": "hotel near the Bund in Shanghai China",
+      "expected_top1": "11",
+      "expected_top3": ["11"],
+      "description": "The Bund Palace in Shanghai (ID 11) - name match"
+    },
+    {
+      "id": 12,
+      "query": "Aztec themed hotel in Mexico City",
+      "expected_top1": "12",
+      "expected_top3": ["12"],
+      "description": "Aztec Heights in Mexico City (ID 12) - name match"
+    },
+    {
+      "id": 13,
+      "query": "Gateway hotel in Mumbai India",
+      "expected_top1": "13",
+      "expected_top3": ["13"],
+      "description": "The Gateway Royale in Mumbai (ID 13) - name match"
+    },
+    {
+      "id": 14,
+      "query": "hotel near the Colosseum in Rome Italy",
+      "expected_top1": "14",
+      "expected_top3": ["14"],
+      "description": "Colosseum Gardens in Rome (ID 14) - name and location match"
+    },
+    {
+      "id": 15,
+      "query": "Table Mountain view hotel in Cape Town South Africa",
+      "expected_top1": "15",
+      "expected_top3": ["15"],
+      "description": "Table Mountain View in Cape Town (ID 15) - exact name match"
+    },
+    {
+      "id": 16,
+      "query": "Han River hotel in Seoul South Korea",
+      "expected_top1": "16",
+      "expected_top3": ["16"],
+      "description": "Han River Oasis in Seoul (ID 16) - name match"
+    },
+    {
+      "id": 17,
+      "query": "hotel near Kremlin in Moscow Russia",
+      "expected_top1": "17",
+      "expected_top3": ["17"],
+      "description": "Kremlin Suites in Moscow (ID 17) - name match"
+    },
+    {
+      "id": 18,
+      "query": "Nile view hotel in Cairo Egypt",
+      "expected_top1": "18",
+      "expected_top3": ["18"],
+      "description": "Nile Grandeur in Cairo (ID 18) - name match"
+    },
+    {
+      "id": 19,
+      "query": "Gaudi inspired hotel in Barcelona Spain",
+      "expected_top1": "19",
+      "expected_top3": ["19"],
+      "description": "Gaudi's Retreat in Barcelona (ID 19) - name match"
+    },
+    {
+      "id": 20,
+      "query": "Orchid hotel in Bangkok Thailand",
+      "expected_top1": "20",
+      "expected_top3": ["20"],
+      "description": "The Orchid Palace in Bangkok (ID 20) - name match"
+    },
+    {
+      "id": 21,
+      "query": "Bosphorus hotel in Istanbul Turkey",
+      "expected_top1": "21",
+      "expected_top3": ["21"],
+      "description": "The Bosphorus Inn in Istanbul (ID 21) - name match"
+    },
+    {
+      "id": 22,
+      "query": "canal house hotel in Amsterdam Netherlands",
+      "expected_top1": "22",
+      "expected_top3": ["22"],
+      "description": "Canal House Grand in Amsterdam (ID 22) - name match"
+    },
+    {
+      "id": 23,
+      "query": "tango hotel in Buenos Aires Argentina",
+      "expected_top1": "23",
+      "expected_top3": ["23"],
+      "description": "Tango Boutique in Buenos Aires (ID 23) - name match"
+    },
+    {
+      "id": 24,
+      "query": "hotel in Lagos Nigeria",
+      "expected_top1": "24",
+      "expected_top3": ["24"],
+      "description": "The Savannah House in Lagos (ID 24)"
+    },
+    {
+      "id": 25,
+      "query": "Kiwi hotel in Wellington New Zealand",
+      "expected_top1": "25",
+      "expected_top3": ["25"],
+      "description": "The Kiwi Grand in Wellington (ID 25) - name match"
+    },
+    {
+      "id": 26,
+      "query": "5 star hotel with best cleanliness rating",
+      "expected_top1": "4",
+      "expected_top3": ["4", "10", "22"],
+      "description": "Kyo-to Grand (ID 4) has cleanliness 9.6, The Maple Grove (ID 10) 9.4, Canal House Grand (ID 22) 9.4"
+    },
+    {
+      "id": 27,
+      "query": "hotel with excellent comfort and facilities in Dubai",
+      "expected_top1": "5",
+      "expected_top3": ["5"],
+      "description": "The Golden Oasis in Dubai (ID 5) - comfort 9.5, facilities 9.6"
+    },
+    {
+      "id": 28,
+      "query": "hotel with amazing location score above 9.5",
+      "expected_top1": "7",
+      "expected_top3": ["7", "14", "6"],
+      "description": "Sydney Harbour Grand (9.8), Colosseum Gardens (9.8), Marina Bay Zenith (9.7)"
+    },
+    {
+      "id": 29,
+      "query": "hotel with best value for money",
+      "expected_top1": "11",
+      "expected_top3": ["11", "22", "10"],
+      "description": "The Bund Palace (8.9), Canal House Grand (8.9), The Maple Grove (8.8)"
+    },
+    {
+      "id": 30,
+      "query": "hotel with excellent staff rating above 9",
+      "expected_top1": "4",
+      "expected_top3": ["4", "5", "16"],
+      "description": "Kyo-to Grand (9.5), The Golden Oasis (9.4), Han River Oasis (9.3)"
+    }
+  ],
+  "visa_queries": [
+    {
+      "id": 1,
+      "query": "do I need a visa from China to United States",
+      "expected_top1": "China_to_United States",
+      "expected_top3": ["China_to_United States"],
+      "description": "China requires Tourist Visa to USA"
+    },
+    {
+      "id": 2,
+      "query": "visa requirements from China to United Kingdom",
+      "expected_top1": "China_to_United Kingdom",
+      "expected_top3": ["China_to_United Kingdom"],
+      "description": "China requires Tourist Visa to UK"
+    },
+    {
+      "id": 3,
+      "query": "traveling from China to France need visa",
+      "expected_top1": "China_to_France",
+      "expected_top3": ["China_to_France"],
+      "description": "China requires Tourist Visa to France"
+    },
+    {
+      "id": 4,
+      "query": "China to Japan visa requirements",
+      "expected_top1": "China_to_Japan",
+      "expected_top3": ["China_to_Japan"],
+      "description": "China requires Tourist Visa to Japan"
+    },
+    {
+      "id": 5,
+      "query": "do Chinese citizens need visa for Dubai UAE",
+      "expected_top1": "China_to_United Arab Emirates",
+      "expected_top3": ["China_to_United Arab Emirates"],
+      "description": "China requires Tourist Visa to UAE"
+    },
+    {
+      "id": 6,
+      "query": "China to Singapore visa",
+      "expected_top1": "China_to_Singapore",
+      "expected_top3": ["China_to_Singapore"],
+      "description": "China requires Tourist Visa to Singapore"
+    },
+    {
+      "id": 7,
+      "query": "visa from China to Australia",
+      "expected_top1": "China_to_Australia",
+      "expected_top3": ["China_to_Australia"],
+      "description": "China requires Tourist Visa to Australia"
+    },
+    {
+      "id": 8,
+      "query": "China to Brazil visa requirements",
+      "expected_top1": "China_to_Brazil",
+      "expected_top3": ["China_to_Brazil"],
+      "description": "China requires Tourist Visa to Brazil"
+    },
+    {
+      "id": 9,
+      "query": "do I need visa from India to United States",
+      "expected_top1": "India_to_United States",
+      "expected_top3": ["India_to_United States"],
+      "description": "India requires Tourist Visa / eVisa to USA"
+    },
+    {
+      "id": 10,
+      "query": "India to UK visa requirements",
+      "expected_top1": "India_to_United Kingdom",
+      "expected_top3": ["India_to_United Kingdom"],
+      "description": "India requires Tourist Visa / eVisa to UK"
+    },
+    {
+      "id": 11,
+      "query": "Indian citizens traveling to France visa",
+      "expected_top1": "India_to_France",
+      "expected_top3": ["India_to_France"],
+      "description": "India requires Tourist Visa / eVisa to France"
+    },
+    {
+      "id": 12,
+      "query": "visa from India to Japan",
+      "expected_top1": "India_to_Japan",
+      "expected_top3": ["India_to_Japan"],
+      "description": "India requires Tourist Visa / eVisa to Japan"
+    },
+    {
+      "id": 13,
+      "query": "India to Dubai UAE visa",
+      "expected_top1": "India_to_United Arab Emirates",
+      "expected_top3": ["India_to_United Arab Emirates"],
+      "description": "India requires Tourist Visa / eVisa to UAE"
+    },
+    {
+      "id": 14,
+      "query": "India to China visa requirements",
+      "expected_top1": "India_to_China",
+      "expected_top3": ["India_to_China"],
+      "description": "India requires Tourist Visa / eVisa to China"
+    },
+    {
+      "id": 15,
+      "query": "visa from Egypt to United States",
+      "expected_top1": "Egypt_to_United States",
+      "expected_top3": ["Egypt_to_United States"],
+      "description": "Egypt requires Tourist Visa / eVisa to USA"
+    },
+    {
+      "id": 16,
+      "query": "Egypt to Australia visa",
+      "expected_top1": "Egypt_to_Australia",
+      "expected_top3": ["Egypt_to_Australia"],
+      "description": "Egypt requires Tourist Visa / eVisa to Australia"
+    },
+    {
+      "id": 17,
+      "query": "Egyptian citizens need visa for France",
+      "expected_top1": "Egypt_to_France",
+      "expected_top3": ["Egypt_to_France"],
+      "description": "Egypt requires Tourist Visa / eVisa to France"
+    },
+    {
+      "id": 18,
+      "query": "do I need visa from Nigeria to United States",
+      "expected_top1": "Nigeria_to_United States",
+      "expected_top3": ["Nigeria_to_United States"],
+      "description": "Nigeria requires Tourist Visa to USA"
+    },
+    {
+      "id": 19,
+      "query": "Nigeria to UK visa requirements",
+      "expected_top1": "Nigeria_to_United Kingdom",
+      "expected_top3": ["Nigeria_to_United Kingdom"],
+      "description": "Nigeria requires Tourist Visa to UK"
+    },
+    {
+      "id": 20,
+      "query": "visa from Nigeria to France",
+      "expected_top1": "Nigeria_to_France",
+      "expected_top3": ["Nigeria_to_France"],
+      "description": "Nigeria requires Tourist Visa to France"
+    },
+    {
+      "id": 21,
+      "query": "Russia to China visa",
+      "expected_top1": "Russia_to_China",
+      "expected_top3": ["Russia_to_China"],
+      "description": "Russia requires Tourist Visa / eVisa to China"
+    },
+    {
+      "id": 22,
+      "query": "Russia to India visa requirements",
+      "expected_top1": "Russia_to_India",
+      "expected_top3": ["Russia_to_India"],
+      "description": "Russia requires Tourist Visa / eVisa to India"
+    },
+    {
+      "id": 23,
+      "query": "South Africa to China visa",
+      "expected_top1": "South Africa_to_China",
+      "expected_top3": ["South Africa_to_China"],
+      "description": "South Africa requires Tourist Visa / eVisa to China"
+    },
+    {
+      "id": 24,
+      "query": "visa from Thailand to China",
+      "expected_top1": "Thailand_to_China",
+      "expected_top3": ["Thailand_to_China"],
+      "description": "Thailand requires Tourist Visa / eVisa to China"
+    },
+    {
+      "id": 25,
+      "query": "Brazil to China visa requirements",
+      "expected_top1": "Brazil_to_China",
+      "expected_top3": ["Brazil_to_China"],
+      "description": "Brazil requires Tourist Visa / eVisa to China"
+    }
+  ]
+}

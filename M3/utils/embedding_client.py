@@ -189,6 +189,16 @@ class EmbeddingClient:
         """Get current model name"""
         return self._model_name
     
+    @property
+    def dimension(self) -> int:
+        """Get embedding dimension (property)"""
+        return self._dimension
+    
+    @property
+    def model_name(self) -> str:
+        """Get current model name (property)"""
+        return self._model_name
+    
     def clear_cache(self):
         """Clear embedding cache"""
         self._cache.clear()

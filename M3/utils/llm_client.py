@@ -87,7 +87,8 @@ class LLMClient:
         prompt: str,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        return_usage: bool = False
     ) -> str:
         """
         Generate text completion from prompt
@@ -97,9 +98,10 @@ class LLMClient:
             temperature: Sampling temperature (overrides default)
             max_tokens: Max tokens in response (overrides default)
             system_prompt: Optional system message
+            return_usage: If True, return tuple of (text, usage_dict)
             
         Returns:
-            Generated text response
+            Generated text response, or (text, usage_dict) if return_usage=True
             
         Raises:
             RuntimeError: If client not initialized
@@ -124,7 +126,18 @@ class LLMClient:
                 max_tokens=max_tokens
             )
             
-            return response.choices[0].message.content
+            text = response.choices[0].message.content
+            
+            if return_usage:
+                usage = {
+                    'prompt_tokens': response.usage.prompt_tokens if hasattr(response, 'usage') else 0,
+                    'completion_tokens': response.usage.completion_tokens if hasattr(response, 'usage') else 0,
+                    'total_tokens': response.usage.total_tokens if hasattr(response, 'usage') else 0,
+                    'model': self._model
+                }
+                return text, usage
+            
+            return text
             
         except Exception as e:
             print(f"Error in LLM generation: {e}")
@@ -226,6 +239,37 @@ class LLMClient:
             'max_tokens': self._max_tokens,
             'initialized': self._client is not None
         }
+    
+    @staticmethod
+    def calculate_cost(usage: Dict[str, Any]) -> float:
+        """
+        Calculate estimated cost based on token usage
+        
+        Args:
+            usage: Usage dict with prompt_tokens, completion_tokens, model
+            
+        Returns:
+            Estimated cost in USD
+            
+        Note: Prices are approximate and based on Groq's pricing
+        Groq offers free tier, so actual cost may be $0
+        """
+        # Groq pricing (as of Dec 2025, free tier available)
+        # These are placeholder values - Groq offers generous free tier
+        PRICING = {
+            'openai/gpt-oss-120b': {'prompt': 0.0, 'completion': 0.0},  # Free tier
+            'meta-llama/llama-4-maverick-17b-128e-instruct': {'prompt': 0.0, 'completion': 0.0},  # Free tier
+            'qwen/qwen3-32b': {'prompt': 0.0, 'completion': 0.0},  # Free tier
+            'default': {'prompt': 0.0, 'completion': 0.0}
+        }
+        
+        model = usage.get('model', 'default')
+        pricing = PRICING.get(model, PRICING['default'])
+        
+        prompt_cost = (usage.get('prompt_tokens', 0) / 1000000) * pricing['prompt']
+        completion_cost = (usage.get('completion_tokens', 0) / 1000000) * pricing['completion']
+        
+        return prompt_cost + completion_cost
     
     @staticmethod
     def get_available_models() -> List[Dict[str, str]]:

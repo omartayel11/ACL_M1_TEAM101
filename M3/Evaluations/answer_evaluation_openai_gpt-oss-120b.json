@@ -1,0 +1,438 @@
+{
+  "model_name": "openai/gpt-oss-120b",
+  "judge_model": "openai/gpt-oss-120b",
+  "evaluation_date": "2025-12-14T00:03:00.026717",
+  "total_evaluated": 15,
+  "successful_evaluations": 12,
+  "average_scores": {
+    "accuracy": 10.0,
+    "completeness": 9.0,
+    "relevance": 9.75,
+    "clarity": 9.583333333333334,
+    "groundedness": 10.0,
+    "overall": 9.666666666666666
+  },
+  "verdict_distribution": {
+    "EXCELLENT": 12
+  },
+  "judge_metrics": {
+    "total_tokens": 17304,
+    "total_cost": 0.0,
+    "avg_tokens_per_evaluation": 1442.0,
+    "avg_cost_per_evaluation": 0.0
+  },
+  "evaluations": [
+    {
+      "query_id": 1,
+      "query": "What are the best 5-star hotels in Dubai?",
+      "generated_answer": "Based on the information you provided, **The Golden Oasis** is highlighted as a top‑rated 5‑star hotel in Dubai, with strong scores across cleanliness (9.3), comfort (9.5), facilities (9.6), location (8.9), staff (9.4) and overall value (8.5).  \n\nIf you’re looking for other 5‑star options, the current context doesn’t include additional hotels, so I can’t provide a broader list. Let me know if you’d like recommendations from other sources!",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 8,
+        "relevance": 9,
+        "clarity": 9,
+        "groundedness": 10,
+        "overall_score": 9.2,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is factually correct and fully grounded in the provided context, directly addresses the query, and is clearly presented. It covers most of the expected key elements, though it does not explicitly use the word \"luxury\".",
+        "strengths": [
+          "Accurate representation of the hotel's scores",
+          "Clear and well‑structured response",
+          "Fully grounded in the given context",
+          "Highly relevant to the user's request"
+        ],
+        "weaknesses": [
+          "Does not explicitly mention the term \"luxury\"",
+          "Limited completeness due to only one hotel being listed"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1507,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-13T23:56:08.239642"
+    },
+    {
+      "query_id": 2,
+      "query": "Find me hotels in Paris with good cleanliness",
+      "generated_answer": "Sure! Based on the information you provided, the Paris hotel with a strong cleanliness rating is:\n\n- **L'Étoile Palace (Paris, France)** – Cleanliness score: **8.8/10** (along with high comfort, location, and staff scores).\n\nNo other Paris hotels are listed in the context, so L'Étoile Palace is the best option for good cleanliness in Paris right now.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 8,
+        "relevance": 10,
+        "clarity": 9,
+        "groundedness": 10,
+        "overall_score": 9.4,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is factually correct and directly addresses the query with clear, well‑structured information drawn entirely from the context. It includes most of the expected key elements but omits the explicit mention of the hotel's 5‑star rating.",
+        "strengths": [
+          "Fully accurate facts",
+          "Highly relevant to the user's request",
+          "Clear and concise presentation",
+          "Entirely grounded in the provided context"
+        ],
+        "weaknesses": [
+          "Did not explicitly state the 5‑star rating, missing one expected key element"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1523,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-13T23:56:29.780478"
+    },
+    {
+      "query_id": 3,
+      "query": "Which hotel has the best location in Singapore?",
+      "generated_answer": "Based on the information provided, **Marina Bay Zenith** has the best location in Singapore, with a location score of 9.7 —the highest in the country.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 9,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 9.8,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is factually correct, directly addresses the query, and is clear and well‑structured. It includes all required key elements, though the phrase \"Marina Bay\" is only implicit in the hotel name.",
+        "strengths": [
+          "Fully accurate information from the context",
+          "Concise and directly answers the question",
+          "Clear and easy to understand",
+          "No hallucinated content"
+        ],
+        "weaknesses": [
+          "Does not explicitly repeat the phrase \"Marina Bay\" as a separate element"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1435,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-13T23:56:51.593723"
+    },
+    {
+      "query_id": 4,
+      "query": "Do I need a visa from China to United States?",
+      "generated_answer": "Yes. As a Chinese citizen traveling to the United States, you’ll need to obtain a tourist visa before your trip.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 10,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 10,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is fully accurate, includes all required key elements, directly addresses the query, is clear and concise, and is completely grounded in the provided context.",
+        "strengths": [
+          "Fully accurate and matches the context",
+          "Includes all expected key elements",
+          "Directly answers the user's question",
+          "Clear and concise phrasing"
+        ],
+        "weaknesses": [],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1159,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-13T23:57:12.786351"
+    },
+    {
+      "query_id": 5,
+      "query": "What do guests say about the staff at hotels in Tokyo?",
+      "generated_answer": "Guests consistently praise the staff at Tokyo hotels—especially at the Kyo‑to Grand. Reviewers describe the team as “incredibly helpful and friendly,” “outstanding” and “very professional,” noting that they “went above and beyond” to fulfill requests and were “courteous throughout our visit.” The hotel’s staff rating of 9.5 out of 10 reflects this high level of service.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 10,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 10,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer perfectly reflects the provided context, includes all expected key elements, stays directly on topic, is clearly written, and contains no hallucinated information.",
+        "strengths": [
+          "Fully accurate and matches the context",
+          "Includes all required key elements",
+          "Highly relevant to the user's query",
+          "Clear and well‑structured phrasing",
+          "Completely grounded with no extraneous information"
+        ],
+        "weaknesses": [],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1471,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-13T23:57:34.700052"
+    },
+    {
+      "query_id": 6,
+      "query": "Compare hotels in New York and London",
+      "generated_answer": "Sure! Based on the information you provided, here’s a quick side‑by‑side comparison of the two 5‑star properties:\n\n| Category | The Azure Tower (New York) | The Royal Compass (London) |\n|----------|---------------------------|----------------------------|\n| **Overall Score** | 8.0 / 10 | 7.9 / 10 |\n| **Cleanliness** | 9.1 | 9.0 |\n| **Comfort** | 8.8 | 9.2 |\n| **Facilities** | 8.9 | 8.8 |\n| **Location** | 9.5 (highlighted as “excellent”) | 9.4 (also very high) |\n| **Staff** | 8.6 | 9.0 |\n| **Value** | 8.0 | 7.9 |\n| **Key Strengths** | Prime New York location, top‑notch cleanliness and facilities | Very high comfort and staff ratings, strong location in London |\n| **Overall Impression** | A luxury hotel that shines especially for its location and cleanliness | A premium hotel noted for comfort and attentive staff |\n\n**What this means**\n\n- **Location:** Both hotels score above 9 for location, with The Azure Tower edging out slightly (9.5 vs. 9.4).  \n- **Comfort vs. Cleanliness:** The Royal Compass is a touch more comfortable (9.2 vs. 8.8), while The Azure Tower is marginally cleaner (9.1 vs. 9.0).  \n- **Staff:** London’s hotel gets",
+      "evaluation": {
+        "accuracy": 0,
+        "completeness": 0,
+        "relevance": 0,
+        "clarity": 0,
+        "groundedness": 0,
+        "overall_score": 0,
+        "verdict": "ERROR",
+        "reasoning": "Evaluation failed: Expecting property name enclosed in double quotes: line 3 column 4 (char 24)",
+        "strengths": [],
+        "weaknesses": [],
+        "success": false,
+        "error": "Expecting property name enclosed in double quotes: line 3 column 4 (char 24)",
+        "judge_tokens": 0,
+        "judge_cost": 0
+      },
+      "timestamp": "2025-12-13T23:57:56.408850"
+    },
+    {
+      "query_id": 7,
+      "query": "What are the cheapest hotels with good value for money?",
+      "generated_answer": "Based on the information you provided, I don’t have any pricing details for the hotels, so I can’t determine which one is the cheapest. All three properties—The Bund Palace in Shanghai, Canal House Grand in Amsterdam, and The Maple Grove in Toronto—have high “value for money” scores (8.8–8.9), indicating they’re all considered good value, but without price data I can’t tell which is the least expensive. If you can share the rates or a budget range, I’d be happy to help you pick the best option!",
+      "evaluation": {
+        "accuracy": 0,
+        "completeness": 0,
+        "relevance": 0,
+        "clarity": 0,
+        "groundedness": 0,
+        "overall_score": 0,
+        "verdict": "ERROR",
+        "reasoning": "Evaluation failed: Unterminated string starting at: line 9 column 18 (char 176)",
+        "strengths": [],
+        "weaknesses": [],
+        "success": false,
+        "error": "Unterminated string starting at: line 9 column 18 (char 176)",
+        "judge_tokens": 0,
+        "judge_cost": 0
+      },
+      "timestamp": "2025-12-13T23:58:18.227539"
+    },
+    {
+      "query_id": 8,
+      "query": "Are there hotels near the beach in Sydney?",
+      "generated_answer": "Yes—according to the information provided, the Sydney Harbour Grand is a 5‑star hotel in Sydney that’s situated right by the water and is praised for its close proximity to both Bondi Beach and Manly Beach. If you’re looking for beachfront accommodation in Sydney, this hotel fits the bill.",
+      "evaluation": {
+        "accuracy": 0,
+        "completeness": 0,
+        "relevance": 0,
+        "clarity": 0,
+        "groundedness": 0,
+        "overall_score": 0,
+        "verdict": "ERROR",
+        "reasoning": "Evaluation failed: Unterminated string starting at: line 8 column 16 (char 146)",
+        "strengths": [],
+        "weaknesses": [],
+        "success": false,
+        "error": "Unterminated string starting at: line 8 column 16 (char 146)",
+        "judge_tokens": 0,
+        "judge_cost": 0
+      },
+      "timestamp": "2025-12-13T23:58:40.029656"
+    },
+    {
+      "query_id": 9,
+      "query": "What visa do Indian citizens need for Japan?",
+      "generated_answer": "Indian citizens need a **tourist visa** to travel to Japan. They can apply for a traditional tourist visa or, if eligible, obtain an **eVisa** online.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 8,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 9.6,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is factually correct and directly addresses the query with clear language. It includes all major elements (India, Japan, Tourist Visa, eVisa) though it does not explicitly state \"Yes\" or the phrase \"visa required,\" resulting in a slight deduction for completeness.",
+        "strengths": [
+          "Accurate information matching the context",
+          "Highly relevant and directly answers the question",
+          "Clear and concise phrasing",
+          "Fully grounded in the provided data"
+        ],
+        "weaknesses": [
+          "Does not explicitly include the words \"Yes\" or \"visa required\" from the expected key elements"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1321,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:00:38.112736"
+    },
+    {
+      "query_id": 10,
+      "query": "Which hotel in Cairo has the best reviews?",
+      "generated_answer": "Based on the information you provided, the Nile Grandeur in Cairo stands out with the strongest reviews. It’s the only hotel mentioned, and its guest feedback is consistently high (overall score 8.4/10 and recent ratings ranging from 8.5 to 9 out of 10).",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 8,
+        "relevance": 9,
+        "clarity": 9,
+        "groundedness": 10,
+        "overall_score": 9.2,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is factually correct and fully grounded in the provided context, clearly stating the hotel's name, location, and overall score. It is highly relevant and well‑written. However, it omits the specific key element about \"Nile views,\" so completeness is slightly lower.",
+        "strengths": [
+          "Accurate factual details",
+          "Clear and concise phrasing",
+          "Directly addresses the user query",
+          "Fully grounded in the given context"
+        ],
+        "weaknesses": [
+          "Does not mention the \"Nile views\" aspect required by the expected key elements"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1580,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:01:00.035127"
+    },
+    {
+      "query_id": 11,
+      "query": "What are the amenities at luxury hotels in Barcelona?",
+      "generated_answer": "The luxury hotel highlighted in the context—**Gaudi’s Retreat** in Barcelona—offers a wide range of upscale amenities, including:\n\n- Rooftop pool  \n- Spa and wellness center  \n- Fitness center  \n- Fine‑dining restaurant  \n- Bar and lounge  \n- Concierge service  \n- 24‑hour room service  \n- Business center  \n- Free Wi‑Fi  \n\nThese amenities are typical of high‑end hotels in Barcelona, providing guests with both relaxation and convenience.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 10,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 10,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer precisely mirrors the amenities listed in the context, includes all expected key elements, stays directly on topic, is clearly formatted with bullet points, and contains no information beyond the provided data.",
+        "strengths": [
+          "Fully accurate representation of the context",
+          "Covers all required key elements",
+          "Highly relevant to the user's query",
+          "Clear and well-structured presentation",
+          "Entirely grounded with no hallucinations"
+        ],
+        "weaknesses": [
+          "None significant; the answer is complete and precise"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1465,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:01:21.648647"
+    },
+    {
+      "query_id": 12,
+      "query": "I'm looking for a family-friendly hotel in Toronto",
+      "generated_answer": "If you’re looking for a family‑friendly hotel in Toronto, **The Maple Grove** is an excellent choice. It’s a 5‑star property with a strong overall score (8.8/10) and high marks for cleanliness, comfort, and staff.  \n\n**Family amenities include:**  \n- Family rooms  \n- Kids club and children’s menu  \n- Babysitting services  \n- Playground and family‑friendly activities  \n\nGuest reviews highlight how well the hotel caters to families, noting the play area and the staff’s accommodation of family needs. It should meet all of your requirements for a comfortable, convenient stay with kids.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 10,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 10,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer perfectly reflects the provided context, includes all expected key elements, stays directly on topic, is clearly organized, and contains no hallucinated information.",
+        "strengths": [
+          "Fully accurate to the context",
+          "Covers all required key elements",
+          "Highly relevant to the user's request",
+          "Clear, well‑structured presentation",
+          "Completely grounded with no extraneous claims"
+        ],
+        "weaknesses": [],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1447,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:01:54.901736"
+    },
+    {
+      "query_id": 13,
+      "query": "What are guests saying about cleanliness at hotels?",
+      "generated_answer": "Guests are raving about how spotless the hotels are.  \n\n- At **Kyo‑to Grand** in Tokyo, guests describe it as “spotlessly clean” with “impressive attention to detail,” calling it “the cleanest hotel I’ve ever stayed in.”  \n- At **The Maple Grove** in Toronto, reviewers note “immaculate rooms” and “excellent housekeeping,” saying the property is “very clean throughout.”  \n- At **Canal House Grand** in Amsterdam, guests say the rooms are in “pristine condition,” “exceeded expectations for cleanliness,” and were “sparkling clean every day.”  \n\nOverall, the feedback highlights consistently high standards of cleanliness across these hotels.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 7,
+        "relevance": 9,
+        "clarity": 9,
+        "groundedness": 10,
+        "overall_score": 9.0,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is factually correct and well‑structured, directly addressing the query with clear, relevant information grounded in the provided context. The only shortcoming is the omission of the specific cleanliness score (9.6) required by the expected key elements.",
+        "strengths": [
+          "Fully accurate statements drawn from the context",
+          "Clear and well‑organized presentation",
+          "Highly relevant to the user's question",
+          "No hallucinated or extraneous information"
+        ],
+        "weaknesses": [
+          "Does not mention the exact cleanliness rating of 9.6 for Kyo‑to Grand",
+          "Does not explicitly include the word \"cleanliness\" as a key element"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1692,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:02:17.016613"
+    },
+    {
+      "query_id": 14,
+      "query": "Do I need a visa from United States to France?",
+      "generated_answer": "No. As a U.S. citizen you can travel to France visa‑free for stays of up to 90 days within any 180‑day period under the Schengen agreement.",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 10,
+        "relevance": 10,
+        "clarity": 10,
+        "groundedness": 10,
+        "overall_score": 10,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer is fully accurate, includes all required key elements, directly addresses the question, is clear and concise, and is completely grounded in the provided context.",
+        "strengths": [
+          "Fully accurate information",
+          "Includes all expected key elements",
+          "Directly answers the user's query",
+          "Clear and concise phrasing",
+          "No hallucinations; fully grounded in context"
+        ],
+        "weaknesses": [],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1217,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:02:38.516125"
+    },
+    {
+      "query_id": 15,
+      "query": "Tell me about hotels in Rome near historical sites",
+      "generated_answer": "Sure! Based on the information I have, **Colosseum Gardens** is a standout option if you want to stay right in the heart of Rome’s ancient attractions.\n\n- **Location:** Just steps away from the Colosseum, with an exceptional location score of 9.8/10. You can easily walk to the Roman Forum, Palatine Hill, and other historic sites.\n- **Rating:** 5‑star hotel with an overall guest score of 8.7/10.\n- **Guest Highlights:** Travelers love the “perfect location for exploring ancient Rome,” the fact that you can “see the Colosseum from our room,” and the convenience of being within walking distance of all major historical sites.\n\nIf you’re looking for more hotel suggestions near Rome’s historic landmarks, the provided context only covers Colosseum Gardens, so I don’t have additional details at the moment. Let me know if you’d like help finding more options or need tips on what to see while you’re there!",
+      "evaluation": {
+        "accuracy": 10,
+        "completeness": 10,
+        "relevance": 10,
+        "clarity": 9,
+        "groundedness": 10,
+        "overall_score": 9.8,
+        "verdict": "EXCELLENT",
+        "reasoning": "The answer faithfully reproduces all facts from the context, includes every expected key element, stays on topic, is well‑structured and easy to read, and contains no hallucinated information.",
+        "strengths": [
+          "Fully accurate and matches the provided context",
+          "Covers all required key elements",
+          "Highly relevant to the user's request",
+          "Clear, concise bullet format"
+        ],
+        "weaknesses": [
+          "Minor opportunity to improve clarity could be a perfect 10"
+        ],
+        "success": true,
+        "error": null,
+        "judge_tokens": 1487,
+        "judge_cost": 0.0
+      },
+      "timestamp": "2025-12-14T00:03:00.022438"
+    }
+  ]
+}

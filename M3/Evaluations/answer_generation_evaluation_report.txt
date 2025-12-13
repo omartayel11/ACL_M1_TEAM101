@@ -1,0 +1,79 @@
+================================================================================
+ANSWER GENERATION EVALUATION REPORT
+================================================================================
+Generated: 2025-12-14 00:13:14
+Judge Model: openai/gpt-oss-120b
+
+AVERAGE SCORES COMPARISON
+--------------------------------------------------------------------------------
+Model                                          Overall Accuracy Complete Relevant  Clarity Grounded
+-------------------------------------------------------------------------------------------------------------------
+openai/gpt-oss-120b                               9.67    10.00     9.00     9.75     9.58    10.00
+meta-llama/llama-4-maverick-17b-128e-instruct     9.60     9.87     9.53     9.53     9.33     9.73
+qwen/qwen3-32b                                    8.65     9.07     8.33     8.53     8.20     9.13
+
+
+================================================================================
+DETAILED ANALYSIS
+================================================================================
+
+openai/gpt-oss-120b
+--------------------------------------------------------------------------------
+Total Evaluated: 12/15
+Average Overall Score: 9.67/10
+
+Verdict Distribution:
+  EXCELLENT: 12 (100.0%)
+
+Judge Evaluation Metrics:
+  Total Tokens: 17304
+  Avg Tokens/Evaluation: 1442.0
+  Total Cost: $0.000000
+  Avg Cost/Evaluation: $0.000000
+
+meta-llama/llama-4-maverick-17b-128e-instruct
+--------------------------------------------------------------------------------
+Total Evaluated: 15/15
+Average Overall Score: 9.60/10
+
+Verdict Distribution:
+  EXCELLENT: 14 (93.3%)
+  GOOD: 1 (6.7%)
+
+Judge Evaluation Metrics:
+  Total Tokens: 22697
+  Avg Tokens/Evaluation: 1513.1
+  Total Cost: $0.000000
+  Avg Cost/Evaluation: $0.000000
+
+qwen/qwen3-32b
+--------------------------------------------------------------------------------
+Total Evaluated: 15/15
+Average Overall Score: 8.65/10
+
+Verdict Distribution:
+  ACCEPTABLE: 1 (6.7%)
+  EXCELLENT: 12 (80.0%)
+  GOOD: 1 (6.7%)
+  POOR: 1 (6.7%)
+
+Judge Evaluation Metrics:
+  Total Tokens: 21907
+  Avg Tokens/Evaluation: 1460.5
+  Total Cost: $0.000000
+  Avg Cost/Evaluation: $0.000000
+
+================================================================================
+RECOMMENDATION
+================================================================================
+
+Best Overall Model: openai/gpt-oss-120b
+Average Score: 9.67/10
+
+Strengths:
+  - Best Accuracy: 10.00/10
+  - Best Relevance: 9.75/10
+  - Best Clarity: 9.58/10
+  - Best Groundedness: 10.00/10
+
+================================================================================

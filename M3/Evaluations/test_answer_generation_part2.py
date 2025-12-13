@@ -127,7 +127,7 @@ Respond ONLY with the JSON, no additional text."""
             response, usage = self.llm_client.generate(
                 evaluation_prompt,
                 temperature=0.1,  # Low temperature for consistent evaluation
-                max_tokens=600,
+                max_tokens=800,  # Increased from 600 to allow complete JSON
                 return_usage=True
             )
             
@@ -138,7 +138,38 @@ Respond ONLY with the JSON, no additional text."""
             elif "```" in response:
                 response = response.split("```")[1].split("```")[0].strip()
             
-            evaluation = json.loads(response)
+            # Try to parse JSON
+            try:
+                evaluation = json.loads(response)
+            except json.JSONDecodeError as je:
+                # If JSON parsing fails, try to fix common issues
+                print(f"  ⚠️  JSON parse error, attempting to fix...")
+                
+                # Try to find JSON object in response
+                import re
+                json_match = re.search(r'\{.*\}', response, re.DOTALL)
+                if json_match:
+                    try:
+                        evaluation = json.loads(json_match.group(0))
+                    except:
+                        # If still fails, retry with higher max_tokens
+                        print(f"  ↻ Retrying with higher token limit...")
+                        response, usage = self.llm_client.generate(
+                            evaluation_prompt,
+                            temperature=0.1,
+                            max_tokens=1000,
+                            return_usage=True
+                        )
+                        
+                        if "```json" in response:
+                            response = response.split("```json")[1].split("```")[0].strip()
+                        elif "```" in response:
+                            response = response.split("```")[1].split("```")[0].strip()
+                        
+                        evaluation = json.loads(response)
+                else:
+                    raise je
+            
             evaluation['success'] = True
             evaluation['error'] = None
             evaluation['judge_tokens'] = usage.get('total_tokens', 0)
@@ -148,6 +179,7 @@ Respond ONLY with the JSON, no additional text."""
             
         except Exception as e:
             print(f"  ✗ Evaluation failed: {e}")
+            print(f"  Raw response preview: {str(response)[:200] if 'response' in locals() else 'N/A'}...")
             return {
                 'accuracy': 0,
                 'completeness': 0,
@@ -286,12 +318,21 @@ class ComprehensiveEvaluator:
                 continue
             
             try:
+                # Remove <think> tags from answer before evaluation (but keep in JSON)
+                # This prevents overwhelming the judge LLM's context with reasoning
+                answer_for_judge = result['generated_answer']
+                if '<think>' in answer_for_judge and '</think>' in answer_for_judge:
+                    # Remove everything between <think> and </think>
+                    import re
+                    answer_for_judge = re.sub(r'<think>.*?</think>\s*', '', answer_for_judge, flags=re.DOTALL)
+                    print(f"  (Removed <think> section for judge evaluation)")
+                
                 # Evaluate the answer
                 evaluation = self.judge.evaluate_answer(
                     query=result['query'],
                     context=result['context'],
                     expected_elements=result['expected_elements'],
-                    generated_answer=result['generated_answer']
+                    generated_answer=answer_for_judge
                 )
                 
                 eval_result = {

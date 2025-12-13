@@ -53,11 +53,20 @@ def embedding_query_node(state: GraphState) -> GraphState:
             )
             
             print(f"✓ Retrieved {len(results)} results from vector index")
+            
+            # Print all embedding results
             if results:
-                if intent == "VisaQuestion":
-                    print(f"Top result: {results[0].get('from_country', 'N/A')} to {results[0].get('to_country', 'N/A')} (score: {results[0].get('similarity_score', 'N/A'):.3f})")
-                else:
-                    print(f"Top result: {results[0].get('hotel_name', 'N/A')} (score: {results[0].get('similarity_score', 'N/A'):.3f})")
+                print(f"\n📊 [EMBEDDING QUERY RESULTS] ({len(results)} total):")
+                for i, result in enumerate(results, 1):
+                    if intent == "VisaQuestion":
+                        print(f"  [{i}] From: {result.get('from_country', 'N/A')} → To: {result.get('to_country', 'N/A')} | Score: {result.get('similarity_score', 0):.3f}")
+                        print(f"       Visa Type: {result.get('visa_type', 'N/A')}")
+                    else:
+                        print(f"  [{i}] {result.get('hotel_name', 'N/A')} | Score: {result.get('similarity_score', 0):.3f}")
+                        if result.get('city') and result.get('country'):
+                            print(f"       Location: {result.get('city')}, {result.get('country')}")
+            else:
+                print("  (No results found)")
         except Exception as e:
             print(f"❌ Embedding search failed: {e}")
             results = []

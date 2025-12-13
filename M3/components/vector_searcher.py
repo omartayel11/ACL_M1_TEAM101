@@ -222,7 +222,8 @@ class VectorSearcher:
                        c.name AS city,
                        country.name AS country
                 """
-                params = {"hotel_id": node_id}
+                # Convert node_id to string as hotel_id is stored as string in Neo4j
+                params = {"hotel_id": str(node_id)}
             elif node_type == "visa":
                 # Parse visa_id like "Egypt_to_France"
                 parts = node_id.split("_to_")

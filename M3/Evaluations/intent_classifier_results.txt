@@ -1,0 +1,164 @@
+✓ Configuration loaded from C:\Users\Omart\Desktop\GUC\ACL_M1_TEAM101\M3\config.yaml
+✓ Groq API key loaded
+✓ Groq client initialized (model: openai/gpt-oss-120b)
+
+================================================================================
+TEST RESULTS SUMMARY
+================================================================================
+
+📊 OVERALL ACCURACY: 85.19%
+   ✅ Correct: 138/162
+   ❌ Incorrect: 24/162
+
+================================================================================
+ACCURACY BY INTENT
+================================================================================
+
+HotelSearch                    ███████████████░░░░░  76.32%
+                               (29/38 correct)
+
+AmenityFilter                  ██████████████████░░  92.31%
+                               (24/26 correct)
+
+ReviewLookup                   ██████████████████░░  90.00%
+                               (18/20 correct)
+
+VisaQuestion                   ████████████████████ 100.00%
+                               (20/20 correct)
+
+HotelRecommendation            █████████████████░░░  88.89%
+                               (16/18 correct)
+
+LocationQuery                  ██████████████░░░░░░  73.33%
+                               (11/15 correct)
+
+CasualConversation             ██████████████████░░  93.33%
+                               (14/15 correct)
+
+GeneralQuestionAnswering       ████████████░░░░░░░░  60.00%
+                               (6/10 correct)
+
+================================================================================
+FAILED TEST CASES
+================================================================================
+
+❌ Failure #1
+   Query: "What hotels are available in Cairo?"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #2
+   Query: "accommodation in Egypt"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #3
+   Query: "I need hotels with good ratings"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #4
+   Query: "hotels rated 9 or higher"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #5
+   Query: "top rated hotels"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #6
+   Query: "Find me hotels with excellent ratings"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #7
+   Query: "Where can I stay in Rome?"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #8
+   Query: "What are my accommodation options in Amsterdam?"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #9
+   Query: "I'm traveling to Istanbul, where should I stay?"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #10
+   Query: "Top family-friendly hotels in Tokyo"
+   Expected: HotelRecommendation
+   Predicted: HotelSearch
+
+❌ Failure #11
+   Query: "Recommend business hotels in London with high ratings"
+   Expected: HotelRecommendation
+   Predicted: HotelSearch
+
+❌ Failure #12
+   Query: "What do people say about The Maple Grove?"
+   Expected: ReviewLookup
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #13
+   Query: "Tell me what people think about Canal House Grand"
+   Expected: ReviewLookup
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #14
+   Query: "Find hotels with excellent location"
+   Expected: LocationQuery
+   Predicted: HotelSearch
+
+❌ Failure #15
+   Query: "Find hotels with great location in Paris"
+   Expected: LocationQuery
+   Predicted: HotelSearch
+
+❌ Failure #16
+   Query: "Best located hotels in Tokyo"
+   Expected: LocationQuery
+   Predicted: HotelSearch
+
+❌ Failure #17
+   Query: "I want a hotel in a prime location"
+   Expected: LocationQuery
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #18
+   Query: "Show me the cleanest hotels"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #19
+   Query: "Find hotels with great staff service"
+   Expected: AmenityFilter
+   Predicted: HotelSearch
+
+❌ Failure #20
+   Query: "What are your capabilities?"
+   Expected: CasualConversation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #21
+   Query: "What do you know about hotels in general?"
+   Expected: GeneralQuestionAnswering
+   Predicted: HotelSearch
+
+❌ Failure #22
+   Query: "Give me information about The Royal Compass"
+   Expected: GeneralQuestionAnswering
+   Predicted: HotelRecommendation
+
+❌ Failure #23
+   Query: "Information about The Maple Grove hotel"
+   Expected: GeneralQuestionAnswering
+   Predicted: HotelRecommendation
+
+❌ Failure #24
+   Query: "I want comprehensive information about The Orchid Palace"
+   Expected: GeneralQuestionAnswering
+   Predicted: HotelRecommendation
+

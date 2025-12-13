@@ -38,10 +38,16 @@ def llm_query_node(state: GraphState) -> GraphState:
         if cypher:
             results = executor.execute(cypher, {})
             print(f"✓ Retrieved {len(results)} results from Neo4j")
+            
+            # Print all LLM query results
             if results:
-                print(f"Sample result: {results[0]}")
+                print(f"\n📊 [LLM QUERY RESULTS] ({len(results)} total):")
+                for i, result in enumerate(results, 1):
+                    print(f"  [{i}] {result}")
+            else:
+                print("  (No results found)")
     except Exception as e:
-        print(f"LLM query generation/execution failed: {e}")
+        print(f"❌ LLM query generation/execution failed: {e}")
         cypher = ""
         results = []
     

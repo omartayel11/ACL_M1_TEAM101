@@ -141,7 +141,8 @@ class QueryLibrary:
         """
         return """
         MATCH (h:Hotel {name: $hotel_name})<-[:REVIEWED]-(r:Review)<-[:WROTE]-(t:Traveller)
-        RETURN r.review_id AS review_id,
+        RETURN h.name AS hotel_name,
+               r.review_id AS review_id,
                r.text AS review_text,
                r.date AS review_date,
                r.score_overall AS score_overall,
@@ -166,7 +167,8 @@ class QueryLibrary:
         """
         return """
         MATCH (h:Hotel {hotel_id: $hotel_id})<-[:REVIEWED]-(r:Review)<-[:WROTE]-(t:Traveller)
-        RETURN r.review_id AS review_id,
+        RETURN h.name AS hotel_name,
+               r.review_id AS review_id,
                r.text AS review_text,
                r.date AS review_date,
                r.score_overall AS score_overall,
@@ -389,11 +391,7 @@ class QuerySelector:
             "get_hotels_by_star_rating"
         ],
         "HotelRecommendation": [
-            "get_top_hotels_for_traveller_type",
-            "get_hotels_by_cleanliness_score",
-            "get_hotels_by_comfort_score",
-            "get_hotels_by_value_for_money",
-            "get_hotels_with_best_staff_scores"
+            "get_top_hotels_for_traveller_type"
         ],
         "ReviewLookup": [
             "get_reviews_by_hotel_name",
@@ -448,17 +446,6 @@ class QuerySelector:
                     entities["traveller_type"], 
                     entities.get("limit", 5)
                 )
-            elif "min_cleanliness" in entities:
-                return QueryLibrary.get_hotels_by_cleanliness_score(entities["min_cleanliness"])
-            elif "min_comfort" in entities:
-                return QueryLibrary.get_hotels_by_comfort_score(entities["min_comfort"])
-            elif "min_value" in entities:
-                return QueryLibrary.get_hotels_by_value_for_money(entities["min_value"])
-            elif "min_staff" in entities:
-                return QueryLibrary.get_hotels_with_best_staff_scores(entities.get("limit", 10))
-            # Fallback: if no specific score provided, default to cleanliness with 8.0 threshold
-            else:
-                return QueryLibrary.get_hotels_by_cleanliness_score(8.0)
         
         elif intent == "ReviewLookup":
             if "hotel_name" in entities:

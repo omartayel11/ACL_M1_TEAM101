@@ -29,8 +29,8 @@ def merge_node(state: GraphState) -> GraphState:
     print(f"\n📋 [MERGED CONTEXT FOR LLM]")
     print(f"Baseline results: {len(baseline_results)} | Embedding results: {len(embedding_results)}")
     print(f"Context length: {len(merged_context)} characters")
-    print(f"\nContext preview:\n{'-'*60}")
-    print(merged_context[:500] + ("..." if len(merged_context) > 500 else ""))
+    print(f"\nFull merged context:\n{'-'*60}")
+    print(merged_context)
     print(f"{'-'*60}")
     
     # Return only changed fields

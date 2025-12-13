@@ -1,0 +1,94 @@
+{
+  "last_completed_index": 26,
+  "results": {
+    "total": 135,
+    "correct": 17,
+    "incorrect": 10,
+    "failures": [
+      {
+        "query": "show me hotels with 4.8 rating",
+        "expected": {
+          "min_rating": 4.8
+        },
+        "extracted": {}
+      },
+      {
+        "query": "I want hotels rated 4.7 or higher",
+        "expected": {
+          "min_rating": 4.7
+        },
+        "extracted": {}
+      },
+      {
+        "query": "hotels with at least 4.3 rating",
+        "expected": {
+          "min_rating": 4.3
+        },
+        "extracted": {}
+      },
+      {
+        "query": "find me 5 star rated hotels",
+        "expected": {
+          "min_rating": 5.0
+        },
+        "extracted": {
+          "star_rating": 5.0
+        }
+      },
+      {
+        "query": "hotels above 4.9 rating",
+        "expected": {
+          "min_rating": 4.9
+        },
+        "extracted": {}
+      },
+      {
+        "query": "show hotels with 4.6+ rating",
+        "expected": {
+          "min_rating": 4.6
+        },
+        "extracted": {}
+      },
+      {
+        "query": "5 star hotels in Paris",
+        "expected": {
+          "city": "Paris",
+          "stars": 5
+        },
+        "extracted": {
+          "city": "Paris",
+          "star_rating": 5.0
+        }
+      },
+      {
+        "query": "find 4 star hotels in London",
+        "expected": {
+          "city": "London",
+          "stars": 4
+        },
+        "extracted": {
+          "city": "London",
+          "star_rating": 4.0
+        }
+      },
+      {
+        "query": "show me 3 star hotels",
+        "expected": {
+          "stars": 3
+        },
+        "extracted": {
+          "star_rating": 3.0
+        }
+      },
+      {
+        "query": "I need a 5 star hotel",
+        "expected": {
+          "stars": 5
+        },
+        "extracted": {
+          "star_rating": 5.0
+        }
+      }
+    ]
+  }
+}

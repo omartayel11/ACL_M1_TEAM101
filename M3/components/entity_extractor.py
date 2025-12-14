@@ -3,7 +3,9 @@ Entity Extractor for Graph-RAG Hotel Travel Assistant
 Extracts structured entities from user queries using LLM
 """
 
-from typing import Dict, Any, Optional
+import re
+import difflib
+from typing import Dict, Any, Optional, List, Tuple
 from utils.llm_client import LLMClient
 
 
@@ -46,7 +48,8 @@ class EntityExtractor:
     
     def extract(self, query: str, intent: str) -> Dict[str, Any]:
         """
-        Extract entities from query based on intent
+        Extract entities from query based on intent using hybrid approach:
+        Rule-based first → LLM with hint (like intent classifier)
         
         Args:
             query: User query string
@@ -58,122 +61,486 @@ class EntityExtractor:
         if not query or not query.strip():
             return {}
         
-        # Use LLM to extract entities
-        entities = self._extract_with_llm(query, intent)
+        # Stage 1: Rule-based extraction with confidence scoring
+        rule_entities, confidence = self._extract_by_rules_with_confidence(query, intent)
         
-        # Validate and normalize entities
-        entities = self._validate_entities(entities)
+        # High confidence (>= 0.9) - use rule results directly (only very obvious patterns)
+        if confidence >= 0.9:
+            validated = self._validate_entities(rule_entities)
+            return validated
         
-        return entities
+        # Medium confidence (0.5-0.9) - use LLM with hint from rules
+        if confidence >= 0.5:
+            llm_entities = self._extract_with_llm(query, intent, hint_entities=rule_entities, hint_confidence=confidence)
+            # Merge: rule results first, LLM only adds/overrides non-None values
+            merged = {**rule_entities}
+            if llm_entities:
+                for key, value in llm_entities.items():
+                    if value is not None and value != "null":
+                        merged[key] = value
+            validated = self._validate_entities(merged)
+            return validated
+        
+        # Low confidence (< 0.5) - pure LLM extraction
+        llm_entities = self._extract_with_llm(query, intent)
+        validated = self._validate_entities(llm_entities) if llm_entities else {}
+        return validated
     
-    def _extract_with_llm(self, query: str, intent: str) -> Dict[str, Any]:
+    def _extract_by_rules_with_confidence(self, query: str, intent: str) -> tuple:
         """
-        Use LLM to extract entities with intent-specific guidance
+        Rule-based extraction with confidence scoring
+        Returns both entities AND confidence score (0.0-1.0)
         
         Args:
             query: User query string
             intent: Classified intent
             
         Returns:
+            Tuple of (entities_dict, confidence_score)
+        """
+        entities = {}
+        confidence_scores = []
+        query_lower = query.lower()
+        
+        # Extract traveller type (solo, couple, family, business, group)
+        # Lower confidence to let LLM help with ambiguous cases
+        traveller_patterns = [
+            (r'as a (solo|couple|family|business|group)', 0.85),
+            (r'as (solo|couple|family|business|group)', 0.75),
+            (r'for (families|couples|groups|business|solo)', 0.8),  # "for families", "for couples"
+            (r'(solo|couple|family|business|group)\s+(?:traveler|traveller|trip)', 0.7),
+            (r'(solo|couple|family|business|group)\s+(?:travelers?|travellers?)', 0.65),
+            (r'or as a (solo|couple|family|business|group)', 0.8),
+        ]
+        for pattern, pattern_conf in traveller_patterns:
+            match = re.search(pattern, query_lower)
+            if match:
+                traveller_type = match.group(1).strip()
+                # Map plural forms to singular
+                type_map = {
+                    'families': 'Family',
+                    'couples': 'Couple',
+                    'groups': 'Group',
+                    'business': 'Business',
+                    'solo': 'Solo'
+                }
+                # Handle both singular and plural
+                normalized = type_map.get(traveller_type.lower(), traveller_type.capitalize())
+                if normalized in self.TRAVELLER_TYPES:
+                    entities["traveller_type"] = normalized
+                    confidence_scores.append(pattern_conf)
+                    break
+        
+        # Extract star rating (5 star, 4 star hotels)
+        star_patterns = [
+            (r'(\d)\s*star\s+hotel', 0.85),
+            (r'(\d)\s*star', 0.8),
+        ]
+        for pattern, pattern_conf in star_patterns:
+            match = re.search(pattern, query_lower)
+            if match:
+                try:
+                    star_rating = float(match.group(1))
+                    if 1.0 <= star_rating <= 5.0:
+                        entities["star_rating"] = star_rating
+                        confidence_scores.append(pattern_conf)
+                        break
+                except ValueError:
+                    pass
+        
+        # Extract reference hotel (similar to X hotel)
+        similar_pattern = r'similar\s+(?:to|with)\s+(?:(?:the|a)\s+)?([^,\n]+?)(?:\s+(?:in|from|for|that|which|where)|$)'
+        match = re.search(similar_pattern, query_lower)
+        if match:
+            hotel_name = match.group(1).strip()
+            hotel_name = re.sub(r'\s+(?:in|from|for|hotel)?$', '', hotel_name)
+            if hotel_name and len(hotel_name) > 2:
+                entities["reference_hotel"] = hotel_name
+                confidence_scores.append(0.95)
+        
+        # Extract visa-related entities (from_country and to_country)
+        # Check for visa patterns first (they're more specific)
+        visa_patterns = [
+            (r'(?:visa|viza)\s+(?:from|requirements from|needed? from|required from)\s+([A-Za-z\s]+?)\s+to\s+([A-Za-z\s]+?)(?:\s|\?|\.|$)', 0.95),
+            (r'(?:from|I\'m from)\s+([A-Za-z\s]+?)(?:,|\s+).*(?:visa|viza)\s+(?:for|to)\s+([A-Za-z\s]+?)(?:\s|\?|\.|$)', 0.9),
+            (r'do\s+([A-Za-z]+?)s?\s+need\s+(?:visa|viza)\s+for\s+([A-Za-z\s]+?)(?:\s|\?|\.|$)', 0.9),
+        ]
+        for pattern, pattern_conf in visa_patterns:
+            match = re.search(pattern, query, re.IGNORECASE)
+            if match:
+                from_country = match.group(1).strip()
+                to_country = match.group(2).strip()
+                if from_country and to_country:
+                    # Normalize country names (e.g., "Americans" -> "United States")
+                    from_country_normalized = self._normalize_country_name(from_country)
+                    to_country_normalized = self._normalize_country_name(to_country)
+                    entities["from_country"] = from_country_normalized
+                    entities["to_country"] = to_country_normalized
+                    confidence_scores.append(pattern_conf)
+                    break
+        
+        # Extract from_country (travelers from X country / popular among X people) - only if not already extracted from visa
+        if "from_country" not in entities:
+            from_country_patterns = [
+                (r'popular\s+among\s+(?:travelers?|guests?|people)\s+from\s+([A-Za-z\s]+?)(?:\s+to|\s+in|[\?\.]|$)', 0.85),
+            ]
+            for pattern, pattern_conf in from_country_patterns:
+                match = re.search(pattern, query, re.IGNORECASE)
+                if match:
+                    country_name = match.group(1).strip()
+                    if country_name and len(country_name) >= 2:
+                        entities["from_country"] = country_name
+                        confidence_scores.append(pattern_conf)
+                        break
+        
+        # Extract city/country name (in X, go to X, visit X)
+        # Skip if this is a visa query or review query
+        if "to_country" not in entities and "visa" not in query_lower and "review" not in query_lower:
+            location_patterns = [
+                (r'(?:hotels?|accommodations?)\s+in\s+([a-zA-Z\s]+?)(?:\s+(?:with|and|or|for|,)|[,?!.]|$)', 0.85),
+                (r'\sin\s+([a-zA-Z\s]+?)(?:\s+(?:with|and|or|for|,)|[,?!.]|$)', 0.75),
+                (r'(?:go|travel|visit|explore)\s+to\s+([a-zA-Z\s]+?)(?:\s+(?:and|or|with|,)|[,?!.]|$)', 0.8),
+            ]
+            for pattern, pattern_conf in location_patterns:
+                match = re.search(pattern, query_lower)
+                if match:
+                    location_name = match.group(1).strip()
+                    # Clean up common noise words
+                    location_name = re.sub(r'\s+(and|or|with|the|a)$', '', location_name)
+                    if location_name and len(location_name) >= 3:
+                        # Normalize to title case
+                        location_name = location_name.title()
+                        
+                        # Check if it's a known country first
+                        if location_name in self.VALID_COUNTRIES or self._normalize_country_name(location_name) in self.VALID_COUNTRIES:
+                            entities["country"] = self._normalize_country_name(location_name)
+                            confidence_scores.append(pattern_conf)
+                        else:
+                            # Assume it's a city
+                            entities["city"] = location_name
+                            confidence_scores.append(pattern_conf * 0.9)  # Slightly lower confidence for cities
+                        break
+        
+        # Extract quality dimensions with numeric thresholds for AmenityFilter/GeneralQuestionAnswering
+        if intent in ["AmenityFilter", "GeneralQuestionAnswering"]:
+            quality_matches = []
+            extracted_numbers = set()  # Track which numbers we've used
+            
+            # Look for patterns like "cleanliness more than 8" or "cleanliness above 8.5" or "cleanliness score 9.2"
+            cleanliness_pattern = r'(?:cleanliness|clean)\s+(?:score\s+)?(?:more than|above|greater than|at least|minimum|of)?\s*([\d.]+)'
+            match = re.search(cleanliness_pattern, query_lower)
+            if match:
+                try:
+                    value = float(match.group(1))
+                    entities["min_cleanliness"] = value
+                    extracted_numbers.add(value)
+                    quality_matches.append(0.85)  # Lower confidence
+                except ValueError:
+                    pass
+            
+            comfort_pattern = r'(?:comfort|comfortable)\s+(?:score\s+)?(?:more than|above|greater than|at least|minimum|of)?\s*([\d.]+)'
+            match = re.search(comfort_pattern, query_lower)
+            if match:
+                try:
+                    value = float(match.group(1))
+                    entities["min_comfort"] = value
+                    extracted_numbers.add(value)
+                    quality_matches.append(0.85)
+                except ValueError:
+                    pass
+            
+            # Improved staff pattern - must include 'staff' keyword
+            staff_pattern = r'(?:staff|service)\s+(?:score\s+)?(?:more than|above|greater than|at least|minimum|of)?\s*([\d.]+)'
+            # Also check for 'friendly staff score X' pattern
+            staff_pattern_2 = r'(?:friendly|helpful|good|excellent)\s+(?:staff|service)\s+(?:score\s+)?(?:more than|above|at least)?\s*([\d.]+)'
+            match = re.search(staff_pattern, query_lower)
+            if not match:
+                match = re.search(staff_pattern_2, query_lower)
+            if match:
+                try:
+                    value = float(match.group(1))
+                    entities["min_staff"] = value
+                    extracted_numbers.add(value)
+                    quality_matches.append(0.85)
+                except ValueError:
+                    pass
+            
+            value_pattern = r'(?:value|affordable)\s+(?:score\s+)?(?:more than|above|greater than|at least|minimum|of)?\s*([\d.]+)'
+            match = re.search(value_pattern, query_lower)
+            if match:
+                try:
+                    value = float(match.group(1))
+                    entities["min_value"] = value
+                    extracted_numbers.add(value)
+                    quality_matches.append(0.85)
+                except ValueError:
+                    pass
+            
+            # Special handling for "good value for money" without number
+            if 'value for money' in query_lower or ('value' in query_lower and 'good' in query_lower):
+                if "min_value" not in entities:
+                    entities["min_value"] = 7.5
+                    quality_matches.append(0.8)
+            
+            if 'balanced' in query_lower or 'balance' in query_lower or 'all dimensions' in query_lower or 'across all' in query_lower or 'all the scores' in query_lower:
+                entities["balanced"] = True
+                quality_matches.append(0.95)
+            
+            # Add quality match confidence
+            if quality_matches:
+                confidence_scores.append(max(quality_matches))
+        
+        # Extract trend signals
+        if 'trend' in query_lower or 'improving' in query_lower or 'getting better' in query_lower or 'improve' in query_lower:
+            entities["is_trending"] = True
+            confidence_scores.append(0.9)
+        
+        # Extract rating (with, above, rating X) - but ONLY if not already extracted quality dimensions
+        # This must come AFTER quality extraction to avoid conflicts
+        if not any(key in entities for key in ["min_cleanliness", "min_comfort", "min_staff", "min_value"]):
+            rating_patterns = [
+                (r'(?:rating|rated|ratng)\s+(?:of\s+)?([\d.]+)', 0.95),  # 'ratng' typo support
+                (r'with\s+(?:rating|ratng)\s+([\d.]+)', 0.95),
+                (r'(?:rating|ratng)\s+(?:above|more than|at least)\s+([\d.]+)', 0.9),
+            ]
+            for pattern, pattern_conf in rating_patterns:
+                match = re.search(pattern, query_lower)
+                if match:
+                    # Skip if quality dimension keywords are present
+                    if any(word in query_lower for word in ['staff', 'service', 'friendly', 'cleanliness', 'clean', 'comfort', 'value', 'affordable']):
+                        continue
+                    try:
+                        rating_value = float(match.group(1))
+                        # Only extract if this number wasn't already used for quality dimensions
+                        if "extracted_numbers" in locals() and rating_value not in extracted_numbers:
+                            entities["min_rating"] = rating_value
+                            confidence_scores.append(pattern_conf)
+                            break
+                        elif "extracted_numbers" not in locals():
+                            # If we haven't extracted quality dimensions, we can use this
+                            entities["min_rating"] = rating_value
+                            confidence_scores.append(pattern_conf)
+                            break
+                    except ValueError:
+                        pass
+        
+        # Calculate overall confidence
+        if not confidence_scores:
+            overall_confidence = 0.0
+        else:
+            # Average confidence, but weight towards high confidence
+            avg_conf = sum(confidence_scores) / len(confidence_scores)
+            # Boost slightly for multiple matches
+            if len(confidence_scores) > 1:
+                avg_conf = min(1.0, avg_conf + 0.1)
+            overall_confidence = avg_conf
+        
+        return entities, overall_confidence
+    
+    def _extract_with_llm(self, query: str, intent: str, hint_entities: Dict[str, Any] = None, hint_confidence: float = None) -> Dict[str, Any]:
+        """
+        Route to intent-specific LLM extraction function.
+        Each intent has its own focused prompt and schema.
+        
+        Args:
+            query: User query string
+            intent: Classified intent
+            hint_entities: Optional entities extracted from rules
+            hint_confidence: Optional confidence score from rules
+            
+        Returns:
             Dictionary of extracted entities
         """
-        # Build intent-specific entity schema
-        schema = self._get_entity_json_schema_for_intent(intent)
+        # Route to intent-specific extraction
+        extractors = {
+            "HotelSearch": self._extract_hotel_search_llm,
+            "HotelRecommendation": self._extract_hotel_recommendation_llm,
+            "ReviewLookup": self._extract_review_lookup_llm,
+            "VisaQuestion": self._extract_visa_question_llm,
+            "AmenityFilter": self._extract_amenity_filter_llm,
+            "GeneralQuestionAnswering": self._extract_general_qa_llm,
+        }
         
-        prompt = f"""Extract entities from this hotel query: "{query}"
-
-Intent: {intent}
-
-Instructions:
-- Extract ONLY entities explicitly mentioned
-- Use null for missing values
-- For traveller types: use singular form (Family not families, Couple not couples, Solo not "solo travelers")
-- If query mentions "me and my wife/husband/partner", set traveller_type to "Couple"
-- If query mentions "families" or "family-friendly", set traveller_type to "Family"
-- If query mentions "solo traveler" or "solo travelers", set traveller_type to "Solo"
-- If query mentions "business traveler", set traveller_type to "Business"
-- For scores: extract numeric values mentioned (e.g., "above 8.5" → 8.5)
-- If user says "high" without a specific number, use 8.0 as the threshold
-- If user says "good" or "best" without a number, use 7.5 as the threshold
-- Score types: cleanliness, comfort, value, staff, location, facilities
-
-IMPORTANT for AmenityFilter intent:
-- If query mentions "clean" or "cleanliness", set min_cleanliness to 7.5 (or higher if specified)
-- If query mentions "comfort" or "comfortable", set min_comfort to 7.5 (or higher if specified)  
-- If query mentions "value", "value for money", or "affordable", set min_value to 7.5 (or higher if specified)
-- If query mentions "staff", "service", or "excellent staff", set min_staff to 7.5 (or higher if specified)
-- If user says "excellent" before a quality word (e.g., "excellent staff"), use 8.5 as the threshold
-- If user says "best", use 8.0 as the threshold
-
-IMPORTANT for rating thresholds:
-- Extract decimal values precisely (e.g., "8.5" should be 8.5, not 8 or rounded)
-- "above 8.5" means min_rating = 8.5
-- "above 8" means min_rating = 8.0
-
-Extract the entities now."""
-
+        extractor_func = extractors.get(intent)
+        if not extractor_func:
+            # Fallback for unknown intents
+            return {}
+        
         try:
-            # Use structured generation for better JSON output
-            entities = self.llm_client.generate_structured(prompt, schema, temperature=0.0)
-            
-            if self.debug:
-                print(f"DEBUG - Extracted entities: {entities}")
-            
-            return entities if entities else {}
-            
+            return extractor_func(query, hint_entities, hint_confidence)
         except Exception as e:
             if self.debug:
-                print(f"DEBUG - LLM extraction failed: {e}")
-            # Return empty dict on failure - LLM only, no fallback
+                print(f"DEBUG - LLM extraction failed for {intent}: {e}")
             return {}
     
-    def _get_entity_json_schema_for_intent(self, intent: str) -> Dict[str, str]:
-        """Get JSON schema for structured extraction based on intent"""
-        schemas = {
-            "HotelSearch": {
-                "city": "string or null",
-                "country": "string or null",
-                "min_rating": "number or null",
-                "star_rating": "number or null",
-                "limit": "number or null"
-            },
-            "HotelRecommendation": {
-                "traveller_type": "string or null",
-                "min_cleanliness": "number or null",
-                "min_comfort": "number or null",
-                "min_value": "number or null",
-                "city": "string or null",
-                "limit": "number or null"
-            },
-            "ReviewLookup": {
-                "hotel_name": "string or null",
-                "hotel_id": "string or null",
-                "limit": "number or null"
-            },
-            "LocationQuery": {
-                "city": "string or null",
-                "limit": "number or null"
-            },
-            "VisaQuestion": {
-                "from_country": "string or null",
-                "to_country": "string or null"
-            },
-            "AmenityFilter": {
-                "min_cleanliness": "number or null",
-                "min_comfort": "number or null",
-                "min_value": "number or null",
-                "min_staff": "number or null",
-                "min_location": "number or null",
-                "min_facilities": "number or null",
-                "limit": "number or null"
-            },
-            "GeneralQuestionAnswering": {
-                "hotel_name": "string or null",
-                "city": "string or null",
-                "country": "string or null"
-            }
+    def _extract_hotel_search_llm(self, query: str, hints: Dict = None, confidence: float = None) -> Dict:
+        """Extract entities for HotelSearch intent"""
+        hint_text = self._build_hint_text(hints, confidence) if hints else ""
+        
+        prompt = f'''Extract location and filters from: "{query}"{hint_text}
+
+Return JSON with:
+- city: city name if mentioned (e.g., "Paris", "London")
+- country: country name if no city specified
+- min_rating: minimum rating if mentioned (e.g., "above 4.5" → 4.5)
+- star_rating: star rating if mentioned (e.g., "5 star" → 5)
+- limit: number of results if specified
+
+Use null for missing values.'''
+
+        schema = {
+            "city": "string or null",
+            "country": "string or null",
+            "min_rating": "number or null",
+            "star_rating": "number or null",
+            "limit": "number or null"
         }
-        return schemas.get(intent, {})
+        
+        return self._call_llm_structured(prompt, schema)
+    
+    def _extract_hotel_recommendation_llm(self, query: str, hints: Dict = None, confidence: float = None) -> Dict:
+        """Extract entities for HotelRecommendation intent"""
+        hint_text = self._build_hint_text(hints, confidence) if hints else ""
+        
+        prompt = f'''Extract traveler preferences from: "{query}"{hint_text}
+
+Return JSON with:
+- traveller_type: "Family", "Couple", "Solo", "Business", or "Group" if mentioned
+  (e.g., "honeymoon" → "Couple", "family trip" → "Family")
+- reference_hotel: hotel name if asking for similar hotels
+- from_country: country name if asking about travelers from a specific country
+- city: city name if mentioned
+- min_cleanliness/min_comfort/min_value: scores if quality mentioned (default 7.5 if just keyword)
+
+Use null for missing values.'''
+
+        schema = {
+            "traveller_type": "string or null",
+            "reference_hotel": "string or null",
+            "from_country": "string or null",
+            "min_cleanliness": "number or null",
+            "min_comfort": "number or null",
+            "min_value": "number or null",
+            "city": "string or null"
+        }
+        
+        return self._call_llm_structured(prompt, schema)
+    
+    def _extract_review_lookup_llm(self, query: str, hints: Dict = None, confidence: float = None) -> Dict:
+        """Extract entities for ReviewLookup intent"""
+        hint_text = self._build_hint_text(hints, confidence) if hints else ""
+        
+        prompt = f'''Extract hotel name from: "{query}"{hint_text}
+
+Return JSON with:
+- hotel_name: name of the hotel if mentioned
+
+Use null if no specific hotel mentioned.'''
+
+        schema = {"hotel_name": "string or null"}
+        return self._call_llm_structured(prompt, schema)
+    
+    def _extract_visa_question_llm(self, query: str, hints: Dict = None, confidence: float = None) -> Dict:
+        """Extract entities for VisaQuestion intent"""
+        hint_text = self._build_hint_text(hints, confidence) if hints else ""
+        
+        prompt = f'''Extract visa-related countries from: "{query}"{hint_text}
+
+Return JSON with:
+- from_country: origin country (where person is from)
+- to_country: destination country (where person wants to go)
+
+Examples:
+- "visa from USA to France" → from_country: "United States", to_country: "France"
+- "do Americans need visa for Japan" → from_country: "United States", to_country: "Japan"
+
+Use null for missing values.'''
+
+        schema = {
+            "from_country": "string or null",
+            "to_country": "string or null"
+        }
+        
+        return self._call_llm_structured(prompt, schema)
+    
+    def _extract_amenity_filter_llm(self, query: str, hints: Dict = None, confidence: float = None) -> Dict:
+        """Extract entities for AmenityFilter intent"""
+        hint_text = self._build_hint_text(hints, confidence) if hints else ""
+        
+        prompt = f'''Extract quality scores and filters from: "{query}"{hint_text}
+
+Return JSON with quality scores (extract actual numbers or use 7.5 for keywords):
+- min_cleanliness: if "clean" or "cleanliness" mentioned
+- min_comfort: if "comfort" or "comfortable" mentioned  
+- min_staff: if "staff" or "service" mentioned
+- min_value: if "value" or "affordable" mentioned
+- city: city name if specified
+- reference_hotel: hotel name if comparing to another hotel
+
+Use null for missing values.'''
+
+        schema = {
+            "city": "string or null",
+            "min_cleanliness": "number or null",
+            "min_comfort": "number or null",
+            "min_value": "number or null",
+            "min_staff": "number or null",
+            "reference_hotel": "string or null"
+        }
+        
+        return self._call_llm_structured(prompt, schema)
+    
+    def _extract_general_qa_llm(self, query: str, hints: Dict = None, confidence: float = None) -> Dict:
+        """Extract entities for GeneralQuestionAnswering intent"""
+        hint_text = self._build_hint_text(hints, confidence) if hints else ""
+        
+        prompt = f'''Extract any relevant entities from: "{query}"{hint_text}
+
+Return JSON (use null for missing):
+- city/country: location if mentioned
+- from_country: if asking about travelers from a country
+- traveller_type: if asking about specific traveler types
+- balanced: true if asking about balanced/consistent scores across dimensions
+- is_trending: true if asking about improving/trending hotels
+- reference_hotel: hotel name if mentioned
+- min_cleanliness/min_comfort/min_staff/min_value: quality scores if mentioned
+
+Use null for missing values.'''
+
+        schema = {
+            "city": "string or null",
+            "country": "string or null",
+            "from_country": "string or null",
+            "traveller_type": "string or null",
+            "balanced": "boolean or null",
+            "is_trending": "boolean or null",
+            "reference_hotel": "string or null",
+            "min_cleanliness": "number or null",
+            "min_comfort": "number or null",
+            "min_staff": "number or null",
+            "min_value": "number or null"
+        }
+        
+        return self._call_llm_structured(prompt, schema)
+    
+    def _build_hint_text(self, hints: Dict, confidence: float) -> str:
+        """Build hint text from rule-based extraction"""
+        if not hints:
+            return ""
+        hints_str = ", ".join([f"{k}={v}" for k, v in hints.items()])
+        return f"\n\nHint from rules ({confidence:.0%} confidence): {hints_str}"
+    
+    def _call_llm_structured(self, prompt: str, schema: Dict) -> Dict:
+        """Call LLM with structured output"""
+        try:
+            result = self.llm_client.generate_structured(prompt, schema, temperature=0.0)
+            if self.debug:
+                print(f"DEBUG - LLM extracted: {result}")
+            return result if result else {}
+        except Exception as e:
+            if self.debug:
+                print(f"DEBUG - LLM call failed: {e}")
+            return {}
     
     def _validate_entities(self, entities: Dict[str, Any]) -> Dict[str, Any]:
         """Validate and normalize extracted entities"""
@@ -207,9 +574,10 @@ Extract the entities now."""
                 if value in self.TRAVELLER_TYPES:
                     validated[key] = value
             
-            # Convert numeric fields
+            # Convert numeric fields (including new ones for TrendAnalysis)
             elif key in ["min_rating", "star_rating", "min_cleanliness", "min_comfort", 
-                        "min_value", "min_staff", "min_location", "min_facilities"]:
+                        "min_value", "min_staff", "min_location", "min_facilities",
+                        "min_recent_score", "min_improvement", "min_value_score"]:
                 try:
                     validated[key] = float(value)
                 except (ValueError, TypeError):
@@ -233,6 +601,10 @@ Extract the entities now."""
                 normalized_country = self._normalize_country(str(value).strip())
                 if normalized_country:
                     validated[key] = normalized_country
+            
+            # Hotel names and reference hotels - just clean whitespace
+            elif key in ["hotel_name", "reference_hotel"]:
+                validated[key] = str(value).strip()
             
             # Other string fields - just clean whitespace
             else:
@@ -268,6 +640,11 @@ Extract the entities now."""
             if city_lower in valid_lower or valid_lower in city_lower:
                 return valid_city
         
+        # Check for potential typos using edit distance + LLM validation
+        closest_match = self._find_closest_match_with_llm(city_input, self.VALID_CITIES, "city")
+        if closest_match:
+            return closest_match
+        
         # No match found - return title case version as fallback
         return city_input.title()
     
@@ -298,6 +675,11 @@ Extract the entities now."""
             if country_lower in valid_lower or valid_lower in country_lower:
                 return valid_country
         
+        # Check for potential typos using edit distance + LLM validation
+        closest_match = self._find_closest_match_with_llm(country_input, self.VALID_COUNTRIES, "country")
+        if closest_match:
+            return closest_match
+        
         # Common aliases
         aliases = {
             "usa": "United States",
@@ -313,6 +695,184 @@ Extract the entities now."""
             return aliases[country_lower]
         
         # No match found - return title case version as fallback
+        return country_input.title()
+    
+    def _find_closest_match_with_llm(self, user_input: str, valid_options: List[str], entity_type: str) -> Optional[str]:
+        """
+        Find closest match for potential typo using edit distance + LLM validation.
+        Only calls LLM when edit distance suggests a likely typo.
+        
+        Args:
+            user_input: User's input (potentially misspelled)
+            valid_options: List of valid values (VALID_CITIES or VALID_COUNTRIES)
+            entity_type: 'city' or 'country' for better LLM prompting
+            
+        Returns:
+            Corrected value if LLM confirms typo, None otherwise
+        """
+        user_lower = user_input.lower().strip()
+        
+        # Find closest matches by edit distance
+        matches_with_distance = []
+        for valid_option in valid_options:
+            # Calculate similarity ratio (0.0 to 1.0)
+            similarity = difflib.SequenceMatcher(None, user_lower, valid_option.lower()).ratio()
+            matches_with_distance.append((valid_option, similarity))
+        
+        # Sort by similarity (highest first)
+        matches_with_distance.sort(key=lambda x: x[1], reverse=True)
+        
+        # If best match has high similarity (0.7-0.95), it's likely a typo
+        best_match, best_similarity = matches_with_distance[0]
+        
+        # Perfect match already handled by earlier checks
+        if best_similarity >= 0.95:
+            return None
+        
+        # If similarity is between 0.7 and 0.95, likely a typo - ask LLM
+        if 0.7 <= best_similarity < 0.95:
+            return self._validate_typo_with_llm(user_input, best_match, entity_type)
+        
+        # Too different, probably not a typo
+        return None
+    
+    def _validate_typo_with_llm(self, user_input: str, suggested_correction: str, entity_type: str) -> Optional[str]:
+        """
+        Ask LLM to validate if user_input is a typo of suggested_correction.
+        
+        Args:
+            user_input: User's input (potentially misspelled)
+            suggested_correction: Suggested correct spelling
+            entity_type: 'city' or 'country'
+            
+        Returns:
+            suggested_correction if LLM confirms typo, None otherwise
+        """
+        try:
+            prompt = f'''Is "{user_input}" a typo or misspelling of the {entity_type} name "{suggested_correction}"?
+
+Answer with ONLY "yes" or "no".
+
+Examples:
+- "Paaris" vs "Paris" → yes
+- "Londan" vs "London" → yes  
+- "Span" vs "Spain" → yes
+- "Canda" vs "Canada" → yes
+- "Berlin" vs "London" → no
+- "Tokyo" vs "Paris" → no
+
+Your answer (yes/no):'''
+            
+            # Use LLM client to generate response
+            response = self.llm_client._client.chat.completions.create(
+                model=self.llm_client._model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,  # Deterministic
+                max_tokens=50  # Increased from 10 to allow full response
+            )
+            
+            # Handle response - some models use 'content', others use 'reasoning'
+            message = response.choices[0].message
+            content = message.content
+            
+            # If content is empty, check reasoning field (for models like gpt-oss-120b)
+            if not content and hasattr(message, 'reasoning') and message.reasoning:
+                content = message.reasoning
+            
+            if self.debug:
+                print(f"Typo validation: '{user_input}' vs '{suggested_correction}'")
+                print(f"  LLM response: {content}")
+            
+            # Handle None or empty content
+            if not content:
+                if self.debug:
+                    print(f"  Result: LLM returned no content")
+                return None
+            
+            answer = content.strip().lower()
+            
+            if "yes" in answer:
+                if self.debug:
+                    print(f"  Result: YES - correcting to '{suggested_correction}'")
+                return suggested_correction
+            else:
+                if self.debug:
+                    print(f"  Result: NO - keeping '{user_input}'")
+                return None
+                
+        except Exception as e:
+            if self.debug:
+                print(f"LLM typo validation failed: {e}")
+            # On error, be conservative and don't correct
+            return None
+    
+    def _normalize_country_name(self, country_input: str) -> str:
+        """
+        Normalize country name or nationality adjective to full country name.
+        Handles cases like "Americans" -> "United States", "UK" -> "United Kingdom"
+        
+        Args:
+            country_input: Country name or nationality adjective
+            
+        Returns:
+            Normalized full country name
+        """
+        if not country_input:
+            return country_input
+        
+        country_lower = country_input.lower().strip()
+        
+        # Nationality adjectives to country names
+        nationality_map = {
+            "american": "United States",
+            "americans": "United States",
+            "british": "United Kingdom",
+            "french": "France",
+            "japanese": "Japan",
+            "german": "Germany",
+            "canadian": "Canada",
+            "canadians": "Canada",
+            "australian": "Australia",
+            "australians": "Australia",
+            "spanish": "Spain",
+            "italian": "Italy",
+            "chinese": "China",
+            "mexican": "Mexico",
+            "indian": "India",
+            "brazilian": "Brazil",
+            "russian": "Russia",
+            "egyptian": "Egypt",
+            "thai": "Thailand",
+            "turkish": "Turkey",
+            "dutch": "Netherlands",
+            "korean": "South Korea",
+            "south korean": "South Korea",
+            "emirati": "United Arab Emirates",
+            "singaporean": "Singapore",
+        }
+        
+        if country_lower in nationality_map:
+            return nationality_map[country_lower]
+        
+        # Common country name variations and abbreviations
+        country_aliases = {
+            "usa": "United States",
+            "us": "United States",
+            "america": "United States",
+            "uk": "United Kingdom",
+            "uae": "United Arab Emirates",
+            "korea": "South Korea",
+        }
+        
+        if country_lower in country_aliases:
+            return country_aliases[country_lower]
+        
+        # Check against valid countries
+        for valid_country in self.VALID_COUNTRIES:
+            if country_lower == valid_country.lower():
+                return valid_country
+        
+        # Return title case as fallback
         return country_input.title()
 
 

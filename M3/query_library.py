@@ -370,6 +370,321 @@ class QueryLibrary:
                avg_value,
                total_reviews
         """, {"hotel_name": hotel_name}
+    
+    # =========================================================================
+    # COMPLEX QUERIES - Multi-Criteria & Advanced Analytics
+    # =========================================================================
+    
+    @staticmethod
+    def get_hotels_by_multiple_criteria(city_name=None, min_cleanliness=None, min_comfort=None, 
+                                        min_staff=None, min_value=None, limit=10):
+        """
+        Query 16: Advanced multi-criteria filtering with all quality dimensions.
+        Finds hotels matching multiple quality thresholds (only those specified are applied).
+        Parameters: city_name (str or None), min_cleanliness (float or None), min_comfort (float or None),
+                    min_staff (float or None), min_value (float or None), limit (int)
+        """
+        where_clauses = ["avg_cleanliness IS NOT NULL"]
+        params = {"limit": limit}
+        
+        if min_cleanliness is not None:
+            where_clauses.append("avg_cleanliness >= $min_cleanliness")
+            params["min_cleanliness"] = min_cleanliness
+        if min_comfort is not None:
+            where_clauses.append("avg_comfort >= $min_comfort")
+            params["min_comfort"] = min_comfort
+        if min_staff is not None:
+            where_clauses.append("avg_staff >= $min_staff")
+            params["min_staff"] = min_staff
+        if min_value is not None:
+            where_clauses.append("avg_value >= $min_value")
+            params["min_value"] = min_value
+        
+        city_filter = ""
+        if city_name:
+            city_filter = "MATCH (h)-[:LOCATED_IN]->(c:City {name: $city_name})\n"
+            params["city_name"] = city_name
+        else:
+            city_filter = "MATCH (h)-[:LOCATED_IN]->(c:City)\n"
+        
+        where_clause = " AND ".join(where_clauses)
+        
+        query = f"""
+        MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
+        {city_filter}
+        OPTIONAL MATCH (c)-[:LOCATED_IN]->(country:Country)
+        WITH h, c, country,
+             AVG(r.score_cleanliness) AS avg_cleanliness,
+             AVG(r.score_comfort) AS avg_comfort,
+             AVG(r.score_staff) AS avg_staff,
+             AVG(r.score_value_for_money) AS avg_value,
+             AVG(r.score_overall) AS avg_overall,
+             COUNT(r) AS review_count
+        WHERE {where_clause}
+        ORDER BY avg_overall DESC, review_count DESC
+        LIMIT $limit
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               avg_overall,
+               avg_cleanliness,
+               avg_comfort,
+               avg_staff,
+               avg_value,
+               review_count,
+               c.name AS city,
+               country.name AS country
+        """
+        return query, params
+    
+    @staticmethod
+    def compare_hotels_by_traveller_type_in_city(city_name, traveller_type=None, limit_per_type=3):
+        """
+        Query 17: Comparative analysis - Top hotels for each traveller type in a city.
+        Shows which hotels are best for Business, Couple, Family, Solo, Group travelers.
+        Parameters: city_name (str), traveller_type (str, optional), limit_per_type (int)
+        """
+        if traveller_type:
+            # Single traveller type - filter by both city and traveller type
+            return """
+        MATCH (c:City {name: $city_name})<-[:LOCATED_IN]-(h:Hotel)
+        MATCH (t:Traveller {type: $traveller_type})-[:WROTE]->(r:Review)-[:REVIEWED]->(h)
+        WITH h, 
+             AVG(r.score_overall) AS avg_rating,
+             COUNT(r) AS review_count
+        ORDER BY avg_rating DESC, review_count DESC
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               avg_rating,
+               review_count
+        LIMIT $limit_per_type
+        """, {"city_name": city_name, "traveller_type": traveller_type, "limit_per_type": limit_per_type}
+        else:
+            # No specific traveller type - compare all types in city
+            return """
+        MATCH (c:City {name: $city_name})<-[:LOCATED_IN]-(h:Hotel)
+        MATCH (t:Traveller)-[:WROTE]->(r:Review)-[:REVIEWED]->(h)
+        WITH t.type AS traveller_type,
+             h, 
+             AVG(r.score_overall) AS avg_rating,
+             COUNT(r) AS review_count
+        ORDER BY traveller_type, avg_rating DESC
+        WITH traveller_type, COLLECT({hotel_name: h.name, 
+                                       hotel_id: h.hotel_id,
+                                       rating: avg_rating,
+                                       reviews: review_count})[0..$limit_per_type] AS top_hotels
+        RETURN traveller_type, top_hotels
+        """, {"city_name": city_name, "limit_per_type": limit_per_type}
+    
+    @staticmethod
+    def get_hotels_with_balanced_scores(min_balance_score=7.0, limit=10):
+        """
+        Query 18: Find hotels with balanced quality across all dimensions.
+        Returns hotels where cleanliness, comfort, staff, location, and value are all high and similar.
+        Parameters: min_balance_score (float) - minimum score for all dimensions, limit (int)
+        """
+        return """
+        MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
+        OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+        WITH h, c, country,
+             AVG(r.score_cleanliness) AS avg_clean,
+             AVG(r.score_comfort) AS avg_comfort,
+             AVG(r.score_staff) AS avg_staff,
+             AVG(r.score_location) AS avg_location,
+             AVG(r.score_value_for_money) AS avg_value,
+             AVG(r.score_overall) AS avg_overall,
+             COUNT(r) AS review_count
+        WHERE avg_clean >= $min_score AND avg_comfort >= $min_score AND 
+              avg_staff >= $min_score AND avg_location >= $min_score AND avg_value >= $min_score
+        WITH h, c, country, avg_overall, review_count,
+             (avg_clean + avg_comfort + avg_staff + avg_location + avg_value) / 5.0 AS balance_score,
+             abs(avg_clean - avg_comfort) + abs(avg_comfort - avg_staff) + 
+             abs(avg_staff - avg_location) + abs(avg_location - avg_value) AS dimension_variance
+        ORDER BY dimension_variance ASC, balance_score DESC
+        LIMIT $limit
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               balance_score,
+               avg_overall,
+               dimension_variance,
+               review_count,
+               c.name AS city,
+               country.name AS country
+        """, {"min_score": min_balance_score, "limit": limit}
+    
+    @staticmethod
+    def get_hotels_by_traveller_origin_patterns(from_country, limit=8):
+        """
+        Query 19: Find hotels that are popular among travelers from a specific country.
+        Shows which hotels have the most positive reviews from travelers from that origin.
+        Parameters: from_country (str), limit (int)
+        """
+        return """
+        MATCH (t:Traveller)-[:FROM_COUNTRY]->(origin:Country {name: $from_country})
+        MATCH (t)-[:WROTE]->(r:Review)-[:REVIEWED]->(h:Hotel)
+        OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(dest:Country)
+        WITH h, c, dest, 
+             AVG(r.score_overall) AS avg_rating,
+             COUNT(r) AS review_count,
+             AVG(r.score_comfort) AS avg_comfort,
+             AVG(r.score_value_for_money) AS avg_value
+        ORDER BY review_count DESC, avg_rating DESC
+        LIMIT $limit
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               avg_rating,
+               review_count,
+               avg_comfort,
+               avg_value,
+               c.name AS city,
+               dest.name AS destination_country
+        """, {"from_country": from_country, "limit": limit}
+    
+    @staticmethod
+    def get_hotels_similar_to_reference(reference_hotel_name, similarity_threshold=6.5, limit=5):
+        """
+        Query 20: Find hotels similar to a reference hotel based on quality profile.
+        Similarity is based on matching review score patterns (same profile of strengths/weaknesses).
+        Parameters: reference_hotel_name (str), similarity_threshold (float), limit (int)
+        """
+        return """
+        MATCH (ref:Hotel {name: $ref_name})<-[:REVIEWED]-(r_ref:Review)
+        WITH ref,
+             AVG(r_ref.score_cleanliness) AS ref_clean,
+             AVG(r_ref.score_comfort) AS ref_comfort,
+             AVG(r_ref.score_staff) AS ref_staff,
+             AVG(r_ref.score_location) AS ref_location,
+             AVG(r_ref.score_value_for_money) AS ref_value
+        MATCH (h:Hotel)<-[:REVIEWED]-(r:Review)
+        WHERE h.name <> $ref_name
+        WITH h, ref,
+             ref_clean, ref_comfort, ref_staff, ref_location, ref_value,
+             AVG(r.score_cleanliness) AS h_clean,
+             AVG(r.score_comfort) AS h_comfort,
+             AVG(r.score_staff) AS h_staff,
+             AVG(r.score_location) AS h_location,
+             AVG(r.score_value_for_money) AS h_value,
+             COUNT(r) AS review_count
+        WITH h, ref, review_count,
+             abs(h_clean - ref_clean) + abs(h_comfort - ref_comfort) + 
+             abs(h_staff - ref_staff) + abs(h_location - ref_location) + 
+             abs(h_value - ref_value) AS profile_distance,
+             (h_clean + h_comfort + h_staff + h_location + h_value) / 5.0 AS avg_score
+        WHERE profile_distance <= $distance_threshold AND review_count >= 5
+        OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+        ORDER BY profile_distance ASC
+        LIMIT $limit
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               avg_score,
+               profile_distance,
+               review_count,
+               c.name AS city,
+               country.name AS country
+        """, {"ref_name": reference_hotel_name, "distance_threshold": similarity_threshold, "limit": limit}
+    
+    @staticmethod
+    def get_hotels_with_specialist_strength(strength_type, min_score=8.0, limit=10):
+        """
+        Query 21: Find hotels with a specific specialist strength (e.g., best for comfort but may lack value).
+        Parameters: strength_type (str) - one of: 'cleanliness', 'comfort', 'staff', 'location', 'value', 'facilities'
+                    min_score (float), limit (int)
+        """
+        dimension_map = {
+            "cleanliness": "score_cleanliness",
+            "comfort": "score_comfort",
+            "staff": "score_staff",
+            "location": "score_location",
+            "value": "score_value_for_money",
+            "facilities": "score_facilities"
+        }
+        
+        score_field = dimension_map.get(strength_type.lower(), "score_overall")
+        
+        return f"""
+        MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
+        OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+        WITH h, c, country,
+             AVG(r.{score_field}) AS specialty_score,
+             AVG(r.score_overall) AS avg_overall,
+             COUNT(r) AS review_count
+        WHERE specialty_score >= $min_score
+        ORDER BY specialty_score DESC, review_count DESC
+        LIMIT $limit
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               specialty_score,
+               avg_overall,
+               review_count,
+               c.name AS city,
+               country.name AS country
+        """, {"min_score": min_score, "limit": limit}
+    
+    @staticmethod
+    # Query 22 DISABLED: Cypher syntax error with avg() on lists
+    # def get_hotels_trending_up(min_recent_score=7.5, min_improvement=0.5, limit=10):
+    #     """
+    #     Query 22: Find hotels with improving review scores (trending up over recent reviews).
+    #     Compares older reviews with recent reviews to detect improvement trend.
+    #     Parameters: min_recent_score (float), min_improvement (float), limit (int)
+    #     """
+    #     return """
+    #     MATCH (h:Hotel)<-[:REVIEWED]-(r:Review)
+    #     WITH h, r
+    #     ORDER BY r.date DESC
+    #     WITH h,
+    #          [r IN collect(r)[0..5] | r.score_overall] AS recent_scores,
+    #          [r IN collect(r)[5..15] | r.score_overall] AS older_scores
+    #     WHERE size(recent_scores) >= 3 AND size(older_scores) >= 2
+    #     WITH h,
+    #          avg(recent_scores) AS avg_recent,
+    #          avg(older_scores) AS avg_older,
+    #          (avg(recent_scores) - avg(older_scores)) AS improvement
+    #     WHERE avg_recent >= $min_score AND improvement >= $min_improvement
+    #     OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+    #     ORDER BY improvement DESC
+    #     LIMIT $limit
+    #     RETURN h.hotel_id AS hotel_id,
+    #            h.name AS hotel_name,
+    #            h.star_rating AS star_rating,
+    #            avg_recent,
+    #            avg_older,
+    #            improvement,
+    #            c.name AS city,
+    #            country.name AS country
+    #     """, {"min_score": min_recent_score, "min_improvement": min_improvement, "limit": limit}
+    
+    @staticmethod
+    def find_best_value_hotels(max_price_category=None, min_value_score=8.0, limit=10):
+        """
+        Query 23: Find hotels offering best value for money.
+        Parameters: max_price_category (str or None) - filter by implicit price tier, 
+                    min_value_score (float), limit (int)
+        """
+        return """
+        MATCH (r:Review)-[:REVIEWED]->(h:Hotel)
+        OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+        WITH h, c, country,
+             AVG(r.score_value_for_money) AS avg_value,
+             AVG(r.score_overall) AS avg_overall,
+             COUNT(r) AS review_count
+        WHERE avg_value >= $min_value_score
+        ORDER BY avg_value DESC, review_count DESC
+        LIMIT $limit
+        RETURN h.hotel_id AS hotel_id,
+               h.name AS hotel_name,
+               h.star_rating AS star_rating,
+               avg_value,
+               avg_overall,
+               review_count,
+               c.name AS city,
+               country.name AS country
+        """, {"min_value_score": min_value_score, "limit": limit}
 
 
 # =========================================================================
@@ -434,7 +749,15 @@ class QuerySelector:
         
         # Simple rule-based selection based on available entities
         if intent == "HotelSearch":
-            if "city" in entities:
+            # Check for complex search scenarios
+            if "reference_hotel" in entities:
+                # Find similar hotels
+                return QueryLibrary.get_hotels_similar_to_reference(
+                    reference_hotel_name=entities["reference_hotel"],
+                    similarity_threshold=entities.get("similarity_threshold", 6.5),
+                    limit=entities.get("limit", 5)
+                )
+            elif "city" in entities:
                 return QueryLibrary.get_hotels_by_city(entities["city"])
             elif "country" in entities:
                 return QueryLibrary.get_hotels_by_country(entities["country"])
@@ -443,7 +766,29 @@ class QuerySelector:
             # star_rating queries not implemented - fall through to return None
         
         elif intent == "HotelRecommendation":
-            if "traveller_type" in entities:
+            # Check for complex recommendation scenarios first
+            if "reference_hotel" in entities:
+                # Find hotels similar to reference
+                return QueryLibrary.get_hotels_similar_to_reference(
+                    reference_hotel_name=entities["reference_hotel"],
+                    similarity_threshold=entities.get("similarity_threshold", 6.5),
+                    limit=entities.get("limit", 5)
+                )
+            elif "from_country" in entities:
+                # Popular among travelers from specific country
+                return QueryLibrary.get_hotels_by_traveller_origin_patterns(
+                    from_country=entities["from_country"],
+                    limit=entities.get("limit", 8)
+                )
+            elif "traveller_type" in entities and "city" in entities:
+                # Traveller type recommendation filtered by city
+                return QueryLibrary.compare_hotels_by_traveller_type_in_city(
+                    city_name=entities["city"],
+                    traveller_type=entities["traveller_type"],
+                    limit_per_type=entities.get("limit", 3)
+                )
+            elif "traveller_type" in entities:
+                # Standard traveller type recommendation (no city filter)
                 return QueryLibrary.get_top_hotels_for_traveller_type(
                     entities["traveller_type"], 
                     entities.get("limit", 5)
@@ -461,6 +806,9 @@ class QuerySelector:
                 return QueryLibrary.get_hotels_by_cleanliness_score(8.0)
         
         elif intent == "ReviewLookup":
+            # Query 22 (trending hotels) disabled due to Cypher syntax error
+            # if entities.get("is_trending"):
+            #     return QueryLibrary.get_hotels_trending_up(...)
             if "hotel_name" in entities:
                 return QueryLibrary.get_reviews_by_hotel_name(
                     entities["hotel_name"],
@@ -473,10 +821,19 @@ class QuerySelector:
                 )
         
         elif intent == "LocationQuery":
-            return QueryLibrary.get_hotels_with_best_location_scores(
-                entities.get("city"),
-                entities.get("limit", 5)
-            )
+            # Check for trend analysis signals even for LocationQuery
+            if "from_country" in entities:
+                # Traveler origin pattern analysis
+                return QueryLibrary.get_hotels_by_traveller_origin_patterns(
+                    from_country=entities["from_country"],
+                    limit=entities.get("limit", 8)
+                )
+            else:
+                # Standard location query
+                return QueryLibrary.get_hotels_with_best_location_scores(
+                    entities.get("city"),
+                    entities.get("limit", 5)
+                )
         
         elif intent == "VisaQuestion":
             if "from_country" in entities and "to_country" in entities:
@@ -487,7 +844,21 @@ class QuerySelector:
         
         elif intent == "AmenityFilter":
             # Handle quality score filters (cleanliness, comfort, value, staff)
-            if "min_cleanliness" in entities:
+            # Check if multiple criteria are specified (escalate to multi-criteria)
+            criteria_count = sum(1 for k in ["min_cleanliness", "min_comfort", "min_staff", "min_value", "min_location", "min_facilities"] if k in entities)
+            
+            if criteria_count >= 2:
+                # Multiple criteria detected - use advanced multi-criteria query
+                return QueryLibrary.get_hotels_by_multiple_criteria(
+                    city_name=entities.get("city"),
+                    min_cleanliness=entities.get("min_cleanliness"),
+                    min_comfort=entities.get("min_comfort"),
+                    min_staff=entities.get("min_staff"),
+                    min_value=entities.get("min_value"),
+                    limit=entities.get("limit", 10)
+                )
+            # Single criterion - use simple filter
+            elif "min_cleanliness" in entities:
                 return QueryLibrary.get_hotels_by_cleanliness_score(entities["min_cleanliness"])
             elif "min_comfort" in entities:
                 return QueryLibrary.get_hotels_by_comfort_score(
@@ -507,7 +878,37 @@ class QuerySelector:
                 return QueryLibrary.get_hotels_by_cleanliness_score(8.0)
         
         elif intent == "GeneralQuestionAnswering":
-            if "hotel_name" in entities:
+            # Check for complex scenarios even in general Q&A
+            if "from_country" in entities:
+                # Hotels popular among travelers from specific country
+                return QueryLibrary.get_hotels_by_traveller_origin_patterns(
+                    from_country=entities["from_country"],
+                    limit=entities.get("limit", 8)
+                )
+            elif "reference_hotel" in entities:
+                # Find similar hotels
+                return QueryLibrary.get_hotels_similar_to_reference(
+                    reference_hotel_name=entities["reference_hotel"],
+                    similarity_threshold=entities.get("similarity_threshold", 6.5),
+                    limit=entities.get("limit", 5)
+                )
+            elif entities.get("balanced"):
+                # Balanced quality across dimensions
+                return QueryLibrary.get_hotels_with_balanced_scores(
+                    min_balance_score=7.0,
+                    limit=entities.get("limit", 10)
+                )
+            # Check for multiple quality dimensions mentioned
+            elif any(k in entities for k in ["min_cleanliness", "min_comfort", "min_staff", "min_value"]):
+                criteria_count = sum(1 for k in ["min_cleanliness", "min_comfort", "min_staff", "min_value"] if k in entities)
+                if criteria_count >= 2:
+                    # Multiple dimensions - use balanced query
+                    return QueryLibrary.get_hotels_with_balanced_scores(
+                        min_balance_score=min((v for k, v in entities.items() if k.startswith("min_") and isinstance(v, (int, float))), default=7.0),
+                        limit=entities.get("limit", 10)
+                    )
+            # Standard general question
+            elif "hotel_name" in entities:
                 return QueryLibrary.get_hotel_full_details(entities["hotel_name"])
         
         return None, None
@@ -516,7 +917,7 @@ class QuerySelector:
 if __name__ == "__main__":
     # Test: print all available queries
     print("=== Hotel Graph-RAG Query Library ===\n")
-    print("Total query templates: 15\n")
+    print("Total query templates: 23\n")
     
     # Example usage
     print("Example 1: Search hotels in Paris")
@@ -530,6 +931,34 @@ if __name__ == "__main__":
     print(f"Parameters: {params}\n")
     
     print("Example 3: Check visa requirements")
-    query, params = QueryLibrary.check_visa_requirements("USA", "France")
+    query, params = QueryLibrary.check_visa_requirements("United States", "France")
     print(f"Query:\n{query}")
     print(f"Parameters: {params}\n")
+    
+    print("Example 4: Multi-criteria filtering (Clean AND Comfortable AND Good Staff)")
+    query, params = QueryLibrary.get_hotels_by_multiple_criteria(
+        city_name="London",
+        min_cleanliness=8.0,
+        min_comfort=7.5,
+        min_staff=8.5,
+        limit=5
+    )
+    print(f"Query:\n{query[:200]}...\n")
+    print(f"Parameters: {params}\n")
+    
+    print("Example 5: Find hotels similar to reference hotel")
+    query, params = QueryLibrary.get_hotels_similar_to_reference(
+        reference_hotel_name="The Ritz",
+        similarity_threshold=6.5,
+        limit=5
+    )
+    print(f"Query:\n{query[:200]}...\n")
+    print(f"Parameters: {params}\n")
+    
+    print("Example 6: Hotels trending up (improving ratings)")
+    query, params = QueryLibrary.get_hotels_trending_up(
+        min_recent_score=7.5,
+        min_improvement=0.5,
+        limit=10
+    )
+    print(f"Query:\n{query[:200]}...\n")

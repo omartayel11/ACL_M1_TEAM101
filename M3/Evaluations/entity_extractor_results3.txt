@@ -1,0 +1,33 @@
+
+================================================================================
+ENTITY EXTRACTOR TEST RESULTS
+================================================================================
+
+Total Test Cases: 123
+Correct: 119
+Incorrect: 4
+Accuracy: 96.75%
+
+[████████████████████████████████████████████████░░] 96.7%
+
+================================================================================
+FAILED TEST CASES (4)
+================================================================================
+
+1. Query: "me and my wife need a hotel"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+2. Query: "traveling with my husband"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+3. Query: "where are the best located hotels in Sydney"
+   Expected: {'city': 'Sydney', 'min_rating': 7.5}
+   Extracted: {'city': 'Sydney'}
+
+4. Query: "find hotels with friendly staff score 9.5"
+   Expected: {'min_staff': 9.5}
+   Extracted: {'min_rating': 9.5}
+
+================================================================================

@@ -56,11 +56,13 @@ class AnswerGenerator:
 {intent_guidance}
 
 CRITICAL RULES:
-- Base your answer ONLY on the provided context
-- Do NOT make up information or hallucinate
-- If the context doesn't contain the answer, say "I don't have enough information to answer that"
+- Base your answer on the provided context
+- Do NOT make up information or hotels
+- Always provide helpful hotel recommendations from the context that match the user's criteria
+- If the context contains relevant hotel information, provide it with explanations
+- Do NOT decline to answer if hotels are available in the context
 - Cite specific hotels, scores, or reviews from the context
-- Be concise but complete
+- Be concise but complete (2-3 sentences for brief answers, 3-5 for detailed recommendations)
 - Use natural language, not technical jargon
 - Consider the conversation history when formulating your answer
 
@@ -113,15 +115,15 @@ Answer:"""
         """Get intent-specific guidance for answer generation"""
         guidance_map = {
             "HotelSearch": "Provide a list of hotels with their key details (location, rating, scores).",
-            "HotelRecommendation": "Recommend hotels based on the criteria, explaining why they're good choices.",
+            "HotelRecommendation": "Recommend the best hotels from the context, explaining why they are excellent choices for the user's specific needs (traveler type, location preference, etc.).",
             "ReviewLookup": "Summarize the reviews, highlighting common themes and specific feedback.",
             "LocationQuery": "Focus on location-related information and scores.",
             "VisaQuestion": "Provide clear visa requirement information.",
-            "AmenityFilter": "Highlight hotels that meet the quality criteria with specific scores.",
-            "GeneralQuestionAnswering": "Provide comprehensive information about the hotel or topic."
+            "AmenityFilter": "Highlight hotels that best meet the specified quality criteria with their specific scores.",
+            "GeneralQuestionAnswering": "Provide comprehensive information about the hotel or topic based on the context."
         }
         
-        return guidance_map.get(intent, "Answer the question clearly and directly.")
+        return guidance_map.get(intent, "Answer the question clearly and directly using the provided context.")
 
 
 if __name__ == "__main__":

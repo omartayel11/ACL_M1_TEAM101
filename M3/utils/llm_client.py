@@ -207,10 +207,16 @@ class LLMClient:
                 elif "```" in content:
                     content = content.split("```")[1].split("```")[0].strip()
                 
-                return json.loads(content)
+                parsed = json.loads(content)
+                
+                # Validate that parsed result has all schema keys (set missing ones to None)
+                result = {key: None for key in schema.keys()}
+                result.update(parsed)
+                return result
+                
             except json.JSONDecodeError as e:
                 print(f"Warning: Failed to parse JSON response: {e}")
-                print(f"Raw response: {content}")
+                print(f"Raw response: {content[:200]}...")  # Print first 200 chars to avoid spam
                 # Return empty dict matching schema keys
                 return {key: None for key in schema.keys()}
                 

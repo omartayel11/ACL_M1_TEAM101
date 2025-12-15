@@ -1,0 +1,57 @@
+
+================================================================================
+ENTITY EXTRACTOR TEST RESULTS
+================================================================================
+
+Total Test Cases: 123
+Correct: 113
+Incorrect: 10
+Accuracy: 91.87%
+
+[█████████████████████████████████████████████░░░░░] 91.9%
+
+================================================================================
+FAILED TEST CASES (10)
+================================================================================
+
+1. Query: "find hotels in Paaris"
+   Expected: {'city': 'Paris'}
+   Extracted: {'city': 'Paaris'}
+
+2. Query: "hotels with ratng above 4.5"
+   Expected: {'min_rating': 4.5}
+   Extracted: {}
+
+3. Query: "hotels in Londan"
+   Expected: {'city': 'London'}
+   Extracted: {'city': 'Londan'}
+
+4. Query: "best hotels for my honeymoon"
+   Expected: {'traveller_type': 'Couple'}
+   Extracted: {}
+
+5. Query: "best located hotels in Tokyo"
+   Expected: {'city': 'Tokyo'}
+   Extracted: {'city': 'Tokyo', 'min_rating': 7.5}
+
+6. Query: "where are the best located hotels in Sydney"
+   Expected: {'city': 'Sydney', 'min_rating': 7.5}
+   Extracted: {'city': 'Sydney'}
+
+7. Query: "visa from UK to Span"
+   Expected: {'from_country': 'United Kingdom', 'to_country': 'Spain'}
+   Extracted: {'from_country': 'United Kingdom', 'to_country': 'Span'}
+
+8. Query: "visa from Canda to Italy"
+   Expected: {'from_country': 'Canada', 'to_country': 'Italy'}
+   Extracted: {'from_country': 'Canda', 'to_country': 'Italy'}
+
+9. Query: "visa from USA to Japn"
+   Expected: {'from_country': 'United States', 'to_country': 'Japan'}
+   Extracted: {'from_country': 'United States', 'to_country': 'Japn'}
+
+10. Query: "find hotels with friendly staff score 9.5"
+   Expected: {'min_staff': 9.5}
+   Extracted: {'min_rating': 9.5}
+
+================================================================================

@@ -472,8 +472,8 @@ class EntityExtractorTester:
 def main():
     parser = argparse.ArgumentParser(description="Test Entity Extractor with comprehensive test cases")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print detailed results for each test")
-    parser.add_argument("-o", "--output", type=str, default="entity_extractor_results.txt", 
-                       help="Output file for results (default: entity_extractor_results.txt)")
+    parser.add_argument("-o", "--output", type=str, default="entity_extractor_results3.txt", 
+                       help="Output file for results (default: entity_extractor_results3.txt)")
     parser.add_argument("--no-resume", action="store_true", 
                        help="Start fresh, ignoring any existing checkpoint")
     

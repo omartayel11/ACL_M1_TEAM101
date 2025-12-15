@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import time
 import argparse
+from datetime import datetime
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -36,8 +37,10 @@ class EmbeddingEvaluator:
             model_name: Embedding model name (if None, uses default)
         """
         self.generator = EmbeddingGenerator(model_name=model_name)
-        self.searcher = VectorSearcher()
         self.model_name = self.generator.get_model_name()
+        
+        # Load embeddings for the specific model
+        self.searcher = self._load_searcher_for_model(self.model_name)
         
         # Load ground truth
         with open(ground_truth_path, 'r') as f:
@@ -46,10 +49,77 @@ class EmbeddingEvaluator:
         self.hotel_queries = self.ground_truth['hotel_queries']
         self.visa_queries = self.ground_truth['visa_queries']
         
+        # Timing statistics
+        self.timing_stats = {
+            'embedding_times': [],
+            'search_times': [],
+            'total_times': []
+        }
+        
         print(f"✓ Loaded {len(self.hotel_queries)} hotel test queries")
         print(f"✓ Loaded {len(self.visa_queries)} visa test queries")
         print(f"✓ Embedding model: {self.generator.get_model_name()}")
-        print(f"✓ Embedding dimension: {self.generator.get_dimension()}\n")
+        print(f"✓ Embedding dimension: {self.generator.get_dimension()}")
+        print(f"✓ FAISS indexes loaded for: {self.model_name}\n")
+    
+    def _load_searcher_for_model(self, model_name: str) -> VectorSearcher:
+        """
+        Load VectorSearcher with correct FAISS files for the model
+        
+        Args:
+            model_name: Embedding model name
+            
+        Returns:
+            VectorSearcher instance with model-specific indexes
+        """
+        searcher = VectorSearcher()
+        
+        # Load model-specific embedding files
+        if 'mpnet' in model_name.lower():
+            # Load mpnet model files
+            searcher._load_model_indexes('_mpnet')
+        else:
+            # Load default (MiniLM) model files
+            searcher._load_model_indexes('')
+        
+        return searcher
+    
+    def _measure_embedding_time(self, query: str) -> Tuple[List[float], float]:
+        """
+        Measure time to generate embedding
+        
+        Args:
+            query: Query text
+            
+        Returns:
+            Tuple of (embedding, time_in_seconds)
+        """
+        start_time = time.time()
+        embedding = self.generator.embed(query)
+        elapsed_time = time.time() - start_time
+        return embedding, elapsed_time
+    
+    def _measure_search_time(self, embedding: List[float], limit: int = 5, intent: str = None) -> Tuple[List[Dict], float]:
+        """
+        Measure time to search embeddings
+        
+        Args:
+            embedding: Query embedding
+            limit: Number of results to retrieve
+            intent: Query intent for routing
+            
+        Returns:
+            Tuple of (search_results, time_in_seconds)
+        """
+        start_time = time.time()
+        results = self.searcher.search(
+            embedding=embedding,
+            limit=limit,
+            threshold=0.0,
+            intent=intent
+        )
+        elapsed_time = time.time() - start_time
+        return results, elapsed_time
     
     def test_hotel_embeddings(self, top_k: int = 5) -> Dict[str, Any]:
         """
@@ -84,14 +154,19 @@ class EmbeddingEvaluator:
             print(f"\n[{i}/{len(self.hotel_queries)}] Query: {query}")
             print(f"Expected: {description}")
             
-            # Generate embedding and search
-            embedding = self.generator.embed(query)
-            search_results = self.searcher.search(
-                embedding=embedding,
+            # Generate embedding and search with timing
+            embedding, embed_time = self._measure_embedding_time(query)
+            search_results, search_time = self._measure_search_time(
+                embedding,
                 limit=top_k,
-                threshold=0.0,  # No threshold for evaluation
                 intent="HotelSearch"
             )
+            total_time = embed_time + search_time
+            
+            # Track timing
+            self.timing_stats['embedding_times'].append(embed_time)
+            self.timing_stats['search_times'].append(search_time)
+            self.timing_stats['total_times'].append(total_time)
             
             # Extract hotel IDs from results
             retrieved_ids = [str(r.get('hotel_id', '')) for r in search_results]
@@ -118,9 +193,10 @@ class EmbeddingEvaluator:
                 match_marker = "✓" if str(hotel_id) in expected_top3 else "✗"
                 print(f"  [{j}] {match_marker} ID:{hotel_id} | {hotel_name} ({city}) | Sim: {similarity:.4f}")
             
-            # Status
+            # Status and timing
             status = "✓ PASS" if top1_match else ("⚠ Top-3" if top3_match else "✗ FAIL")
             print(f"Status: {status}")
+            print(f"⏱️  Embedding: {embed_time*1000:.2f}ms | Search: {search_time*1000:.2f}ms | Total: {total_time*1000:.2f}ms")
             
             # Record details
             query_detail = {
@@ -151,6 +227,21 @@ class EmbeddingEvaluator:
         results['top1_accuracy'] = results['top1_correct'] / results['total_queries']
         results['top3_accuracy'] = results['top3_correct'] / results['total_queries']
         results['top5_accuracy'] = results['top5_correct'] / results['total_queries']
+        
+        # Calculate timing metrics for hotel results
+        if self.timing_stats['total_times']:
+            results['avg_embedding_time_ms'] = (sum(self.timing_stats['embedding_times']) / len(self.timing_stats['embedding_times'])) * 1000
+            results['avg_search_time_ms'] = (sum(self.timing_stats['search_times']) / len(self.timing_stats['search_times'])) * 1000
+            results['avg_total_time_ms'] = (sum(self.timing_stats['total_times']) / len(self.timing_stats['total_times'])) * 1000
+            results['min_total_time_ms'] = min(self.timing_stats['total_times']) * 1000
+            results['max_total_time_ms'] = max(self.timing_stats['total_times']) * 1000
+        
+        # Reset timing stats for next test type
+        self.timing_stats = {
+            'embedding_times': [],
+            'search_times': [],
+            'total_times': []
+        }
         
         return results
     
@@ -187,14 +278,19 @@ class EmbeddingEvaluator:
             print(f"\n[{i}/{len(self.visa_queries)}] Query: {query}")
             print(f"Expected: {description}")
             
-            # Generate embedding and search
-            embedding = self.generator.embed(query)
-            search_results = self.searcher.search(
-                embedding=embedding,
+            # Generate embedding and search with timing
+            embedding, embed_time = self._measure_embedding_time(query)
+            search_results, search_time = self._measure_search_time(
+                embedding,
                 limit=top_k,
-                threshold=0.0,  # No threshold for evaluation
                 intent="VisaQuestion"
             )
+            total_time = embed_time + search_time
+            
+            # Track timing
+            self.timing_stats['embedding_times'].append(embed_time)
+            self.timing_stats['search_times'].append(search_time)
+            self.timing_stats['total_times'].append(total_time)
             
             # Extract visa IDs from results
             retrieved_ids = []
@@ -227,9 +323,10 @@ class EmbeddingEvaluator:
                 match_marker = "✓" if visa_id in expected_top3 else "✗"
                 print(f"  [{j}] {match_marker} {from_country} → {to_country} | {visa_type} | Sim: {similarity:.4f}")
             
-            # Status
+            # Status and timing
             status = "✓ PASS" if top1_match else ("⚠ Top-3" if top3_match else "✗ FAIL")
             print(f"Status: {status}")
+            print(f"⏱️  Embedding: {embed_time*1000:.2f}ms | Search: {search_time*1000:.2f}ms | Total: {total_time*1000:.2f}ms")
             
             # Record details
             query_detail = {
@@ -261,6 +358,14 @@ class EmbeddingEvaluator:
         results['top3_accuracy'] = results['top3_correct'] / results['total_queries']
         results['top5_accuracy'] = results['top5_correct'] / results['total_queries']
         
+        # Calculate timing metrics for visa results
+        if self.timing_stats['total_times']:
+            results['avg_embedding_time_ms'] = (sum(self.timing_stats['embedding_times']) / len(self.timing_stats['embedding_times'])) * 1000
+            results['avg_search_time_ms'] = (sum(self.timing_stats['search_times']) / len(self.timing_stats['search_times'])) * 1000
+            results['avg_total_time_ms'] = (sum(self.timing_stats['total_times']) / len(self.timing_stats['total_times'])) * 1000
+            results['min_total_time_ms'] = min(self.timing_stats['total_times']) * 1000
+            results['max_total_time_ms'] = max(self.timing_stats['total_times']) * 1000
+        
         return results
     
     def print_summary(self, hotel_results: Dict, visa_results: Dict, model_name: str = None):
@@ -278,6 +383,11 @@ class EmbeddingEvaluator:
         print(f"  Top-3 Accuracy: {hotel_results['top3_accuracy']:.2%} ({hotel_results['top3_correct']}/{hotel_results['total_queries']})")
         print(f"  Top-5 Accuracy: {hotel_results['top5_accuracy']:.2%} ({hotel_results['top5_correct']}/{hotel_results['total_queries']})")
         print(f"  Failed Queries: {len(hotel_results['failed_queries'])}")
+        print(f"\n  ⏱️  PERFORMANCE METRICS:")
+        print(f"    Avg Embedding Time: {hotel_results['avg_embedding_time_ms']:.2f}ms")
+        print(f"    Avg Search Time: {hotel_results['avg_search_time_ms']:.2f}ms")
+        print(f"    Avg Total Time: {hotel_results['avg_total_time_ms']:.2f}ms")
+        print(f"    Min/Max Total Time: {hotel_results['min_total_time_ms']:.2f}ms / {hotel_results['max_total_time_ms']:.2f}ms")
         
         print("\n📊 VISA EMBEDDINGS RESULTS:")
         print(f"  Total Queries: {visa_results['total_queries']}")
@@ -285,6 +395,11 @@ class EmbeddingEvaluator:
         print(f"  Top-3 Accuracy: {visa_results['top3_accuracy']:.2%} ({visa_results['top3_correct']}/{visa_results['total_queries']})")
         print(f"  Top-5 Accuracy: {visa_results['top5_accuracy']:.2%} ({visa_results['top5_correct']}/{visa_results['total_queries']})")
         print(f"  Failed Queries: {len(visa_results['failed_queries'])}")
+        print(f"\n  ⏱️  PERFORMANCE METRICS:")
+        print(f"    Avg Embedding Time: {visa_results['avg_embedding_time_ms']:.2f}ms")
+        print(f"    Avg Search Time: {visa_results['avg_search_time_ms']:.2f}ms")
+        print(f"    Avg Total Time: {visa_results['avg_total_time_ms']:.2f}ms")
+        print(f"    Min/Max Total Time: {visa_results['min_total_time_ms']:.2f}ms / {visa_results['max_total_time_ms']:.2f}ms")
         
         # Comparison
         print("\n📈 COMPARISON (Hotel vs Visa):")
@@ -332,6 +447,7 @@ class EmbeddingEvaluator:
         
         with open(output_file, 'w') as f:
             json.dump(output, f, indent=2)
+        print(f"✓ Results saved to {output_file}")
         
 def compare_models(model_names: List[str]):
     """
@@ -381,18 +497,20 @@ def compare_models(model_names: List[str]):
     print("=" * 80)
     
     print("\n📊 HOTEL EMBEDDINGS - MODEL COMPARISON:")
-    print(f"{'Model':<30} {'Top-1':>10} {'Top-3':>10} {'Top-5':>10}")
+    print(f"{'Model':<30} {'Top-1':>10} {'Top-3':>10} {'Avg Time':>12}")
     print("-" * 80)
     for model_name, results in all_results.items():
         hotel = results['hotel']
-        print(f"{model_name:<30} {hotel['top1_accuracy']:>9.2%} {hotel['top3_accuracy']:>9.2%} {hotel['top5_accuracy']:>9.2%}")
+        avg_time = hotel.get('avg_total_time_ms', 0)
+        print(f"{model_name:<30} {hotel['top1_accuracy']:>9.2%} {hotel['top3_accuracy']:>9.2%} {avg_time:>11.2f}ms")
     
     print("\n📊 VISA EMBEDDINGS - MODEL COMPARISON:")
-    print(f"{'Model':<30} {'Top-1':>10} {'Top-3':>10} {'Top-5':>10}")
+    print(f"{'Model':<30} {'Top-1':>10} {'Top-3':>10} {'Avg Time':>12}")
     print("-" * 80)
     for model_name, results in all_results.items():
         visa = results['visa']
-        print(f"{model_name:<30} {visa['top1_accuracy']:>9.2%} {visa['top3_accuracy']:>9.2%} {visa['top5_accuracy']:>9.2%}")
+        avg_time = visa.get('avg_total_time_ms', 0)
+        print(f"{model_name:<30} {visa['top1_accuracy']:>9.2%} {visa['top3_accuracy']:>9.2%} {avg_time:>11.2f}ms")
     
     # Determine best models
     print("\n🏆 BEST MODELS:")
@@ -424,6 +542,162 @@ def compare_models(model_names: List[str]):
         json.dump(comparison_output, f, indent=2)
     
     print(f"\n✓ Comparison results saved to embedding_model_comparison.json")
+    
+    # Generate comprehensive text report
+    generate_text_report(all_results, model_names, "embedding_comparison_report.txt")
+
+
+def generate_text_report(all_results: Dict, model_names: List[str], output_file: str = "embedding_comparison_report.txt"):
+    """
+    Generate a comprehensive text report of model comparison
+    
+    Args:
+        all_results: Dictionary of results by model
+        model_names: List of model names tested
+        output_file: Output filename for the report
+    """
+    timestamp = datetime.now().strftime("%B %d, %Y at %H:%M:%S")
+    
+    with open(output_file, 'w', encoding='utf-8') as f:
+        # Header
+        f.write("=" * 80 + "\n")
+        f.write("COMPREHENSIVE EMBEDDING EVALUATION - DETAILED REPORT\n")
+        f.write("=" * 80 + "\n")
+        f.write(f"Date: {timestamp}\n")
+        f.write(f"Models Compared: {', '.join(model_names)}\n")
+        
+        # Calculate total test cases
+        first_model = list(all_results.values())[0]
+        total_hotel = first_model['hotel']['total_queries']
+        total_visa = first_model['visa']['total_queries']
+        f.write(f"Total Test Cases: {total_hotel + total_visa} ({total_hotel} Hotel + {total_visa} Visa)\n\n")
+        
+        # Executive Summary
+        f.write("=" * 80 + "\n")
+        f.write("EXECUTIVE SUMMARY\n")
+        f.write("=" * 80 + "\n\n")
+        
+        for model_name in model_names:
+            results = all_results[model_name]
+            hotel = results['hotel']
+            visa = results['visa']
+            
+            f.write(f"Model: {model_name}\n")
+            f.write(f"{'─' * 80}\n")
+            f.write(f"  Hotel Embeddings:\n")
+            f.write(f"    - Top-1 Accuracy: {hotel['top1_accuracy']:.2%} ({hotel['top1_correct']}/{hotel['total_queries']} correct)\n")
+            f.write(f"    - Top-3 Accuracy: {hotel['top3_accuracy']:.2%} ({hotel['top3_correct']}/{hotel['total_queries']} correct)\n")
+            f.write(f"    - Top-5 Accuracy: {hotel['top5_accuracy']:.2%} ({hotel['top5_correct']}/{hotel['total_queries']} correct)\n")
+            f.write(f"    - Failed Queries: {len(hotel['failed_queries'])}\n")
+            f.write(f"    - Avg Total Time: {hotel.get('avg_total_time_ms', 0):.2f}ms\n")
+            f.write(f"\n")
+            f.write(f"  Visa Embeddings:\n")
+            f.write(f"    - Top-1 Accuracy: {visa['top1_accuracy']:.2%} ({visa['top1_correct']}/{visa['total_queries']} correct)\n")
+            f.write(f"    - Top-3 Accuracy: {visa['top3_accuracy']:.2%} ({visa['top3_correct']}/{visa['total_queries']} correct)\n")
+            f.write(f"    - Top-5 Accuracy: {visa['top5_accuracy']:.2%} ({visa['top5_correct']}/{visa['total_queries']} correct)\n")
+            f.write(f"    - Failed Queries: {len(visa['failed_queries'])}\n")
+            f.write(f"    - Avg Total Time: {visa.get('avg_total_time_ms', 0):.2f}ms\n")
+            f.write(f"\n")
+        
+        # Model Comparison Table
+        f.write("\n" + "=" * 80 + "\n")
+        f.write("MODEL COMPARISON\n")
+        f.write("=" * 80 + "\n\n")
+        
+        f.write("HOTEL EMBEDDINGS:\n")
+        f.write(f"{'Model':<30} {'Top-1':>10} {'Top-3':>10} {'Top-5':>10} {'Avg Time':>12}\n")
+        f.write("-" * 80 + "\n")
+        for model_name in model_names:
+            hotel = all_results[model_name]['hotel']
+            avg_time = hotel.get('avg_total_time_ms', 0)
+            f.write(f"{model_name:<30} {hotel['top1_accuracy']:>9.2%} {hotel['top3_accuracy']:>9.2%} {hotel['top5_accuracy']:>9.2%} {avg_time:>11.2f}ms\n")
+        
+        f.write("\nVISA EMBEDDINGS:\n")
+        f.write(f"{'Model':<30} {'Top-1':>10} {'Top-3':>10} {'Top-5':>10} {'Avg Time':>12}\n")
+        f.write("-" * 80 + "\n")
+        for model_name in model_names:
+            visa = all_results[model_name]['visa']
+            avg_time = visa.get('avg_total_time_ms', 0)
+            f.write(f"{model_name:<30} {visa['top1_accuracy']:>9.2%} {visa['top3_accuracy']:>9.2%} {visa['top5_accuracy']:>9.2%} {avg_time:>11.2f}ms\n")
+        
+        # Best Models
+        f.write("\n" + "=" * 80 + "\n")
+        f.write("BEST MODELS\n")
+        f.write("=" * 80 + "\n\n")
+        
+        best_hotel_model = max(all_results.items(), key=lambda x: x[1]['hotel']['top1_accuracy'])
+        best_visa_model = max(all_results.items(), key=lambda x: x[1]['visa']['top1_accuracy'])
+        
+        f.write(f"Best for Hotels: {best_hotel_model[0]}\n")
+        f.write(f"  - Top-1 Accuracy: {best_hotel_model[1]['hotel']['top1_accuracy']:.2%}\n")
+        f.write(f"  - Avg Time: {best_hotel_model[1]['hotel'].get('avg_total_time_ms', 0):.2f}ms\n\n")
+        
+        f.write(f"Best for Visas: {best_visa_model[0]}\n")
+        f.write(f"  - Top-1 Accuracy: {best_visa_model[1]['visa']['top1_accuracy']:.2%}\n")
+        f.write(f"  - Avg Time: {best_visa_model[1]['visa'].get('avg_total_time_ms', 0):.2f}ms\n\n")
+        
+        # Performance Metrics Details
+        f.write("\n" + "=" * 80 + "\n")
+        f.write("DETAILED PERFORMANCE METRICS\n")
+        f.write("=" * 80 + "\n\n")
+        
+        for model_name in model_names:
+            results = all_results[model_name]
+            hotel = results['hotel']
+            visa = results['visa']
+            
+            f.write(f"Model: {model_name}\n")
+            f.write(f"{'─' * 80}\n\n")
+            
+            f.write(f"  HOTEL EMBEDDINGS:\n")
+            f.write(f"    Avg Embedding Time: {hotel.get('avg_embedding_time_ms', 0):.2f}ms\n")
+            f.write(f"    Avg Search Time: {hotel.get('avg_search_time_ms', 0):.2f}ms\n")
+            f.write(f"    Avg Total Time: {hotel.get('avg_total_time_ms', 0):.2f}ms\n")
+            f.write(f"    Min/Max Total Time: {hotel.get('min_total_time_ms', 0):.2f}ms / {hotel.get('max_total_time_ms', 0):.2f}ms\n\n")
+            
+            f.write(f"  VISA EMBEDDINGS:\n")
+            f.write(f"    Avg Embedding Time: {visa.get('avg_embedding_time_ms', 0):.2f}ms\n")
+            f.write(f"    Avg Search Time: {visa.get('avg_search_time_ms', 0):.2f}ms\n")
+            f.write(f"    Avg Total Time: {visa.get('avg_total_time_ms', 0):.2f}ms\n")
+            f.write(f"    Min/Max Total Time: {visa.get('min_total_time_ms', 0):.2f}ms / {visa.get('max_total_time_ms', 0):.2f}ms\n\n")
+        
+        # Failed Queries
+        f.write("\n" + "=" * 80 + "\n")
+        f.write("FAILED QUERIES ANALYSIS\n")
+        f.write("=" * 80 + "\n\n")
+        
+        for model_name in model_names:
+            results = all_results[model_name]
+            hotel = results['hotel']
+            visa = results['visa']
+            
+            f.write(f"Model: {model_name}\n")
+            f.write(f"{'─' * 80}\n\n")
+            
+            if hotel['failed_queries']:
+                f.write(f"  HOTEL QUERIES THAT FAILED (Top-3):\n")
+                for failure in hotel['failed_queries']:
+                    f.write(f"    Query {failure['query_id']}: {failure['query']}\n")
+                    f.write(f"      Expected: {failure['expected']}\n")
+                    f.write(f"      Retrieved: {failure['retrieved']}\n\n")
+            else:
+                f.write(f"  HOTEL: All queries passed!\n\n")
+            
+            if visa['failed_queries']:
+                f.write(f"  VISA QUERIES THAT FAILED (Top-3):\n")
+                for failure in visa['failed_queries']:
+                    f.write(f"    Query {failure['query_id']}: {failure['query']}\n")
+                    f.write(f"      Expected: {failure['expected']}\n")
+                    f.write(f"      Retrieved: {failure['retrieved']}\n\n")
+            else:
+                f.write(f"  VISA: All queries passed!\n\n")
+        
+        # Footer
+        f.write("=" * 80 + "\n")
+        f.write("END OF REPORT\n")
+        f.write("=" * 80 + "\n")
+    
+    print(f"✓ Text report saved to {output_file}")
 
 
 def main():
@@ -456,9 +730,6 @@ def main():
     print("✓ EVALUATION COMPLETE")
     print("=" * 80)
 
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()

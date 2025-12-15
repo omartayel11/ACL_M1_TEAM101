@@ -8,6 +8,7 @@ from state.graph_state import GraphState
 from nodes import (
     input_node,
     intent_node,
+    entity_node,
     embedding_query_node,
     merge_node,  # Format embedding results
     answer_node,
@@ -37,6 +38,7 @@ def create_embedding_workflow():
     # Add nodes
     workflow.add_node("input", input_node)
     workflow.add_node("intent", intent_node)
+    workflow.add_node("entity", entity_node)
     workflow.add_node("casual", casual_conversation_node)
     workflow.add_node("embedding_query", embedding_query_node)
     workflow.add_node("merge", merge_node)  # Format results
@@ -53,10 +55,11 @@ def create_embedding_workflow():
     # Define edges
     workflow.set_entry_point("input")
     workflow.add_edge("input", "intent")
+    workflow.add_edge("intent", "entity")  # Extract entities after intent
     
-    # Conditional routing
+    # Conditional routing after entity extraction
     workflow.add_conditional_edges(
-        "intent",
+        "entity",
         route_after_intent,
         {
             "casual": "casual",

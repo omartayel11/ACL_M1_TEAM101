@@ -1,0 +1,189 @@
+================================================================================
+COMPREHENSIVE EMBEDDING EVALUATION - DETAILED REPORT
+================================================================================
+Date: December 15, 2025 at 22:56:44
+Models Compared: all-MiniLM-L6-v2, all-mpnet-base-v2
+Total Test Cases: 55 (30 Hotel + 25 Visa)
+
+================================================================================
+EXECUTIVE SUMMARY
+================================================================================
+
+Model: all-MiniLM-L6-v2
+────────────────────────────────────────────────────────────────────────────────
+  Hotel Embeddings:
+    - Top-1 Accuracy: 83.33% (25/30 correct)
+    - Top-3 Accuracy: 86.67% (26/30 correct)
+    - Top-5 Accuracy: 90.00% (27/30 correct)
+    - Failed Queries: 4
+    - Avg Total Time: 56.96ms
+
+  Visa Embeddings:
+    - Top-1 Accuracy: 80.00% (20/25 correct)
+    - Top-3 Accuracy: 84.00% (21/25 correct)
+    - Top-5 Accuracy: 84.00% (21/25 correct)
+    - Failed Queries: 4
+    - Avg Total Time: 67.13ms
+
+Model: all-mpnet-base-v2
+────────────────────────────────────────────────────────────────────────────────
+  Hotel Embeddings:
+    - Top-1 Accuracy: 83.33% (25/30 correct)
+    - Top-3 Accuracy: 86.67% (26/30 correct)
+    - Top-5 Accuracy: 90.00% (27/30 correct)
+    - Failed Queries: 4
+    - Avg Total Time: 19.76ms
+
+  Visa Embeddings:
+    - Top-1 Accuracy: 80.00% (20/25 correct)
+    - Top-3 Accuracy: 84.00% (21/25 correct)
+    - Top-5 Accuracy: 84.00% (21/25 correct)
+    - Failed Queries: 4
+    - Avg Total Time: 18.80ms
+
+
+================================================================================
+MODEL COMPARISON
+================================================================================
+
+HOTEL EMBEDDINGS:
+Model                               Top-1      Top-3      Top-5     Avg Time
+--------------------------------------------------------------------------------
+all-MiniLM-L6-v2                  83.33%    86.67%    90.00%       56.96ms
+all-mpnet-base-v2                 83.33%    86.67%    90.00%       19.76ms
+
+VISA EMBEDDINGS:
+Model                               Top-1      Top-3      Top-5     Avg Time
+--------------------------------------------------------------------------------
+all-MiniLM-L6-v2                  80.00%    84.00%    84.00%       67.13ms
+all-mpnet-base-v2                 80.00%    84.00%    84.00%       18.80ms
+
+================================================================================
+BEST MODELS
+================================================================================
+
+Best for Hotels: all-MiniLM-L6-v2
+  - Top-1 Accuracy: 83.33%
+  - Avg Time: 56.96ms
+
+Best for Visas: all-MiniLM-L6-v2
+  - Top-1 Accuracy: 80.00%
+  - Avg Time: 67.13ms
+
+
+================================================================================
+DETAILED PERFORMANCE METRICS
+================================================================================
+
+Model: all-MiniLM-L6-v2
+────────────────────────────────────────────────────────────────────────────────
+
+  HOTEL EMBEDDINGS:
+    Avg Embedding Time: 22.21ms
+    Avg Search Time: 34.75ms
+    Avg Total Time: 56.96ms
+    Min/Max Total Time: 32.62ms / 230.86ms
+
+  VISA EMBEDDINGS:
+    Avg Embedding Time: 12.54ms
+    Avg Search Time: 54.59ms
+    Avg Total Time: 67.13ms
+    Min/Max Total Time: 25.68ms / 629.55ms
+
+Model: all-mpnet-base-v2
+────────────────────────────────────────────────────────────────────────────────
+
+  HOTEL EMBEDDINGS:
+    Avg Embedding Time: 0.01ms
+    Avg Search Time: 19.75ms
+    Avg Total Time: 19.76ms
+    Min/Max Total Time: 13.66ms / 26.25ms
+
+  VISA EMBEDDINGS:
+    Avg Embedding Time: 0.01ms
+    Avg Search Time: 18.79ms
+    Avg Total Time: 18.80ms
+    Min/Max Total Time: 14.92ms / 29.98ms
+
+
+================================================================================
+FAILED QUERIES ANALYSIS
+================================================================================
+
+Model: all-MiniLM-L6-v2
+────────────────────────────────────────────────────────────────────────────────
+
+  HOTEL QUERIES THAT FAILED (Top-3):
+    Query 1: luxury hotel in New York with excellent location
+      Expected: ['1', '2', '3']
+      Retrieved: ['5', '8', '20', '17', '16']
+
+    Query 26: 5 star hotel with best cleanliness rating
+      Expected: ['4', '10', '22']
+      Retrieved: ['5', '19', '17', '6', '16']
+
+    Query 28: hotel with amazing location score above 9.5
+      Expected: ['7', '14', '6']
+      Retrieved: ['5', '20', '13', '19', '6']
+
+    Query 29: hotel with best value for money
+      Expected: ['11', '22', '10']
+      Retrieved: ['5', '21', '17', '20', '16']
+
+  VISA QUERIES THAT FAILED (Top-3):
+    Query 18: do I need visa from Nigeria to United States
+      Expected: ['Nigeria_to_United States']
+      Retrieved: ['South Africa_to_United States', 'India_to_United States', 'Egypt_to_United States', 'Russia_to_United States', 'South Africa_to_United Kingdom']
+
+    Query 19: Nigeria to UK visa requirements
+      Expected: ['Nigeria_to_United Kingdom']
+      Retrieved: ['South Africa_to_United Kingdom', 'India_to_United Kingdom', 'Russia_to_United Kingdom', 'Egypt_to_United Kingdom', 'South Africa_to_United Arab Emirates']
+
+    Query 20: visa from Nigeria to France
+      Expected: ['Nigeria_to_France']
+      Retrieved: ['South Africa_to_France', 'India_to_France', 'Egypt_to_France', 'Thailand_to_France', 'Russia_to_France']
+
+    Query 25: Brazil to China visa requirements
+      Expected: ['Brazil_to_China']
+      Retrieved: ['China_to_Brazil', 'Egypt_to_Brazil', 'Thailand_to_Brazil', 'India_to_Brazil', 'Russia_to_Brazil']
+
+Model: all-mpnet-base-v2
+────────────────────────────────────────────────────────────────────────────────
+
+  HOTEL QUERIES THAT FAILED (Top-3):
+    Query 1: luxury hotel in New York with excellent location
+      Expected: ['1', '2', '3']
+      Retrieved: ['5', '8', '20', '17', '16']
+
+    Query 26: 5 star hotel with best cleanliness rating
+      Expected: ['4', '10', '22']
+      Retrieved: ['5', '19', '17', '6', '16']
+
+    Query 28: hotel with amazing location score above 9.5
+      Expected: ['7', '14', '6']
+      Retrieved: ['5', '20', '13', '19', '6']
+
+    Query 29: hotel with best value for money
+      Expected: ['11', '22', '10']
+      Retrieved: ['5', '21', '17', '20', '16']
+
+  VISA QUERIES THAT FAILED (Top-3):
+    Query 18: do I need visa from Nigeria to United States
+      Expected: ['Nigeria_to_United States']
+      Retrieved: ['South Africa_to_United States', 'India_to_United States', 'Egypt_to_United States', 'Russia_to_United States', 'South Africa_to_United Kingdom']
+
+    Query 19: Nigeria to UK visa requirements
+      Expected: ['Nigeria_to_United Kingdom']
+      Retrieved: ['South Africa_to_United Kingdom', 'India_to_United Kingdom', 'Russia_to_United Kingdom', 'Egypt_to_United Kingdom', 'South Africa_to_United Arab Emirates']
+
+    Query 20: visa from Nigeria to France
+      Expected: ['Nigeria_to_France']
+      Retrieved: ['South Africa_to_France', 'India_to_France', 'Egypt_to_France', 'Thailand_to_France', 'Russia_to_France']
+
+    Query 25: Brazil to China visa requirements
+      Expected: ['Brazil_to_China']
+      Retrieved: ['China_to_Brazil', 'Egypt_to_Brazil', 'Thailand_to_Brazil', 'India_to_Brazil', 'Russia_to_Brazil']
+
+================================================================================
+END OF REPORT
+================================================================================

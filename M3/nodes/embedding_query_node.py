@@ -15,7 +15,12 @@ config = ConfigLoader()
 
 def embedding_query_node(state: GraphState) -> GraphState:
     """
-    Generate query embedding and perform vector search
+    Generate query embedding and perform vector search.
+    
+    NEW: Now uses entity-driven FAISS index selection:
+    - Extracts entities from state (city, traveller_type, from_country, etc.)
+    - Passes entities to searcher to intelligently select indexes
+    - Searches multiple indexes if entities match (e.g., traveller_type → also search reviews)
     
     Args:
         state: Current graph state
@@ -25,6 +30,7 @@ def embedding_query_node(state: GraphState) -> GraphState:
     """
     query = state.get("user_query", "")
     intent = state.get("intent", None)
+    entities = state.get("entities", {})  # NEW: Extract entities from state
     
     # Generate embedding
     embedding = generator.embed(query)
@@ -36,20 +42,23 @@ def embedding_query_node(state: GraphState) -> GraphState:
             limit = config.get('retrieval.embedding.max_results', 10)
             threshold = config.get('retrieval.embedding.similarity_threshold', 0.7)
             
-            # Determine search target based on intent
-            search_target = "visa" if intent == "VisaQuestion" else "hotels"
+            # NEW: Get selected indexes based on intent AND entities
+            selected_indexes = searcher.select_faiss_indexes(intent, entities)
             
             print(f"\n🧠 [EMBEDDING RETRIEVAL]")
             print(f"Query: {query}")
             print(f"Intent: {intent}")
+            print(f"Entities: {entities}")  # NEW: Show extracted entities
             print(f"Embedding dimensions: {len(embedding)}")
-            print(f"Searching {search_target} | Top-K: {limit} | Threshold: {threshold}")
+            print(f"Selected indexes: {selected_indexes} | Top-K: {limit} | Threshold: {threshold}")  # NEW: Show which indexes
             
+            # NEW: Pass entities to searcher for smart index selection
             results = searcher.search(
                 embedding=embedding,
                 limit=limit,
                 threshold=threshold,
-                intent=intent
+                intent=intent,
+                entities=entities  # NEW: Pass entities
             )
             
             print(f"✓ Retrieved {len(results)} results from vector index")
@@ -65,6 +74,9 @@ def embedding_query_node(state: GraphState) -> GraphState:
                         print(f"  [{i}] {result.get('hotel_name', 'N/A')} | Score: {result.get('similarity_score', 0):.3f}")
                         if result.get('city') and result.get('country'):
                             print(f"       Location: {result.get('city')}, {result.get('country')}")
+                        # NEW: Show if result came from review embeddings
+                        if result.get('has_review_match'):
+                            print(f"       ✓ Matches traveler profile in reviews")
             else:
                 print("  (No results found)")
         except Exception as e:

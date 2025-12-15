@@ -1,6 +1,7 @@
 """
-Create Embeddings Script - Generate FAISS indexes for hotels and reviews
-Run this once after creating the knowledge graph to enable semantic search
+Create Embeddings Script - Generate FAISS indexes for all-mpnet-base-v2 model
+Run this to generate embeddings using the second embedding model
+Files are saved with _mpnet suffix to coexist with all-MiniLM-L6-v2 embeddings
 """
 
 import json
@@ -45,9 +46,6 @@ def fetch_hotels_from_neo4j(neo4j_client: Neo4jClient) -> List[Dict]:
     results = neo4j_client.run_query(cypher, {})
     print(f"✓ Fetched {len(results)} hotels from Neo4j")
     return results
-
-
-
 
 
 def build_hotel_feature_string(hotel: Dict) -> str:
@@ -105,7 +103,7 @@ def create_hotel_embeddings(
     Returns:
         Tuple of (faiss_path, mapping_path)
     """
-    print("\n=== Creating Hotel Embeddings ===")
+    print("\n=== Creating Hotel Embeddings (all-mpnet-base-v2) ===")
     
     # Fetch hotels
     hotels = fetch_hotels_from_neo4j(neo4j_client)
@@ -146,14 +144,14 @@ def create_hotel_embeddings(
     
     print(f"✓ Created FAISS index with {index.ntotal} vectors")
     
-    # Save FAISS index
-    faiss_path = os.path.join(output_dir, "hotel_embeddings.faiss")
+    # Save FAISS index with _mpnet suffix
+    faiss_path = os.path.join(output_dir, "hotel_embeddings_mpnet.faiss")
     faiss.write_index(index, faiss_path)
     print(f"✓ Saved FAISS index to {faiss_path}")
     
     # Create mapping: faiss_index -> hotel_id
     mapping = {i: hotel_id for i, hotel_id in enumerate(hotel_ids)}
-    mapping_path = os.path.join(output_dir, "hotel_id_mapping.json")
+    mapping_path = os.path.join(output_dir, "hotel_id_mapping_mpnet.json")
     
     with open(mapping_path, 'w') as f:
         json.dump(mapping, f, indent=2)
@@ -225,7 +223,7 @@ def create_visa_embeddings(
     Returns:
         Tuple of (faiss_path, mapping_path)
     """
-    print("\n=== Creating Visa Embeddings ===")
+    print("\n=== Creating Visa Embeddings (all-mpnet-base-v2) ===")
     
     # Fetch visa relationships
     visa_rels = fetch_visa_relationships_from_neo4j(neo4j_client)
@@ -267,14 +265,14 @@ def create_visa_embeddings(
     
     print(f"✓ Created FAISS index with {index.ntotal} vectors")
     
-    # Save FAISS index
-    faiss_path = os.path.join(output_dir, "visa_embeddings.faiss")
+    # Save FAISS index with _mpnet suffix
+    faiss_path = os.path.join(output_dir, "visa_embeddings_mpnet.faiss")
     faiss.write_index(index, faiss_path)
     print(f"✓ Saved FAISS index to {faiss_path}")
     
     # Create mapping: faiss_index -> visa_id
     mapping = {i: visa_id for i, visa_id in enumerate(visa_ids)}
-    mapping_path = os.path.join(output_dir, "visa_id_mapping.json")
+    mapping_path = os.path.join(output_dir, "visa_id_mapping_mpnet.json")
     
     with open(mapping_path, 'w') as f:
         json.dump(mapping, f, indent=2)
@@ -381,7 +379,7 @@ def create_review_embeddings(
     Returns:
         Tuple of (faiss_path, mapping_path)
     """
-    print("\n=== Creating Review Embeddings ===")
+    print("\n=== Creating Review Embeddings (all-mpnet-base-v2) ===")
     
     # Fetch reviews
     reviews = fetch_reviews_from_neo4j(neo4j_client)
@@ -422,14 +420,14 @@ def create_review_embeddings(
     
     print(f"✓ Created FAISS index with {index.ntotal} vectors")
     
-    # Save FAISS index
-    faiss_path = os.path.join(output_dir, "review_embeddings.faiss")
+    # Save FAISS index with _mpnet suffix
+    faiss_path = os.path.join(output_dir, "review_embeddings_mpnet.faiss")
     faiss.write_index(index, faiss_path)
     print(f"✓ Saved FAISS index to {faiss_path}")
     
     # Create mapping: faiss_index -> hotel_id (each review maps back to its hotel for result retrieval)
     mapping = {i: hotel_id for i, hotel_id in enumerate(hotel_ids)}
-    mapping_path = os.path.join(output_dir, "review_id_mapping.json")
+    mapping_path = os.path.join(output_dir, "review_id_mapping_mpnet.json")
     
     with open(mapping_path, 'w') as f:
         json.dump(mapping, f, indent=2)
@@ -443,14 +441,15 @@ def main():
     """Main execution"""
     print("=" * 60)
     print("FAISS Embedding Generation Script")
+    print("Model: all-mpnet-base-v2 (768 dimensions)")
     print("=" * 60)
     
-    # Initialize clients
-    print("\nInitializing clients...")
+    # Initialize clients with mpnet model
+    print("\nInitializing clients with all-mpnet-base-v2 model...")
     neo4j_client = Neo4jClient()
     neo4j_client.connect()
     
-    embedding_client = EmbeddingClient()
+    embedding_client = EmbeddingClient(model_name="all-mpnet-base-v2")
     
     try:
         # Create hotel embeddings
@@ -473,7 +472,7 @@ def main():
         
         # Summary
         print("\n" + "=" * 60)
-        print("✓ EMBEDDING GENERATION COMPLETE")
+        print("✓ EMBEDDING GENERATION COMPLETE (all-mpnet-base-v2)")
         print("=" * 60)
         print("\nGenerated files:")
         if hotel_faiss:
@@ -486,7 +485,10 @@ def main():
             print(f"  • {review_faiss}")
             print(f"  • {review_mapping}")
         
-        print("\nYou can now run embedding_workflow and hybrid_workflow!")
+        print("\nBoth embedding models are now ready!")
+        print("UI can switch between:")
+        print("  • all-MiniLM-L6-v2 (384 dims, faster)")
+        print("  • all-mpnet-base-v2 (768 dims, higher quality)")
         print("=" * 60)
         
     finally:

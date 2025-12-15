@@ -36,6 +36,8 @@ class VectorSearcher:
         self.hotel_mapping = None
         self.visa_index = None
         self.visa_mapping = None
+        self.review_index = None
+        self.review_mapping = None
         self.query_executor = QueryExecutor()
         
         # Try to load indexes on initialization
@@ -67,10 +69,69 @@ class VectorSearcher:
                 print(f"✓ Loaded visa index: {self.visa_index.ntotal} vectors")
             else:
                 print(f"Warning: Visa FAISS index not found at {visa_index_path}")
+            
+            # Load review index
+            review_index_path = self.index_dir / "review_embeddings.faiss"
+            review_mapping_path = self.index_dir / "review_id_mapping.json"
+            
+            if review_index_path.exists() and review_mapping_path.exists():
+                self.review_index = faiss.read_index(str(review_index_path))
+                with open(review_mapping_path, 'r') as f:
+                    self.review_mapping = json.load(f)
+                print(f"✓ Loaded review index: {self.review_index.ntotal} vectors")
+            else:
+                print(f"Warning: Review FAISS index not found at {review_index_path}")
                 
         except Exception as e:
             print(f"Error loading FAISS indexes: {e}")
             print("Run create_embeddings.py to generate indexes")
+    
+    def _load_model_indexes(self, model_suffix: str = ''):
+        """
+        Load FAISS indexes for a specific embedding model
+        
+        Args:
+            model_suffix: Suffix for model-specific files ('' for MiniLM, '_mpnet' for MPNet)
+        """
+        try:
+            # Load hotel index
+            hotel_index_path = self.index_dir / f"hotel_embeddings{model_suffix}.faiss"
+            hotel_mapping_path = self.index_dir / f"hotel_id_mapping{model_suffix}.json"
+            
+            if hotel_index_path.exists() and hotel_mapping_path.exists():
+                self.hotel_index = faiss.read_index(str(hotel_index_path))
+                with open(hotel_mapping_path, 'r') as f:
+                    self.hotel_mapping = json.load(f)
+                print(f"✓ Loaded hotel index ({model_suffix or 'default'}): {self.hotel_index.ntotal} vectors")
+            else:
+                print(f"Warning: Hotel FAISS index not found for {model_suffix or 'default'} model")
+            
+            # Load visa index
+            visa_index_path = self.index_dir / f"visa_embeddings{model_suffix}.faiss"
+            visa_mapping_path = self.index_dir / f"visa_id_mapping{model_suffix}.json"
+            
+            if visa_index_path.exists() and visa_mapping_path.exists():
+                self.visa_index = faiss.read_index(str(visa_index_path))
+                with open(visa_mapping_path, 'r') as f:
+                    self.visa_mapping = json.load(f)
+                print(f"✓ Loaded visa index ({model_suffix or 'default'}): {self.visa_index.ntotal} vectors")
+            else:
+                print(f"Warning: Visa FAISS index not found for {model_suffix or 'default'} model")
+            
+            # Load review index
+            review_index_path = self.index_dir / f"review_embeddings{model_suffix}.faiss"
+            review_mapping_path = self.index_dir / f"review_id_mapping{model_suffix}.json"
+            
+            if review_index_path.exists() and review_mapping_path.exists():
+                self.review_index = faiss.read_index(str(review_index_path))
+                with open(review_mapping_path, 'r') as f:
+                    self.review_mapping = json.load(f)
+                print(f"✓ Loaded review index ({model_suffix or 'default'}): {self.review_index.ntotal} vectors")
+            else:
+                print(f"Warning: Review FAISS index not found for {model_suffix or 'default'} model")
+                
+        except Exception as e:
+            print(f"Error loading FAISS indexes for {model_suffix or 'default'} model: {e}")
     
     def load_index(self, index_path: str):
         """
@@ -91,48 +152,124 @@ class VectorSearcher:
         embedding: List[float],
         limit: int = 10,
         threshold: float = 0.7,
-        intent: str = None
+        intent: str = None,
+        entities: Dict[str, Any] = None
     ) -> List[Dict[str, Any]]:
         """
-        Search for similar items in FAISS index based on intent
+        Search for similar items in FAISS indexes based on intent and entities.
+        
+        This is the main search entry point that:
+        1. Uses select_faiss_indexes() to determine which indexes to search
+        2. Uses multi_index_search() to search them and merge results
+        3. Falls back to intent-only routing for backward compatibility
         
         Args:
             embedding: Query embedding vector
             limit: Maximum number of results
             threshold: Minimum similarity score (0-1)
             intent: Query intent to determine which index to search
+            entities: Extracted entities dict (city, traveller_type, from_country, etc.)
             
         Returns:
             List of similar items with similarity scores and full details from Neo4j
         """
+        if entities is None:
+            entities = {}
+        
         results = []
         
         # Convert embedding to numpy array
         query_vector = np.array([embedding], dtype=np.float32)
         
-        # Route to appropriate index based on intent
-        if intent == "VisaQuestion" and self.visa_index is not None:
-            # Search visa index for visa questions
-            results = self._search_index(
-                self.visa_index,
-                self.visa_mapping,
-                query_vector,
-                limit,
-                threshold,
-                "visa"
-            )
-        elif self.hotel_index is not None:
-            # Search hotel index for all other queries
-            results = self._search_index(
-                self.hotel_index,
-                self.hotel_mapping,
-                query_vector,
-                limit,
-                threshold,
-                "hotel"
-            )
+        # NEW: Use entity-driven index selection
+        if entities:
+            # Intelligent routing: use both intent and entities
+            indexes_to_search = self.select_faiss_indexes(intent, entities)
+            
+            if indexes_to_search:
+                # Search selected indexes with multi-index merge
+                results = self.multi_index_search(
+                    embedding,
+                    indexes_to_search,
+                    limit,
+                    threshold
+                )
+        
+        # FALLBACK: If no entities or no results, use intent-based routing (backward compatible)
+        if not results:
+            if intent == "VisaQuestion" and self.visa_index is not None:
+                # Search visa index for visa questions
+                results = self._search_index(
+                    self.visa_index,
+                    self.visa_mapping,
+                    query_vector,
+                    limit,
+                    threshold,
+                    "visa"
+                )
+            elif self.hotel_index is not None:
+                # Search hotel index for all other queries
+                results = self._search_index(
+                    self.hotel_index,
+                    self.hotel_mapping,
+                    query_vector,
+                    limit,
+                    threshold,
+                    "hotel"
+                )
         
         return results
+    
+    def select_faiss_indexes(self, intent: str, entities: Dict[str, Any] = None) -> List[str]:
+        """
+        Select which FAISS indexes to search based on intent and extracted entities.
+        
+        This is the core of entity-driven index selection:
+        - Entities like traveller_type or from_country trigger review embeddings
+        - Intent VisaQuestion triggers visa embeddings
+        - Hotel-related intents trigger hotel embeddings
+        
+        Args:
+            intent: Query intent (e.g., "HotelRecommendation", "VisaQuestion")
+            entities: Extracted entities dict with keys like traveller_type, from_country, city, etc.
+            
+        Returns:
+            List of index names to search: ["hotel"], ["visa"], ["review"], or combinations
+        """
+        if entities is None:
+            entities = {}
+        
+        indexes_to_search = []
+        
+        # Rule 1: If traveller_type or from_country present, search review embeddings
+        # These entities indicate user demographic info relevant to reviews
+        if "traveller_type" in entities or "from_country" in entities:
+            if self.review_index is not None:
+                indexes_to_search.append("review")
+        
+        # Rule 2: If intent is VisaQuestion, search visa embeddings
+        if intent == "VisaQuestion":
+            if self.visa_index is not None:
+                indexes_to_search.append("visa")
+        
+        # Rule 3: If intent is ReviewLookup, search review embeddings
+        if intent == "ReviewLookup":
+            if self.review_index is not None and "review" not in indexes_to_search:
+                indexes_to_search.append("review")
+        
+        # Rule 4: For all other intents (hotel search, recommendation, etc.), search hotel embeddings
+        # Hotel-related intents: HotelSearch, HotelRecommendation, AmenityFilter, LocationQuery, GeneralQuestionAnswering, CasualConversation
+        hotel_intents = ["HotelSearch", "HotelRecommendation", "AmenityFilter", "LocationQuery", 
+                        "GeneralQuestionAnswering", "CasualConversation"]
+        if intent in hotel_intents or intent not in ["VisaQuestion", "ReviewLookup"]:
+            if self.hotel_index is not None and "hotel" not in indexes_to_search:
+                indexes_to_search.append("hotel")
+        
+        # Default: if no intent matched and no entities, search hotels
+        if not indexes_to_search and self.hotel_index is not None:
+            indexes_to_search.append("hotel")
+        
+        return indexes_to_search
     
     def _search_index(
         self,
@@ -193,13 +330,101 @@ class VectorSearcher:
             print(f"Error searching {node_type} index: {e}")
             return []
     
+    def multi_index_search(
+        self,
+        embedding: List[float],
+        indexes: List[str],
+        limit: int = 10,
+        threshold: float = 0.7
+    ) -> List[Dict[str, Any]]:
+        """
+        Search multiple FAISS indexes and merge results intelligently.
+        
+        Hotels appearing in multiple indexes (e.g., both hotel and review embeddings)
+        get boosted scores because they match from multiple perspectives.
+        
+        Args:
+            embedding: Query embedding vector
+            indexes: List of index names to search ["hotel", "visa", "review"]
+            limit: Maximum number of results
+            threshold: Minimum similarity score
+            
+        Returns:
+            Merged list of results from all indexes, with boosted scores for multi-index hits
+        """
+        query_vector = np.array([embedding], dtype=np.float32)
+        all_results = {}  # Key: node_id, Value: aggregated result
+        
+        # Search each requested index
+        for index_name in indexes:
+            if index_name == "hotel" and self.hotel_index is not None:
+                index_results = self._search_index(
+                    self.hotel_index,
+                    self.hotel_mapping,
+                    query_vector,
+                    limit * 2,  # Get more to allow filtering
+                    threshold,
+                    "hotel"
+                )
+                for result in index_results:
+                    node_id = result.get('hotel_id')
+                    if node_id:
+                        if node_id not in all_results:
+                            all_results[node_id] = result
+                        else:
+                            # Boost score if hotel appears in multiple indexes
+                            all_results[node_id]['similarity_score'] += result.get('similarity_score', 0) * 0.5
+                            all_results[node_id]['search_indexes'] = all_results[node_id].get('search_indexes', []) + [index_name]
+            
+            elif index_name == "visa" and self.visa_index is not None:
+                index_results = self._search_index(
+                    self.visa_index,
+                    self.visa_mapping,
+                    query_vector,
+                    limit * 2,
+                    threshold,
+                    "visa"
+                )
+                for result in index_results:
+                    node_id = f"{result.get('from_country')}_to_{result.get('to_country')}"
+                    if node_id not in all_results:
+                        all_results[node_id] = result
+            
+            elif index_name == "review" and self.review_index is not None:
+                index_results = self._search_index(
+                    self.review_index,
+                    self.review_mapping,
+                    query_vector,
+                    limit * 2,
+                    threshold,
+                    "review"
+                )
+                for result in index_results:
+                    node_id = result.get('hotel_id')
+                    if node_id:
+                        if node_id not in all_results:
+                            all_results[node_id] = result
+                        else:
+                            # Boost score if hotel review matches user query
+                            all_results[node_id]['similarity_score'] += result.get('similarity_score', 0) * 0.5
+                            all_results[node_id]['has_review_match'] = True
+        
+        # Sort by similarity score and return top results
+        sorted_results = sorted(
+            all_results.values(),
+            key=lambda x: x.get('similarity_score', 0),
+            reverse=True
+        )
+        
+        return sorted_results[:limit]
+    
     def _fetch_node_from_neo4j(self, node_id: str, node_type: str) -> Optional[Dict[str, Any]]:
         """
         Fetch full node details from Neo4j
         
         Args:
-            node_id: Node ID (hotel_id or visa_id like "Egypt_to_France")
-            node_type: "hotel" or "visa"
+            node_id: Node ID (hotel_id, visa_id like "Egypt_to_France", or hotel_id for reviews)
+            node_type: "hotel", "visa", or "review"
             
         Returns:
             Node details dictionary or None
@@ -223,6 +448,26 @@ class VectorSearcher:
                        country.name AS country
                 """
                 # Convert node_id to string as hotel_id is stored as string in Neo4j
+                params = {"hotel_id": str(node_id)}
+            elif node_type == "review":
+                # For reviews, node_id is actually the hotel_id from the review embedding mapping
+                # Fetch hotel details (same as hotel node_type)
+                cypher = """
+                MATCH (h:Hotel {hotel_id: $hotel_id})
+                OPTIONAL MATCH (h)-[:LOCATED_IN]->(c:City)-[:LOCATED_IN]->(country:Country)
+                RETURN h.hotel_id AS hotel_id,
+                       h.name AS hotel_name,
+                       h.star_rating AS star_rating,
+                       h.average_reviews_score AS avg_score,
+                       h.cleanliness_base AS cleanliness,
+                       h.comfort_base AS comfort,
+                       h.facilities_base AS facilities,
+                       h.location_base AS location,
+                       h.staff_base AS staff,
+                       h.value_for_money_base AS value,
+                       c.name AS city,
+                       country.name AS country
+                """
                 params = {"hotel_id": str(node_id)}
             elif node_type == "visa":
                 # Parse visa_id like "Egypt_to_France"

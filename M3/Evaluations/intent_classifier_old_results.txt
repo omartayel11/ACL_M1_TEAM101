@@ -1,0 +1,254 @@
+✓ Configuration loaded from C:\Users\Omart\Desktop\GUC\ACL_M1_TEAM101\m3\config.yaml
+✓ Groq API key loaded
+✓ Groq client initialized (model: openai/gpt-oss-120b)
+
+================================================================================
+TEST RESULTS SUMMARY - OLD CLASSIFIER (LLM-ONLY)
+================================================================================
+
+📊 OVERALL ACCURACY: 74.07%
+   ✅ Correct: 120/162
+   ❌ Incorrect: 42/162
+
+================================================================================
+ACCURACY BY INTENT
+================================================================================
+
+HotelSearch                    ██████████░░░░░░░░░░  52.63%
+                               (20/38 correct)
+
+AmenityFilter                  ██████████████░░░░░░  73.08%
+                               (19/26 correct)
+
+ReviewLookup                   ███████████████████░  95.00%
+                               (19/20 correct)
+
+VisaQuestion                   ████████████████████ 100.00%
+                               (20/20 correct)
+
+HotelRecommendation            ██████████░░░░░░░░░░  50.00%
+                               (9/18 correct)
+
+LocationQuery                  █████████████░░░░░░░  66.67%
+                               (10/15 correct)
+
+CasualConversation             █████████████████░░░  86.67%
+                               (13/15 correct)
+
+GeneralQuestionAnswering       ████████████████████ 100.00%
+                               (10/10 correct)
+
+================================================================================
+FAILED TEST CASES
+================================================================================
+
+❌ Failure #1
+   Query: "accommodation in Egypt"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #2
+   Query: "Find hotels with rating above 8"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #3
+   Query: "Show me highly rated hotels"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #4
+   Query: "I need hotels with good ratings"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #5
+   Query: "hotels rated 9 or higher"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #6
+   Query: "top rated hotels"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #7
+   Query: "hotels with rating above 8.5"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #8
+   Query: "Find me hotels with excellent ratings"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #9
+   Query: "5-star hotels in Paris"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #10
+   Query: "Find 5 star hotels"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #11
+   Query: "I want a five-star hotel"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #12
+   Query: "Show me 4-star hotels in London"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #13
+   Query: "luxury 5-star accommodation"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #14
+   Query: "Find 5-star hotels in Dubai with rating above 9"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #15
+   Query: "I need highly rated hotels in Tokyo"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #16
+   Query: "Show me top hotels in Singapore"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #17
+   Query: "What are my accommodation options in Amsterdam?"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #18
+   Query: "I'm traveling to Istanbul, where should I stay?"
+   Expected: HotelSearch
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #19
+   Query: "What are the best hotels for solo travelers?"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #20
+   Query: "I'm traveling for business, what hotels do you recommend?"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #21
+   Query: "Top rated hotels for group travel"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #22
+   Query: "Best hotels for couples in Paris"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #23
+   Query: "Top family-friendly hotels in Tokyo"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #24
+   Query: "Recommend business hotels in London with high ratings"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #25
+   Query: "What's the best hotel for a romantic getaway?"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #26
+   Query: "Where do couples usually stay?"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #27
+   Query: "Recommend hotels for solo travelers"
+   Expected: HotelRecommendation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #28
+   Query: "What's the feedback for hotels in Paris?"
+   Expected: ReviewLookup
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #29
+   Query: "Hotels in the best locations"
+   Expected: LocationQuery
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #30
+   Query: "Find hotels with great location in Paris"
+   Expected: LocationQuery
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #31
+   Query: "Hotels with top location scores in Dubai"
+   Expected: LocationQuery
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #32
+   Query: "I want a hotel in a prime location"
+   Expected: LocationQuery
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #33
+   Query: "Show me centrally located hotels"
+   Expected: LocationQuery
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #34
+   Query: "Hotels known for cleanliness"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #35
+   Query: "Good value for money"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #36
+   Query: "Best value hotels"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #37
+   Query: "Show me hotels with friendly staff"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #38
+   Query: "Hotels with best staff ratings"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #39
+   Query: "Find hotels with good value and excellent staff"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #40
+   Query: "Show me hotels with great cleanliness and staff scores"
+   Expected: AmenityFilter
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #41
+   Query: "Help"
+   Expected: CasualConversation
+   Predicted: GeneralQuestionAnswering
+
+❌ Failure #42
+   Query: "How can you help me?"
+   Expected: CasualConversation
+   Predicted: GeneralQuestionAnswering
+

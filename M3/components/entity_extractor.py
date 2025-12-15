@@ -34,6 +34,9 @@ class EntityExtractor:
         "Thailand", "Turkey", "Netherlands", "Argentina", "Nigeria", "New Zealand"
     ]
     
+    # Valid hotels - will be populated from database at runtime
+    VALID_HOTELS = []
+    
     def __init__(self, debug: bool = False):
         """Initialize entity extractor
         
@@ -45,6 +48,38 @@ class EntityExtractor:
             self.llm_client = LLMClient()
         except Exception as e:
             raise RuntimeError(f"Failed to initialize LLM client for entity extraction: {e}")
+        
+        # Load valid hotels from database on first initialization
+        # This helps with fuzzy matching for hotel names
+        if not EntityExtractor.VALID_HOTELS:
+            self._load_valid_hotels()
+    
+    def _load_valid_hotels(self):
+        """Load valid hotel names from the database"""
+        try:
+            from utils.config_loader import ConfigLoader
+            from neo4j import GraphDatabase
+            config = ConfigLoader()
+            uri = config.get('neo4j.uri')
+            username = config.get('neo4j.username')
+            password = config.get('neo4j.password')
+            
+            if not uri or not username or not password:
+                print(f"⚠ Neo4j configuration incomplete, skipping hotel list loading")
+                EntityExtractor.VALID_HOTELS = []
+                return
+            
+            driver = GraphDatabase.driver(uri, auth=(username, password))
+            with driver.session() as session:
+                result = session.run("MATCH (h:Hotel) RETURN h.name AS name ORDER BY h.name")
+                EntityExtractor.VALID_HOTELS = [record["name"] for record in result if record["name"]]
+                print(f"✓ Successfully loaded {len(EntityExtractor.VALID_HOTELS)} hotel names from database")
+                if self.debug and EntityExtractor.VALID_HOTELS:
+                    print(f"  Sample hotels: {EntityExtractor.VALID_HOTELS[:5]}")
+            driver.close()
+        except Exception as e:
+            print(f"⚠ Could not load hotel names from database: {e}")
+            EntityExtractor.VALID_HOTELS = []
     
     def extract(self, query: str, intent: str) -> Dict[str, Any]:
         """
@@ -264,7 +299,7 @@ class EntityExtractor:
                     quality_matches.append(0.85)
                 except ValueError:
                     pass
-            
+        
             value_pattern = r'(?:value|affordable)\s+(?:score\s+)?(?:more than|above|greater than|at least|minimum|of)?\s*([\d.]+)'
             match = re.search(value_pattern, query_lower)
             if match:
@@ -602,9 +637,14 @@ Use null for missing values.'''
                 if normalized_country:
                     validated[key] = normalized_country
             
-            # Hotel names and reference hotels - just clean whitespace
+            # Hotel names and reference hotels - validate against known hotels
             elif key in ["hotel_name", "reference_hotel"]:
-                validated[key] = str(value).strip()
+                normalized_hotel = self._normalize_hotel_name(str(value).strip())
+                if normalized_hotel:
+                    validated[key] = normalized_hotel
+                else:
+                    # If normalization fails, keep the original (fuzzy matching may not work offline)
+                    validated[key] = str(value).strip()
             
             # Other string fields - just clean whitespace
             else:
@@ -696,6 +736,50 @@ Use null for missing values.'''
         
         # No match found - return title case version as fallback
         return country_input.title()
+    
+    def _normalize_hotel_name(self, hotel_input: str) -> Optional[str]:
+        """
+        Normalize hotel name to match valid hotels from database.
+        Uses fuzzy matching to handle missing/extra "The", typos, etc.
+        
+        Args:
+            hotel_input: User's hotel input (may have typos or missing articles)
+            
+        Returns:
+            Normalized hotel name or None if no match
+        """
+        if not hotel_input:
+            return None
+        
+        hotel_lower = hotel_input.lower().strip()
+        
+        # If we have hotel list loaded, try to match against it
+        if EntityExtractor.VALID_HOTELS and len(EntityExtractor.VALID_HOTELS) > 0:
+            # Exact match (case-insensitive)
+            for valid_hotel in EntityExtractor.VALID_HOTELS:
+                if hotel_lower == valid_hotel.lower():
+                    return valid_hotel
+            
+            # Fuzzy match: remove "the" from both and compare
+            hotel_no_the = hotel_lower.replace("the ", "").strip()
+            for valid_hotel in EntityExtractor.VALID_HOTELS:
+                valid_no_the = valid_hotel.lower().replace("the ", "").strip()
+                if hotel_no_the == valid_no_the:
+                    return valid_hotel
+            
+            # Substring match (handles partial names)
+            for valid_hotel in EntityExtractor.VALID_HOTELS:
+                valid_lower = valid_hotel.lower()
+                if hotel_lower in valid_lower or valid_lower in hotel_lower:
+                    return valid_hotel
+            
+            # If still no match, use fuzzy matching with LLM for typo correction
+            closest_match = self._find_closest_match_with_llm(hotel_input, EntityExtractor.VALID_HOTELS, "hotel")
+            if closest_match:
+                return closest_match
+        
+        # No match found or hotel list not loaded - return original as title case
+        return hotel_input.title()
     
     def _find_closest_match_with_llm(self, user_input: str, valid_options: List[str], entity_type: str) -> Optional[str]:
         """

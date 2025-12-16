@@ -70,6 +70,22 @@ class EmbeddingClient:
             print(f"✗ Failed to load embedding model {model_name}: {e}")
             self._model = None
             return False
+
+    def reload_model(self, model_name: str):
+        """
+        Force reload embedding model (even if already loaded).
+        Used when switching models in the UI.
+            
+        Args:
+            model_name: Model identifier from sentence-transformers
+        """
+            # Clear singleton state
+        self._model = None
+        self._cache.clear()
+            
+            # Load new model
+        print(f"\n🔄 Reloading embedding model: {model_name}")
+        self.load_model(model_name)
     
     def encode(
         self,

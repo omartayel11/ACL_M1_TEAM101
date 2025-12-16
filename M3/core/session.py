@@ -39,6 +39,7 @@ def initialize_session_state():
         
         # Initialize workflow
         initialize_workflow()
+        sync_embedding_model()
 
 
 def initialize_workflow():
@@ -48,6 +49,24 @@ def initialize_workflow():
         st.session_state.memory
     )
 
+def sync_embedding_model():
+    """
+    Synchronize embedding model across all components.
+    Called on page load to ensure EmbeddingClient and VectorSearcher use correct model.
+    """
+    current_model = st.session_state.current_embedding_model
+    
+    # Reload EmbeddingClient
+    embedding_client = EmbeddingClient()
+    if embedding_client.model_name != current_model:
+        embedding_client.reload_model(current_model)
+    
+    # Reload VectorSearcher indexes
+    from components.vector_searcher import VectorSearcher
+    searcher = VectorSearcher()
+    searcher.reload_indexes_for_model(current_model)
+    
+    add_dev_log('SYSTEM', f"✓ Synced embedding model: {current_model}")
 
 def add_dev_log(log_type: str, message: str):
     """Add a log entry to developer console"""

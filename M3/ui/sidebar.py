@@ -117,7 +117,7 @@ def render_sidebar():
         
         st.markdown("---")
         
-        # Embedding Model selection
+                # Embedding Model selection
         st.markdown("#### 🧠 Embedding Model")
         available_embedding_models = st.session_state.config.get('embedding.available_models', [])
         embedding_model_names = [m['name'] for m in available_embedding_models]
@@ -131,18 +131,18 @@ def render_sidebar():
             key="embedding_selector"
         )
         
+        # Handle model switch - requires page refresh to reload all components
         if selected_embedding != st.session_state.current_embedding_model:
-            if st.button("🔄 Regenerate Embeddings", key="regen_embeddings"):
-                with st.spinner("Regenerating embeddings... This may take a minute."):
-                    if regenerate_embeddings(selected_embedding):
-                        st.session_state.current_embedding_model = selected_embedding
-                        st.success(f"✓ Embeddings regenerated with {selected_embedding}")
-                        st.rerun()
-                    else:
-                        st.error("❌ Failed to regenerate embeddings. Check developer console.")
-        
-        st.markdown("---")
-        
+            st.warning(f"⚠️ Switching to {selected_embedding}")
+            st.info("📋 This will reload the page to ensure all components use the correct model.")
+            
+            if st.button("🔄 Switch Model & Reload", key="switch_embedding", use_container_width=True):
+                # Update session state
+                st.session_state.current_embedding_model = selected_embedding
+                
+                # Force full page refresh to reinitialize all components
+                add_dev_log('SYSTEM', f"Switched embedding model to: {selected_embedding}")
+                st.rerun()
         # Session controls
         st.markdown("#### 🎛️ Session Controls")
         

@@ -132,7 +132,26 @@ class VectorSearcher:
                 
         except Exception as e:
             print(f"Error loading FAISS indexes for {model_suffix or 'default'} model: {e}")
+        
+    def reload_indexes_for_model(self, model_name: str):
+        """
+        Reload FAISS indexes for a specific embedding model.
+        Determines the correct file suffix based on model name.
+            
+        Args:
+            model_name: Embedding model name ('all-MiniLM-L6-v2' or 'all-mpnet-base-v2')
+        """
+        # Determine suffix based on model name
+        if 'mpnet' in model_name.lower():
+            suffix = '_mpnet'
+        else:
+            suffix = ''  # Default MiniLM
+            
+        print(f"\n🔄 Reloading FAISS indexes for model: {model_name} (suffix: '{suffix}')")
+        self._load_model_indexes(suffix)
+        print(f"✓ FAISS indexes reloaded successfully\n")
     
+
     def load_index(self, index_path: str):
         """
         Load hotel FAISS index from disk

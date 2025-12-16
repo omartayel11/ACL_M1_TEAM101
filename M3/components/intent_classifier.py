@@ -75,21 +75,30 @@ class IntentClassifier:
             "passport": 0.3
         },
         "LocationQuery": {
+            "location": 0.6,
             "location score": 0.7,
             "location rating": 0.7,
-            "best location": 0.6,
-            "good location": 0.5
+            "best location": 0.7,
+            "good location": 0.7,
+            "great location": 0.7,
+            "excellent location": 0.7,
+            "high location": 0.6
         },
         "AmenityFilter": {
-            "cleanliness": 0.5,
-            "comfort": 0.5,
-            "staff": 0.5,
-            "value for money": 0.5,
-            "value": 0.4
+            "cleanliness": 0.6,
+            "clean": 0.6,
+            "cleanest": 0.6,
+            "comfort": 0.6,
+            "comfortable": 0.6,
+            "staff": 0.6,
+            "service": 0.5,
+            "value for money": 0.6,
+            "value": 0.6,
+            "affordable": 0.6
         },
         "HotelSearch": {
             "hotels in": 0.6,
-            "find hotels": 0.6,
+            "find hotels": 0.5,
             "rating above": 0.5,
             "star": 0.3
         },
@@ -115,8 +124,21 @@ class IntentClassifier:
             (r'\breview(?:s)?\s+(?:for|of|about)\s+', 0.7),
             (r'\bfeedback\s+(?:for|about)\s+', 0.6),
         ],
+        "LocationQuery": [
+            (r'(?:best|good|great|excellent|high)\s+location', 0.8),
+            (r'location\s+(?:score|rating)', 0.85),
+        ],
         "HotelRecommendation": [
             (r'\b(?:best|top)\s+(?:hotels?\s+)?for\s+(couples?|families|business|solo)', 0.9),
+        ],
+        "AmenityFilter": [
+            (r'(?:clean|cleanliness)(?:\s+(?:and|&))?\s+(?:comfortable|comfort)', 0.85),
+            (r'(?:comfortable|comfort)(?:\s+(?:and|&))?\s+(?:clean|cleanliness)', 0.85),
+            (r'cleanest', 0.8),
+            (r'(?:high|excellent|best|great)\s+(?:cleanliness|clean)', 0.8),
+            (r'(?:high|excellent|best|great)\s+(?:comfort|comfortable)', 0.8),
+            (r'(?:high|excellent|best|great)\s+(?:staff|service)', 0.8),
+            (r'(?:high|excellent|best|great)\s+(?:value|afford)', 0.8),
         ],
         "HotelSearch": [
             (r'\brating\s+above\s+[\d.]+', 0.8),
@@ -126,7 +148,7 @@ class IntentClassifier:
     
     # Negative indicators - if these appear, reduce confidence for that intent
     NEGATIVE_INDICATORS = {
-        "LocationQuery": ["cleanliness", "comfort", "staff", "value"],
+        "LocationQuery": ["cleanliness", "clean", "cleanest", "comfort", "comfortable", "staff", "value", "afford"],
         "HotelSearch": ["review", "feedback"],
     }
     

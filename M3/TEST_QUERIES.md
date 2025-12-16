@@ -31,8 +31,7 @@ This document contains comprehensive test queries for all active queries in quer
 **Test Queries**:
 1. "show me hotels with rating above 8"
 2. "find hotels with at least 9 rating"
-3. "what hotels have rating higher than 7.5?"
-4. "hotels with minimum rating 8.5"
+3. "hotels with minimum rating 8.5"
 
 **Expected**: Returns hotels with average review score above the specified threshold
 
